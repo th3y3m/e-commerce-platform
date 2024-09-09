@@ -1,14 +1,25 @@
 package Util
 
 import (
+	"log"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/joho/godotenv"
 )
 
-var jwtSecret = []byte("JFY6rIq/uHpNoAUQ9VSvBExfnqXosicZZIyWALbcaxs=") // Replace with your actual secret key
-
 func GenerateToken(user string) (string, error) {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// Get environment variables
+	key := os.Getenv("JWT_SECRET")
+
+	var jwtSecret = []byte(key) // Replace with your actual secret key
+
 	// Create the JWT claims, including user ID and expiration time
 	claims := jwt.MapClaims{
 		"Id":  user,

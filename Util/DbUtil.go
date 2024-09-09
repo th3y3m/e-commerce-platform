@@ -3,13 +3,22 @@ package Util
 import (
 	"database/sql"
 	"fmt"
+	"log"
+	"os"
 
 	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/joho/godotenv"
 )
 
 // ConnectToSQLServer connects to a SQL Server database
 func ConnectToSQLServer() (*sql.DB, error) {
-	connString := "server=(local);user id=sa;password=12345;database=ChatApplicationDb;encrypt=disable"
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+	databaseURL := os.Getenv("CONNECTION_STRING")
+
+	connString := databaseURL
 
 	db, err := sql.Open("sqlserver", connString)
 	if err != nil {
