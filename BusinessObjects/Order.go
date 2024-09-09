@@ -10,7 +10,8 @@ type Order struct {
 	TotalAmount           float64   `json:"total_amount" db:"total_amount"`
 	OrderStatus           string    `json:"order_status" db:"order_status"`
 	ShippingAddress       string    `json:"shipping_address" db:"shipping_address"`
-	RateID                string    `json:"rate_id" db:"rate_id"`
+	CourierID             string    `json:"courier_id" db:"courier_id"`
+	FreightPrice          float64   `json:"freight_price" db:"freight_price"`
 	EstimatedDeliveryDate time.Time `json:"estimated_delivery_date" db:"estimated_delivery_date"`
 	ActualDeliveryDate    time.Time `json:"actual_delivery_date" db:"actual_delivery_date"`
 	PaymentMethod         string    `json:"payment_method" db:"payment_method"`
