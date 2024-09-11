@@ -4,13 +4,19 @@ import "time"
 
 // Product represents the Products table
 type Product struct {
-	ProductID   string    `json:"product_id" db:"product_id"`
-	SellerID    string    `json:"seller_id" db:"seller_id"`
-	ProductName string    `json:"product_name" db:"product_name"`
-	Description string    `json:"description" db:"description"`
-	Price       float64   `json:"price" db:"price"`
-	Quantity    int       `json:"quantity" db:"quantity"`
-	CategoryID  string    `json:"category_id" db:"category_id"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ProductID   string    `gorm:"primaryKey;column:product_id"`
+	SellerID    string    `gorm:"column:seller_id"`
+	ProductName string    `gorm:"column:product_name"`
+	Description string    `gorm:"column:description"`
+	Price       float64   `gorm:"column:price"`
+	Quantity    int       `gorm:"column:quantity"`
+	CategoryID  string    `gorm:"column:category_id"`
+	CreatedAt   time.Time `gorm:"autoCreateTime;column:created_at"`
+	UpdatedAt   time.Time `gorm:"autoUpdateTime;column:updated_at"`
+	Status      bool      `gorm:"column:status"`
+
+	OrderDetails     []OrderDetail     `gorm:"foreignKey:ProductID"`
+	ProductDiscounts []ProductDiscount `gorm:"foreignKey:ProductID"`
+	Reviews          []Review          `gorm:"foreignKey:ProductID"`
+	CartItems        []CartItem        `gorm:"foreignKey:ProductID"`
 }

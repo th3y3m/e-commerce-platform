@@ -2,6 +2,6 @@ package BusinessObjects
 
 // ProductDiscount represents the ProductDiscounts table
 type ProductDiscount struct {
-	ProductID  string `json:"product_id" db:"product_id"`
-	DiscountID string `json:"discount_id" db:"discount_id"`
+	ProductID  string `gorm:"primaryKey;column:product_id"`
+	DiscountID string `gorm:"primaryKey;column:discount_id"`
 }

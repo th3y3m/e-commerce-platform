@@ -1,103 +1,151 @@
 package Repositories
 
 import (
-	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
+func GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return Util.PaginatedList[BusinessObjects.News]{}, err
+	}
+
+	var news []BusinessObjects.News
+	query := db.Model(&BusinessObjects.News{})
+
+	if newId != "" {
+		query = query.Where("news_id = ?", newId)
+	}
+
+	if authorID != "" {
+		query = query.Where("author_id = ?", authorID)
+	}
+
+	if searchValue != "" {
+		query = query.Where("title LIKE ?", "%"+searchValue+"%")
+	}
+
+	if status != nil {
+		query = query.Where("status = ?", *status)
+	}
+
+	switch sortBy {
+	case "news_id_asc":
+		query = query.Order("news_id ASC")
+	case "news_id_desc":
+		query = query.Order("news_id DESC")
+	case "title_asc":
+		query = query.Order("title ASC")
+	case "title_desc":
+		query = query.Order("title DESC")
+	case "content_asc":
+		query = query.Order("content ASC")
+	case "content_desc":
+		query = query.Order("content DESC")
+	case "published_date_asc":
+		query = query.Order("published_date ASC")
+	case "published_date_desc":
+		query = query.Order("published_date DESC")
+	case "author_id_asc":
+		query = query.Order("author_id ASC")
+	case "author_id_desc":
+		query = query.Order("author_id DESC")
+	case "category_asc":
+		query = query.Order("category ASC")
+	case "category_desc":
+		query = query.Order("category DESC")
+	case "status_asc":
+		query = query.Order("status ASC")
+	case "status_desc":
+		query = query.Order("status DESC")
+	default:
+		query = query.Order("created_at ASC")
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.News]{}, err
+	}
+
+	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&news).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.News]{}, err
+	}
+
+	return Util.PaginatedList[BusinessObjects.News]{
+		Items:      news,
+		TotalCount: total,
+		PageIndex:  pageIndex,
+		PageSize:   pageSize,
+	}, nil
+}
+
+// GetAllNews retrieves all freight news from the database
 func GetAllNews() ([]BusinessObjects.News, error) {
-	db, err := Util.ConnectToSQLServer()
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return nil, err
 	}
-	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM News")
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
+	var news []BusinessObjects.News
+	if err := db.Find(&news).Error; err != nil {
 		return nil, err
-	}
-	defer rows.Close()
-
-	news := []BusinessObjects.News{}
-	for rows.Next() {
-		var newsItem BusinessObjects.News
-		err := rows.Scan(&newsItem.NewsID, &newsItem.Title, &newsItem.Content, &newsItem.PublishedDate, &newsItem.AuthorID, &newsItem.Status, &newsItem.ImageURL, &newsItem.Category)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		news = append(news, newsItem)
 	}
 
 	return news, nil
 }
 
-func GetNewsById(id string) (BusinessObjects.News, error) {
-	db, err := Util.ConnectToSQLServer()
+// GetNewByID retrieves a freight news by its ID
+func GetNewByID(newsID string) (BusinessObjects.News, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return BusinessObjects.News{}, err
 	}
-	defer db.Close()
 
 	var news BusinessObjects.News
-	err = db.QueryRow("SELECT * FROM News WHERE NewsID = ?", id).Scan(&news.NewsID, &news.Title, &news.Content, &news.PublishedDate, &news.AuthorID, &news.Status, &news.ImageURL, &news.Category)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
+	if err := db.First(&news, "news_id = ?", newsID).Error; err != nil {
 		return BusinessObjects.News{}, err
 	}
 
 	return news, nil
 }
 
-func CreateNews(news BusinessObjects.News) error {
-	db, err := Util.ConnectToSQLServer()
+// CreateNew adds a new freight news to the database
+func CreateNew(news BusinessObjects.News) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("INSERT INTO News (Title, Content, DatePublished) VALUES (?, ?, ?)", news.Title, news.Content, news.PublishedDate, news.AuthorID, news.Status, news.ImageURL, news.Category)
-	if err != nil {
-		log.Fatalf("Error inserting into the database: %v", err)
+	if err := db.Create(&news).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func UpdateNews(news BusinessObjects.News) error {
-	db, err := Util.ConnectToSQLServer()
+// UpdateNew updates an existing freight news
+func UpdateNew(news BusinessObjects.News) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("UPDATE News SET Title = ?, Content = ?, DatePublished = ? WHERE NewsID = ?", news.Title, news.Content, news.PublishedDate, news.AuthorID, news.Status, news.ImageURL, news.Category, news.NewsID)
-	if err != nil {
-		log.Fatalf("Error updating the database: %v", err)
+	if err := db.Save(&news).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func DeleteNews(news BusinessObjects.News) error {
-	db, err := Util.ConnectToSQLServer()
+// DeleteNew removes a freight news from the database by its ID
+func DeleteNew(newsID string) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil
+		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("DELETE FROM News WHERE NewsID = ?", news.NewsID)
-	if err != nil {
-		log.Fatalf("Error deleting from the database: %v", err)
+	if err := db.Delete(&BusinessObjects.News{}, "news_id = ?", newsID).Error; err != nil {
 		return err
 	}
 

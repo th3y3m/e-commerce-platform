@@ -1,187 +1,130 @@
 package Repositories
 
 import (
-	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetAllShoppingCart() ([]BusinessObjects.ShoppingCart, error) {
-	db, err := Util.ConnectToSQLServer()
+func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.ShoppingCart], error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil, err
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT * FROM ShoppingCarts")
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	shoppingCarts := []BusinessObjects.ShoppingCart{}
-	for rows.Next() {
-		var shoppingCart BusinessObjects.ShoppingCart
-		err := rows.Scan(&shoppingCart.CartID, &shoppingCart.UserID, &shoppingCart.CreatedAt)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		shoppingCarts = append(shoppingCarts, shoppingCart)
+		return Util.PaginatedList[BusinessObjects.ShoppingCart]{}, err
 	}
 
-	return shoppingCarts, nil
+	var carts []BusinessObjects.ShoppingCart
+	query := db.Model(&BusinessObjects.ShoppingCart{})
+
+	if cartID != "" {
+		query = query.Where("cart_id = ?", cartID)
+	}
+
+	if userID != "" {
+		query = query.Where("user_id = ?", userID)
+	}
+
+	if status != nil {
+		query = query.Where("status = ?", *status)
+	}
+
+	switch sortBy {
+	case "cart_id_asc":
+		query = query.Order("cart_id ASC")
+	case "cart_id_desc":
+		query = query.Order("cart_id DESC")
+	case "user_id_asc":
+		query = query.Order("user_id ASC")
+	case "user_id_desc":
+		query = query.Order("user_id DESC")
+	case "status_asc":
+		query = query.Order("status ASC")
+	case "status_desc":
+		query = query.Order("status DESC")
+	case "created_at_asc":
+		query = query.Order("created_at ASC")
+	case "created_at_desc":
+		query = query.Order("created_at DESC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.ShoppingCart]{}, err
+	}
+
+	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&carts).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.ShoppingCart]{}, err
+	}
+
+	return Util.PaginatedList[BusinessObjects.ShoppingCart]{Items: carts, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
 }
 
-func GetShoppingCartById(id string) (BusinessObjects.ShoppingCart, error) {
-	db, err := Util.ConnectToSQLServer()
+// GetAllShoppingCarts retrieves all shopping carts from the database
+func GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return BusinessObjects.ShoppingCart{}, err
-	}
-	defer db.Close()
-
-	var shoppingCart BusinessObjects.ShoppingCart
-
-	err = db.QueryRow("SELECT * FROM ShoppingCarts WHERE CartID = ?", id).Scan(&shoppingCart.CartID, &shoppingCart.UserID, &shoppingCart.CreatedAt)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return BusinessObjects.ShoppingCart{}, err
+		return nil, err
 	}
 
-	return shoppingCart, nil
+	var carts []BusinessObjects.ShoppingCart
+	if err := db.Find(&carts).Error; err != nil {
+		return nil, err
+	}
+
+	return carts, nil
 }
 
-func CreateShoppingCart(shoppingCart BusinessObjects.ShoppingCart) error {
-	db, err := Util.ConnectToSQLServer()
+// GetShoppingCartByID retrieves a shopping cart by its ID
+func GetShoppingCartByID(cartID string) (BusinessObjects.ShoppingCart, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
+		return BusinessObjects.ShoppingCart{}, err
+	}
+
+	var cart BusinessObjects.ShoppingCart
+	if err := db.First(&cart, "cart_id = ?", cartID).Error; err != nil {
+		return BusinessObjects.ShoppingCart{}, err
+	}
+
+	return cart, nil
+}
+
+// CreateShoppingCart adds a new shopping cart to the database
+func CreateShoppingCart(cart BusinessObjects.ShoppingCart) error {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO ShoppingCarts (CartID, UserID, CreatedAt) VALUES (?, ?, ?)", shoppingCart.CartID, shoppingCart.UserID, shoppingCart.CreatedAt)
-	if err != nil {
-		log.Fatalf("Error inserting into the database: %v", err)
+	if err := db.Create(&cart).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func GetShoppingCartByUserId(userId string) ([]BusinessObjects.ShoppingCart, error) {
-	db, err := Util.ConnectToSQLServer()
+// UpdateShoppingCart updates an existing shopping cart
+func UpdateShoppingCart(cart BusinessObjects.ShoppingCart) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil, err
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT * FROM ShoppingCarts WHERE UserID = ?", userId)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	shoppingCarts := []BusinessObjects.ShoppingCart{}
-	for rows.Next() {
-		var shoppingCart BusinessObjects.ShoppingCart
-		err := rows.Scan(&shoppingCart.CartID, &shoppingCart.UserID, &shoppingCart.CreatedAt)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		shoppingCarts = append(shoppingCarts, shoppingCart)
-	}
-
-	return shoppingCarts, nil
-}
-
-func DeleteShoppingCartById(id string) error {
-	db, err := Util.ConnectToSQLServer()
-	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("DELETE FROM ShoppingCarts WHERE CartID = ?", id)
-	if err != nil {
-		log.Fatalf("Error deleting from the database: %v", err)
+	if err := db.Save(&cart).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func UpdateShoppingCart(shoppingCart BusinessObjects.ShoppingCart) error {
-	db, err := Util.ConnectToSQLServer()
+// DeleteShoppingCart removes a shopping cart from the database by its ID
+func DeleteShoppingCart(cartID string) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return err
-	}
-	defer db.Close()
-
-	_, err = db.Exec("UPDATE ShoppingCarts SET UserID = ?, CreatedAt = ? WHERE CartID = ?", shoppingCart.UserID, shoppingCart.CreatedAt, shoppingCart.CartID)
-	if err != nil {
-		log.Fatalf("Error updating the database: %v", err)
 		return err
 	}
 
-	return nil
-}
-
-func GetShoppingCartByCartId(cartId string) (BusinessObjects.ShoppingCart, error) {
-	db, err := Util.ConnectToSQLServer()
-	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return BusinessObjects.ShoppingCart{}, err
-	}
-	defer db.Close()
-
-	var shoppingCart BusinessObjects.ShoppingCart
-
-	err = db.QueryRow("SELECT * FROM ShoppingCarts WHERE CartID = ?", cartId).Scan(&shoppingCart.CartID, &shoppingCart.UserID, &shoppingCart.CreatedAt)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return BusinessObjects.ShoppingCart{}, err
-	}
-
-	return shoppingCart, nil
-}
-
-func GetShoppingCartByUserIdAndCartId(userId string, cartId string) (BusinessObjects.ShoppingCart, error) {
-	db, err := Util.ConnectToSQLServer()
-	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return BusinessObjects.ShoppingCart{}, err
-	}
-	defer db.Close()
-
-	var shoppingCart BusinessObjects.ShoppingCart
-
-	err = db.QueryRow("SELECT * FROM ShoppingCarts WHERE UserID = ? AND CartID = ?", userId, cartId).Scan(&shoppingCart.CartID, &shoppingCart.UserID, &shoppingCart.CreatedAt)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return BusinessObjects.ShoppingCart{}, err
-	}
-
-	return shoppingCart, nil
-}
-
-func DeleteShoppingCartByUserIdAndCartId(userId string, cartId string) error {
-	db, err := Util.ConnectToSQLServer()
-	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return err
-	}
-	defer db.Close()
-
-	_, err = db.Exec("DELETE FROM ShoppingCarts WHERE UserID = ? AND CartID = ?", userId, cartId)
-	if err != nil {
-		log.Fatalf("Error deleting from the database: %v", err)
+	if err := db.Delete(&BusinessObjects.ShoppingCart{}, "cart_id = ?", cartID).Error; err != nil {
 		return err
 	}
 

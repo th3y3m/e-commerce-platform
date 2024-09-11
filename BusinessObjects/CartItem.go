@@ -2,8 +2,8 @@ package BusinessObjects
 
 // CartItem represents the CartItems table
 type CartItem struct {
-	CartItemID string `json:"cart_item_id" db:"cart_item_id"`
-	CartID     string `json:"cart_id" db:"cart_id"`
-	ProductID  string `json:"product_id" db:"product_id"`
-	Quantity   int    `json:"quantity" db:"quantity"`
+	CartID    string  `gorm:"primaryKey;column:cart_id"`
+	ProductID string  `gorm:"primaryKey;column:product_id"`
+	Quantity  int     `gorm:"column:quantity"`
+	UnitPrice float64 `gorm:"column:unit_price"`
 }

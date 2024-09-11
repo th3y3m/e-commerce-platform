@@ -1,100 +1,127 @@
 package Repositories
 
 import (
-	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
-	db, err := Util.ConnectToSQLServer()
+func GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.CartItem], error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil, err
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT * FROM CartItems")
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	cartItems := []BusinessObjects.CartItem{}
-
-	for rows.Next() {
-		var cartItem BusinessObjects.CartItem
-		err := rows.Scan(&cartItem.CartItemID, &cartItem.CartID, &cartItem.ProductID, &cartItem.Quantity)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		cartItems = append(cartItems, cartItem)
+		return Util.PaginatedList[BusinessObjects.CartItem]{}, err
 	}
 
-	return cartItems, nil
+	var cartItems []BusinessObjects.CartItem
+	query := db.Model(&BusinessObjects.CartItem{})
+
+	// Apply search filter
+	if searchValue != "" {
+		query = query.Where("LOWER(cart_id) LIKE ?", "%"+searchValue+"%")
+	}
+
+	// Apply sorting
+	switch sortBy {
+	case "cart_id_asc":
+		query = query.Order("cart_id ASC")
+	case "cart_id_desc":
+		query = query.Order("cart_id DESC")
+	case "product_id_asc":
+		query = query.Order("product_id ASC")
+	case "product_id_desc":
+		query = query.Order("product_id DESC")
+	case "quantity_asc":
+		query = query.Order("quantity ASC")
+	case "quantity_desc":
+		query = query.Order("quantity DESC")
+	case "price_asc":
+		query = query.Order("price ASC")
+	case "price_desc":
+		query = query.Order("price DESC")
+	default:
+		query = query.Order("product_id ASC")
+	}
+
+	// Get the total count of records
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.CartItem]{}, err
+	}
+
+	// Paginate the results
+	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&cartItems).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.CartItem]{}, err
+	}
+
+	return Util.PaginatedList[BusinessObjects.CartItem]{Items: cartItems, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
 }
 
-func GetCartItemByID(cartItemID string) (BusinessObjects.CartItem, error) {
-	db, err := Util.ConnectToSQLServer()
+// GetAllCartItems retrieves all freight cartItems from the database
+func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
+		return nil, err
+	}
+
+	var cartItem []BusinessObjects.CartItem
+	if err := db.Find(&cartItem).Error; err != nil {
+		return nil, err
+	}
+
+	return cartItem, nil
+}
+
+// GetCartItemByID retrieves a freight cartItem by its ID
+func GetCartItemByID(cartItemID string) (BusinessObjects.CartItem, error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
 		return BusinessObjects.CartItem{}, err
 	}
-	defer db.Close()
 
 	var cartItem BusinessObjects.CartItem
-
-	err = db.QueryRow("SELECT * FROM CartItems WHERE CartItemID = ?", cartItemID).Scan(&cartItem.CartItemID, &cartItem.CartID, &cartItem.ProductID, &cartItem.Quantity)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
+	if err := db.First(&cartItem, "cart_id = ?", cartItemID).Error; err != nil {
 		return BusinessObjects.CartItem{}, err
 	}
 
 	return cartItem, nil
 }
 
+// CreateCartItem adds a new freight cartItem to the database
 func CreateCartItem(cartItem BusinessObjects.CartItem) error {
-	db, err := Util.ConnectToSQLServer()
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO CartItems (CartItemID, CartID, ProductID, Quantity) VALUES (?, ?, ?, ?)", cartItem.CartItemID, cartItem.CartID, cartItem.ProductID, cartItem.Quantity)
-	if err != nil {
-		log.Fatalf("Error inserting into the database: %v", err)
+	if err := db.Create(&cartItem).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// UpdateCartItem updates an existing freight cartItem
 func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
-	db, err := Util.ConnectToSQLServer()
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
 
-	_, err = db.Exec("UPDATE CartItems SET CartID = ?, ProductID = ?, Quantity = ? WHERE CartItemID = ?", cartItem.CartID, cartItem.ProductID, cartItem.Quantity, cartItem.CartItemID)
-	if err != nil {
-		log.Fatalf("Error updating the database: %v", err)
+	if err := db.Save(&cartItem).Error; err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func DeleteCartItem(cartItem BusinessObjects.CartItem) error {
-	db, err := Util.ConnectToSQLServer()
+// DeleteCartItem removes a freight cartItem from the database by its ID
+func DeleteCartItem(cartItemID string) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
+		return err
 	}
 
-	_, err = db.Exec("DELETE FROM CartItems WHERE CartItemID = ?", cartItem.CartItemID)
-	if err != nil {
-		log.Fatalf("Error deleting from the database: %v", err)
+	if err := db.Delete(&BusinessObjects.CartItem{}, "cart_id = ?", cartItemID).Error; err != nil {
+		return err
 	}
 
 	return nil

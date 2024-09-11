@@ -1,105 +1,138 @@
 package Repositories
 
 import (
-	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
+func GetPaginatedFreightRateList(searchValue, sortBy, courierID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.FreightRate], error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return Util.PaginatedList[BusinessObjects.FreightRate]{}, err
+	}
+
+	var rates []BusinessObjects.FreightRate
+	query := db.Model(&BusinessObjects.FreightRate{})
+
+	if courierID != "" {
+		query = query.Where("courier_id = ?", courierID)
+	}
+
+	if searchValue != "" {
+		query = query.Where("rate_id LIKE ?", "%"+searchValue+"%")
+	}
+
+	if status != nil {
+		query = query.Where("status = ?", *status)
+	}
+
+	switch sortBy {
+	case "rate_id_asc":
+		query = query.Order("rate_id ASC")
+	case "rate_id_desc":
+		query = query.Order("rate_id DESC")
+	case "courier_id_asc":
+		query = query.Order("courier_id ASC")
+	case "courier_id_desc":
+		query = query.Order("courier_id DESC")
+	case "distance_min_km_asc":
+		query = query.Order("distance_min_km ASC")
+	case "distance_min_km_desc":
+		query = query.Order("distance_min_km DESC")
+	case "distance_max_km_asc":
+		query = query.Order("distance_max_km ASC")
+	case "distance_max_km_desc":
+		query = query.Order("distance_max_km DESC")
+	case "cost_per_km_asc":
+		query = query.Order("cost_per_km ASC")
+	case "cost_per_km_desc":
+		query = query.Order("cost_per_km DESC")
+	case "status_asc":
+		query = query.Order("status ASC")
+	case "status_desc":
+		query = query.Order("status DESC")
+	default:
+		query = query.Order("distance_min_km ASC")
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.FreightRate]{}, err
+	}
+
+	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&rates).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.FreightRate]{}, err
+	}
+
+	return Util.PaginatedList[BusinessObjects.FreightRate]{Items: rates, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+}
+
+// GetAllFreightRates retrieves all freight rates from the database
 func GetAllFreightRates() ([]BusinessObjects.FreightRate, error) {
-	db, err := Util.ConnectToSQLServer()
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return nil, err
 	}
-	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM FreightRates")
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
+	var rates []BusinessObjects.FreightRate
+	if err := db.Find(&rates).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	freightRates := []BusinessObjects.FreightRate{}
-
-	for rows.Next() {
-		var freightRate BusinessObjects.FreightRate
-		err := rows.Scan(&freightRate.RateID, &freightRate.CourierID, &freightRate.DistanceMinKM, &freightRate.DistanceMaxKM, &freightRate.CostPerKM)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		freightRates = append(freightRates, freightRate)
-	}
-
-	return freightRates, nil
+	return rates, nil
 }
 
-func GetFreightRateById(id string) (BusinessObjects.FreightRate, error) {
-	db, err := Util.ConnectToSQLServer()
+// GetFreightRateByID retrieves a freight rate by its ID
+func GetFreightRateByID(rateID string) (BusinessObjects.FreightRate, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return BusinessObjects.FreightRate{}, err
-	}
-	defer db.Close()
-
-	var freightRate BusinessObjects.FreightRate
-
-	err = db.QueryRow("SELECT * FROM FreightRates WHERE RateID = ?", id).Scan(&freightRate.RateID, &freightRate.CourierID, &freightRate.DistanceMinKM, &freightRate.DistanceMaxKM, &freightRate.CostPerKM)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
 		return BusinessObjects.FreightRate{}, err
 	}
 
-	return freightRate, nil
+	var rate BusinessObjects.FreightRate
+	if err := db.First(&rate, "rate_id = ?", rateID).Error; err != nil {
+		return BusinessObjects.FreightRate{}, err
+	}
+
+	return rate, nil
 }
 
-func CreateFreightRate(freightRate BusinessObjects.FreightRate) error {
-	db, err := Util.ConnectToSQLServer()
+// CreateFreightRate adds a new freight rate to the database
+func CreateFreightRate(rate BusinessObjects.FreightRate) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil
+		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("INSERT INTO FreightRates (RateID, Courier, ShippingMethod, DistanceMinKM, DistanceMaxKM, CostPerKM) VALUES (?, ?, ?, ?, ?, ?)", freightRate.RateID, freightRate.CourierID, freightRate.DistanceMinKM, freightRate.DistanceMaxKM, freightRate.CostPerKM)
-	if err != nil {
-		log.Fatalf("Error executing query: %v", err)
+	if err := db.Create(&rate).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func UpdateFreightRate(freightRate BusinessObjects.FreightRate) error {
-	db, err := Util.ConnectToSQLServer()
+// UpdateFreightRate updates an existing freight rate
+func UpdateFreightRate(rate BusinessObjects.FreightRate) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil
+		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("UPDATE FreightRates SET Courier = ?, ShippingMethod = ?, DistanceMinKM = ?, DistanceMaxKM = ?, CostPerKM = ? WHERE RateID = ?", freightRate.CourierID, freightRate.DistanceMinKM, freightRate.DistanceMaxKM, freightRate.CostPerKM, freightRate.RateID)
-	if err != nil {
-		log.Fatalf("Error executing query: %v", err)
+	if err := db.Save(&rate).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func DeleteFreightRate(freightRate BusinessObjects.FreightRate) error {
-	db, err := Util.ConnectToSQLServer()
+// DeleteFreightRate removes a freight rate from the database by its ID
+func DeleteFreightRate(rateID string) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil
+		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("DELETE FROM FreightRates WHERE RateID = ?", freightRate.RateID)
-	if err != nil {
-		log.Fatalf("Error executing query: %v", err)
+	if err := db.Delete(&BusinessObjects.FreightRate{}, "rate_id = ?", rateID).Error; err != nil {
 		return err
 	}
 

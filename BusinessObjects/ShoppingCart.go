@@ -4,7 +4,10 @@ import "time"
 
 // ShoppingCart represents the ShoppingCart table
 type ShoppingCart struct {
-	CartID    string    `json:"cart_id" db:"cart_id"`
-	UserID    string    `json:"user_id" db:"user_id"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	CartID    string    `gorm:"primaryKey;column:cart_id"`
+	UserID    string    `gorm:"column:user_id"`
+	CreatedAt time.Time `gorm:"autoCreateTime;column:created_at"`
+	Status    bool      `gorm:"column:status"`
+
+	CartItems []CartItem `gorm:"foreignKey:CartID"`
 }

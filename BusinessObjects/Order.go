@@ -2,19 +2,22 @@ package BusinessObjects
 
 import "time"
 
-// Order represents the Orders table
+// Order represents an order in the system
 type Order struct {
-	OrderID               string    `json:"order_id" db:"order_id"`
-	CustomerID            string    `json:"customer_id" db:"customer_id"`
-	OrderDate             time.Time `json:"order_date" db:"order_date"`
-	TotalAmount           float64   `json:"total_amount" db:"total_amount"`
-	OrderStatus           string    `json:"order_status" db:"order_status"`
-	ShippingAddress       string    `json:"shipping_address" db:"shipping_address"`
-	CourierID             string    `json:"courier_id" db:"courier_id"`
-	FreightPrice          float64   `json:"freight_price" db:"freight_price"`
-	EstimatedDeliveryDate time.Time `json:"estimated_delivery_date" db:"estimated_delivery_date"`
-	ActualDeliveryDate    time.Time `json:"actual_delivery_date" db:"actual_delivery_date"`
-	PaymentMethod         string    `json:"payment_method" db:"payment_method"`
-	PaymentStatus         string    `json:"payment_status" db:"payment_status"`
-	VoucherID             string    `json:"voucher_id" db:"voucher_id"`
+	OrderID               string    `gorm:"primaryKey;column:order_id"`
+	CustomerID            string    `gorm:"column:customer_id"`
+	OrderDate             time.Time `gorm:"autoCreateTime;column:order_date"`
+	TotalAmount           float64   `gorm:"column:total_amount"`
+	OrderStatus           string    `gorm:"column:order_status"`
+	ShippingAddress       string    `gorm:"column:shipping_address"`
+	CourierID             string    `gorm:"column:courier_id"`
+	FreightPrice          float64   `gorm:"column:freight_price"`
+	EstimatedDeliveryDate time.Time `gorm:"column:estimated_delivery_date"`
+	ActualDeliveryDate    time.Time `gorm:"column:actual_delivery_date"`
+	PaymentMethod         string    `gorm:"column:payment_method"`
+	PaymentStatus         string    `gorm:"column:payment_status"`
+	VoucherID             string    `gorm:"column:voucher_id"`
+
+	OrderDetails []OrderDetail `gorm:"foreignKey:OrderID"`
+	Transactions []Transaction `gorm:"foreignKey:OrderID"`
 }

@@ -1,91 +1,117 @@
 package Repositories
 
 import (
-	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func CheckProductDiscount(productId string) ([]BusinessObjects.ProductDiscount, error) {
-	db, err := Util.ConnectToSQLServer()
+func GetPaginatedProductDiscountList(discountID, sortBy, productID string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.ProductDiscount], error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return nil, err
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT * FROM ProductDiscounts WHERE ProductID = ?", productId)
-
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return nil, err
+		return Util.PaginatedList[BusinessObjects.ProductDiscount]{}, err
 	}
 
-	defer rows.Close()
+	var rates []BusinessObjects.ProductDiscount
+	query := db.Model(&BusinessObjects.ProductDiscount{})
 
-	productDiscounts := []BusinessObjects.ProductDiscount{}
-	for rows.Next() {
-		var productDiscount BusinessObjects.ProductDiscount
-		err := rows.Scan(&productDiscount.ProductID, &productDiscount.DiscountID)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		productDiscounts = append(productDiscounts, productDiscount)
+	if productID != "" {
+		query = query.Where("product_id = ?", productID)
+	}
+	if discountID != "" {
+		query = query.Where("discount_id = ?", productID)
 	}
 
-	return productDiscounts, nil
+	switch sortBy {
+	case "product_id_asc":
+		query = query.Order("product_id ASC")
+	case "product_id_desc":
+		query = query.Order("product_id DESC")
+	case "discount_id_asc":
+		query = query.Order("discount_id ASC")
+	case "discount_id_desc":
+		query = query.Order("discount_id DESC")
+	default:
+		query = query.Order("product_id ASC")
+	}
+
+	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&rates).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.ProductDiscount]{}, err
+	}
+
+	var totalCount int64
+	if err := query.Count(&totalCount).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.ProductDiscount]{}, err
+	}
+
+	return Util.PaginatedList[BusinessObjects.ProductDiscount]{Items: rates, TotalCount: totalCount, PageIndex: pageIndex, PageSize: pageSize}, nil
 }
 
-func GetProductByDiscountId(discountId string) (BusinessObjects.ProductDiscount, error) {
-	db, err := Util.ConnectToSQLServer()
+// GetAllProductDiscounts retrieves all freight rates from the database
+func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
-		return BusinessObjects.ProductDiscount{}, err
-	}
-	defer db.Close()
-
-	var productDiscount BusinessObjects.ProductDiscount
-
-	err = db.QueryRow("SELECT * FROM ProductDiscounts WHERE DiscountID = ?", discountId).Scan(&productDiscount.ProductID, &productDiscount.DiscountID)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
-		return BusinessObjects.ProductDiscount{}, err
+		return nil, err
 	}
 
-	return productDiscount, nil
+	var rates []BusinessObjects.ProductDiscount
+	if err := db.Find(&rates).Error; err != nil {
+		return nil, err
+	}
+
+	return rates, nil
 }
 
-func CreateProductDiscount(productDiscount BusinessObjects.ProductDiscount) error {
-	db, err := Util.ConnectToSQLServer()
+// GetProductDiscountByID retrieves a freight rate by its ID
+func GetProductDiscountByID(rateID string) (BusinessObjects.ProductDiscount, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
+		return BusinessObjects.ProductDiscount{}, err
+	}
+
+	var rate BusinessObjects.ProductDiscount
+	if err := db.First(&rate, "product_id = ?", rateID).Error; err != nil {
+		return BusinessObjects.ProductDiscount{}, err
+	}
+
+	return rate, nil
+}
+
+// CreateProductDiscount adds a new freight rate to the database
+func CreateProductDiscount(rate BusinessObjects.ProductDiscount) error {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("INSERT INTO ProductDiscounts (ProductID, DiscountID) VALUES (?, ?)", productDiscount.ProductID, productDiscount.DiscountID)
-
-	if err != nil {
-		log.Fatalf("Error inserting into the database: %v", err)
+	if err := db.Create(&rate).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func DeleteProductDiscount(productId string, discountId string) error {
-	db, err := Util.ConnectToSQLServer()
+// UpdateProductDiscount updates an existing freight rate
+func UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
 
-	defer db.Close()
+	if err := db.Save(&rate).Error; err != nil {
+		return err
+	}
 
-	_, err = db.Exec("DELETE FROM ProductDiscounts WHERE ProductID = ? AND DiscountID = ?", productId, discountId)
+	return nil
+}
+
+// DeleteProductDiscount removes a freight rate from the database by its ID
+func DeleteProductDiscount(rateID string) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error deleting from the database: %v", err)
+		return err
+	}
+
+	if err := db.Delete(&BusinessObjects.ProductDiscount{}, "product_id = ?", rateID).Error; err != nil {
 		return err
 	}
 

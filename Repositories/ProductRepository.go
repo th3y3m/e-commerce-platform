@@ -1,104 +1,136 @@
 package Repositories
 
 import (
-	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetAllProduct() ([]BusinessObjects.Product, error) {
-	db, err := Util.ConnectToSQLServer()
+func GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
+		return Util.PaginatedList[BusinessObjects.Product]{}, err
+	}
+
+	var products []BusinessObjects.Product
+	query := db.Model(&BusinessObjects.Product{})
+
+	if productID != "" {
+		query = query.Where("product_id = ?", productID)
+	}
+
+	if searchValue != "" {
+		query = query.Where("product_name LIKE ?", "%"+searchValue+"%")
+	}
+
+	if status != nil {
+		query = query.Where("status = ?", *status)
+	}
+
+	switch sortBy {
+	case "product_id_asc":
+		query = query.Order("product_id ASC")
+	case "product_id_desc":
+		query = query.Order("product_id DESC")
+	case "product_name_asc":
+		query = query.Order("product_name ASC")
+	case "product_name_desc":
+		query = query.Order("product_name DESC")
+	case "product_description_asc":
+		query = query.Order("product_description ASC")
+	case "product_description_desc":
+		query = query.Order("product_description DESC")
+	case "product_price_asc":
+		query = query.Order("product_price ASC")
+	case "product_price_desc":
+		query = query.Order("product_price DESC")
+	case "product_stock_asc":
+		query = query.Order("product_stock ASC")
+	case "product_stock_desc":
+		query = query.Order("product_stock DESC")
+	case "status_asc":
+		query = query.Order("status ASC")
+	case "status_desc":
+		query = query.Order("status DESC")
+	}
+
+	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&products).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.Product]{}, err
+	}
+
+	var totalCount int64
+	if err := query.Count(&totalCount).Error; err != nil {
+		return Util.PaginatedList[BusinessObjects.Product]{}, err
+	}
+
+	return Util.PaginatedList[BusinessObjects.Product]{Items: products, TotalCount: totalCount, PageIndex: pageIndex, PageSize: pageSize}, nil
+}
+
+// GetAllProducts retrieves all products from the database
+func GetAllProducts() ([]BusinessObjects.Product, error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM Products")
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
+	var products []BusinessObjects.Product
+	if err := db.Find(&products).Error; err != nil {
 		return nil, err
-	}
-	defer rows.Close()
-
-	products := []BusinessObjects.Product{}
-	for rows.Next() {
-		var product BusinessObjects.Product
-		err := rows.Scan(&product.ProductID, &product.SellerID, &product.ProductName, &product.Description, &product.Price, &product.Quantity, &product.CategoryID, &product.CreatedAt, &product.UpdatedAt)
-		if err != nil {
-			log.Fatalf("Error scanning row: %v", err)
-			return nil, err
-		}
-		products = append(products, product)
 	}
 
 	return products, nil
 }
 
-func GetProductById(id string) (BusinessObjects.Product, error) {
-	db, err := Util.ConnectToSQLServer()
+// GetProductByID retrieves a product by its ID
+func GetProductByID(productID string) (BusinessObjects.Product, error) {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return BusinessObjects.Product{}, err
 	}
-	defer db.Close()
 
 	var product BusinessObjects.Product
-
-	err = db.QueryRow("SELECT * FROM Products WHERE ProductID = ?", id).Scan(&product.ProductID, &product.SellerID, &product.ProductName, &product.Description, &product.Price, &product.Quantity, &product.CategoryID, &product.CreatedAt, &product.UpdatedAt)
-	if err != nil {
-		log.Fatalf("Error querying the database: %v", err)
+	if err := db.First(&product, "product_id = ?", productID).Error; err != nil {
 		return BusinessObjects.Product{}, err
 	}
 
 	return product, nil
 }
 
+// CreateProduct adds a new product to the database
 func CreateProduct(product BusinessObjects.Product) error {
-	db, err := Util.ConnectToSQLServer()
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("INSERT INTO Products (ProductID, SellerID, ProductName, Description, Price, Quantity, CategoryID, CreatedAt, UpdatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", product.ProductID, product.SellerID, product.ProductName, product.Description, product.Price, product.Quantity, product.CategoryID, product.CreatedAt, product.UpdatedAt)
-	if err != nil {
-		log.Fatalf("Error inserting into the database: %v", err)
+	if err := db.Create(&product).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// UpdateProduct updates an existing product
 func UpdateProduct(product BusinessObjects.Product) error {
-	db, err := Util.ConnectToSQLServer()
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("UPDATE Products SET SellerID = ?, ProductName = ?, Description = ?, Price = ?, Quantity = ?, CategoryID = ?, UpdatedAt = ? WHERE ProductID = ?", product.SellerID, product.ProductName, product.Description, product.Price, product.Quantity, product.CategoryID, product.UpdatedAt, product.ProductID)
-	if err != nil {
-		log.Fatalf("Error updating the database: %v", err)
+	if err := db.Save(&product).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func DeleteProduct(id string) error {
-	db, err := Util.ConnectToSQLServer()
+// DeleteProduct removes a product from the database by its ID
+func DeleteProduct(productID string) error {
+	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		log.Fatalf("Error connecting to SQL Server: %v", err)
 		return err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("DELETE FROM Products WHERE ProductID = ?", id)
-	if err != nil {
-		log.Fatalf("Error deleting from the database: %v", err)
+	if err := db.Delete(&BusinessObjects.Product{}, "product_id = ?", productID).Error; err != nil {
 		return err
 	}
 
