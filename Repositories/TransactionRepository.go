@@ -81,8 +81,7 @@ func GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageInde
 		return Util.PaginatedList[BusinessObjects.Transaction]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Transaction]{
-		Items: transactions, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(transactions, total, pageIndex, pageSize), nil
 }
 
 // GetAllTransactions retrieves all freight transactions from the database

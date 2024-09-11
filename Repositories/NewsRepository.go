@@ -72,12 +72,7 @@ func GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex
 		return Util.PaginatedList[BusinessObjects.News]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.News]{
-		Items:      news,
-		TotalCount: total,
-		PageIndex:  pageIndex,
-		PageSize:   pageSize,
-	}, nil
+	return Util.NewPaginatedList(news, total, pageIndex, pageSize), nil
 }
 
 // GetAllNews retrieves all freight news from the database

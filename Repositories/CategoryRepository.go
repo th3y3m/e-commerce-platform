@@ -38,7 +38,7 @@ func GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int
 		return Util.PaginatedList[BusinessObjects.Category]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Category]{Items: categories, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(categories, total, pageIndex, pageSize), nil
 }
 
 // GetAllCategories retrieves all categories from the database

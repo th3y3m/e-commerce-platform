@@ -14,9 +14,9 @@ type PaginatedList[T any] struct {
 }
 
 // NewPaginatedList creates a new PaginatedList
-func NewPaginatedList[T any](items []T, count int64, pageIndex, pageSize int) *PaginatedList[T] {
+func NewPaginatedList[T any](items []T, count int64, pageIndex, pageSize int) PaginatedList[T] {
 	totalPages1 := int(math.Ceil(float64(count) / float64(pageSize)))
-	return &PaginatedList[T]{
+	return PaginatedList[T]{
 		Items:      items,
 		TotalCount: count,
 		PageIndex:  pageIndex,

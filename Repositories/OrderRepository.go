@@ -73,7 +73,7 @@ func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId str
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Order]{Items: orders, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(orders, total, pageIndex, pageSize), nil
 }
 
 // GetAllOrders retrieves all orders from the database

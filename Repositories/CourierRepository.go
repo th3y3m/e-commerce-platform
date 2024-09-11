@@ -38,12 +38,7 @@ func GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int
 		return Util.PaginatedList[BusinessObjects.Courier]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Courier]{
-		Items:      couriers,
-		TotalCount: total,
-		PageIndex:  pageIndex,
-		PageSize:   pageSize,
-	}, nil
+	return Util.NewPaginatedList(couriers, total, pageIndex, pageSize), nil
 }
 
 // GetAllCouriers retrieves all couriers from the database

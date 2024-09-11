@@ -62,7 +62,7 @@ func GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryI
 		return Util.PaginatedList[BusinessObjects.Product]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Product]{Items: products, TotalCount: totalCount, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(products, totalCount, pageIndex, pageSize), nil
 }
 
 // GetAllProducts retrieves all products from the database

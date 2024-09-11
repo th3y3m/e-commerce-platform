@@ -43,7 +43,7 @@ func GetPaginatedProductDiscountList(discountID, sortBy, productID string, pageI
 		return Util.PaginatedList[BusinessObjects.ProductDiscount]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.ProductDiscount]{Items: rates, TotalCount: totalCount, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(rates, totalCount, pageIndex, pageSize), nil
 }
 
 // GetAllProductDiscounts retrieves all freight rates from the database

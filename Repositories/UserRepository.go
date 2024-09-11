@@ -79,10 +79,7 @@ func GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, s
 	}
 
 	// Create paginated list
-	paginatedList := Util.PaginatedList[BusinessObjects.User]{
-		Items:      users,
-		TotalCount: totalCount,
-	}
+	paginatedList := Util.NewPaginatedList(users, totalCount, pageIndex, pageSize)
 
 	return paginatedList, nil
 }
@@ -152,4 +149,18 @@ func DeleteUser(userID string) error {
 	}
 
 	return nil
+}
+
+func GetUserByEmail(email string) (BusinessObjects.User, error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return BusinessObjects.User{}, err
+	}
+
+	var user BusinessObjects.User
+	if err := db.First(&user, "email = ?", email).Error; err != nil {
+		return BusinessObjects.User{}, err
+	}
+
+	return user, nil
 }

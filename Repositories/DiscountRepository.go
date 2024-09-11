@@ -52,7 +52,7 @@ func GetPaginatedDiscountList(searchValue, sortBy string, pageIndex, pageSize in
 		return Util.PaginatedList[BusinessObjects.Discount]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Discount]{Items: discounts, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(discounts, total, pageIndex, pageSize), nil
 }
 
 // GetAllDiscounts retrieves all discounts from the database

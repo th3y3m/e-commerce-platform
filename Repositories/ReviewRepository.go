@@ -72,7 +72,7 @@ func GetPaginatedReviewList(sortBy, reviewID, userID, productID string, pageInde
 		return Util.PaginatedList[BusinessObjects.Review]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Review]{Items: reviews, TotalCount: totalItems, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(reviews, totalItems, pageIndex, pageSize), nil
 }
 
 // GetAllReviews retrieves all freight reviews from the database

@@ -52,7 +52,7 @@ func GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pag
 		return Util.PaginatedList[BusinessObjects.CartItem]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.CartItem]{Items: cartItems, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(cartItems, total, pageIndex, pageSize), nil
 }
 
 // GetAllCartItems retrieves all freight cartItems from the database

@@ -64,7 +64,7 @@ func GetPaginatedFreightRateList(searchValue, sortBy, courierID string, pageInde
 		return Util.PaginatedList[BusinessObjects.FreightRate]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.FreightRate]{Items: rates, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(rates, total, pageIndex, pageSize), nil
 }
 
 // GetAllFreightRates retrieves all freight rates from the database

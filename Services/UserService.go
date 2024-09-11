@@ -21,7 +21,7 @@ func GetUserByID(id string) (BusinessObjects.User, error) {
 	return Repositories.GetUserByID(id)
 }
 
-func CreateUser(email, username, password, role string) error {
+func CreateUser(email, password, role string) error {
 	passwordHash, err := Util.HashPassword(password)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func CreateUser(email, username, password, role string) error {
 	user := BusinessObjects.User{
 		UserID:       uuid.New().String(),
 		Email:        email,
-		Username:     username,
+		Username:     email,
 		PasswordHash: passwordHash,
 		UserType:     role,
 		CreatedAt:    time.Now(),
@@ -51,6 +51,35 @@ func BanUser(id string) error {
 	}
 
 	user.Status = false
+	if err := Repositories.UpdateUser(user); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UnBanUser(id string) error {
+	user, err := GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.Status = true
+	if err := Repositories.UpdateUser(user); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateProfile(id, fullname, phonenumber, address string) error {
+	user, err := GetUserByID(id)
+	if err != nil {
+		return err
+	}
+
+	user.FullName = fullname
+	user.PhoneNumber = phonenumber
+	user.Address = address
+
 	if err := Repositories.UpdateUser(user); err != nil {
 		return err
 	}

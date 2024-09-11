@@ -56,7 +56,7 @@ func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, page
 		return Util.PaginatedList[BusinessObjects.ShoppingCart]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.ShoppingCart]{Items: carts, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(carts, total, pageIndex, pageSize), nil
 }
 
 // GetAllShoppingCarts retrieves all shopping carts from the database

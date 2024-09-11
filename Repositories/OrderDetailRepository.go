@@ -56,12 +56,7 @@ func GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string,
 		return Util.PaginatedList[BusinessObjects.OrderDetail]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.OrderDetail]{
-		Items:      rates,
-		TotalCount: total,
-		PageIndex:  pageIndex,
-		PageSize:   pageSize,
-	}, nil
+	return Util.NewPaginatedList(rates, total, pageIndex, pageSize), nil
 }
 
 // GetAllOrderDetails retrieves all freight rates from the database

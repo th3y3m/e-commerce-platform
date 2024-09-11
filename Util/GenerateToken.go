@@ -3,14 +3,15 @@ package Util
 import (
 	"log"
 	"os"
+	"th3y3m/e-commerce-platform/BusinessObjects"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 )
 
-func GenerateToken(user string) (string, error) {
-	err := godotenv.Load("../.env")
+func GenerateToken(user BusinessObjects.User) (string, error) {
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -22,8 +23,10 @@ func GenerateToken(user string) (string, error) {
 
 	// Create the JWT claims, including user ID and expiration time
 	claims := jwt.MapClaims{
-		"Id":  user,
-		"exp": time.Now().Add(time.Hour * 1).Unix(), // Token expires in 1 hour
+		"Id":    user.UserID,
+		"Role":  user.UserType,
+		"Email": user.Email,
+		"exp":   time.Now().Add(time.Hour * 1).Unix(), // Token expires in 1 hour
 	}
 
 	// Create the token using the claims

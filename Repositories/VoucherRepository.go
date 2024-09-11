@@ -59,7 +59,7 @@ func GetPaginatedVoucherList(sortBy, voucherID string, pageIndex, pageSize int, 
 		return Util.PaginatedList[BusinessObjects.Voucher]{}, err
 	}
 
-	return Util.PaginatedList[BusinessObjects.Voucher]{Items: vouchers, TotalCount: total, PageIndex: pageIndex, PageSize: pageSize}, nil
+	return Util.NewPaginatedList(vouchers, total, pageIndex, pageSize), nil
 }
 
 // GetAllVouchers retrieves all vouchers from the database
