@@ -126,3 +126,17 @@ func DeleteCartItem(cartItemID string) error {
 
 	return nil
 }
+
+func GetUserByToken(token string) (BusinessObjects.User, error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return BusinessObjects.User{}, err
+	}
+
+	var user BusinessObjects.User
+	if err := db.First(&user, "token = ?", token).Error; err != nil {
+		return BusinessObjects.User{}, err
+	}
+
+	return user, nil
+}

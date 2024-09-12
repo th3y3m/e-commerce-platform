@@ -21,10 +21,10 @@ func GetUserByID(id string) (BusinessObjects.User, error) {
 	return Repositories.GetUserByID(id)
 }
 
-func CreateUser(email, password, role string) error {
+func CreateUser(email, password, role string) (BusinessObjects.User, error) {
 	passwordHash, err := Util.HashPassword(password)
 	if err != nil {
-		return err
+		return BusinessObjects.User{}, err
 	}
 
 	user := BusinessObjects.User{
@@ -37,11 +37,12 @@ func CreateUser(email, password, role string) error {
 		Status:       true,
 	}
 
-	if err := Repositories.CreateUser(user); err != nil {
-		return err
+	newUser, err := Repositories.CreateUser(user)
+	if err != nil {
+		return BusinessObjects.User{}, err
 	}
 
-	return nil
+	return newUser, nil
 }
 
 func BanUser(id string) error {

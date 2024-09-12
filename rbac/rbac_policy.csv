@@ -1,0 +1,10 @@
+# Policy: role, object, action
+p, admin, /admin/*, (GET|POST|PUT|DELETE)
+p, seller, /seller/*, (GET|POST|PUT|DELETE)
+p, customer, /customer/*, GET
+p, customer, /orders, POST
+
+# Role hierarchies: user, role
+g, alice, admin
+g, bob, seller
+g, carol, customer

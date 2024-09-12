@@ -1,9 +1,14 @@
 package Repositories
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
+	"time"
+
+	"gorm.io/gorm"
 )
 
 func GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.User], error) {
@@ -112,17 +117,17 @@ func GetUserByID(userID string) (BusinessObjects.User, error) {
 	return user, nil
 }
 
-func CreateUser(user BusinessObjects.User) error {
+func CreateUser(user BusinessObjects.User) (BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		return err
+		return BusinessObjects.User{}, err
 	}
 
 	if err := db.Create(&user).Error; err != nil {
-		return err
+		return BusinessObjects.User{}, err
 	}
 
-	return nil
+	return user, nil
 }
 
 func UpdateUser(user BusinessObjects.User) error {
@@ -154,13 +159,63 @@ func DeleteUser(userID string) error {
 func GetUserByEmail(email string) (BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		return BusinessObjects.User{}, err
+		return BusinessObjects.User{}, fmt.Errorf("database connection failed: %w", err)
 	}
 
 	var user BusinessObjects.User
 	if err := db.First(&user, "email = ?", email).Error; err != nil {
-		return BusinessObjects.User{}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// No record found, return an empty user and nil error
+			return BusinessObjects.User{}, nil
+		}
+		// Other errors
+		return BusinessObjects.User{}, fmt.Errorf("error querying user by email: %w", err)
 	}
 
 	return user, nil
+}
+
+func StoreToken(user *BusinessObjects.User, token string) error {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return err
+	}
+
+	user.Token = token
+	user.TokenExpires = time.Now().Add(time.Hour * 24) // Token valid for 24 hours
+
+	// Save to database (pseudocode)
+	return db.Save(user).Error
+}
+
+func SetToken(user *BusinessObjects.User, token string) error {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return err
+	}
+
+	user.Token = token
+	user.TokenExpires = time.Now().Add(time.Hour * 24) // Token valid for 24 hours
+
+	// Save to database (pseudocode)
+	return db.Save(user).Error
+}
+
+func VerifyToken(token string) bool {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return false
+	}
+
+	var user BusinessObjects.User
+	if err := db.Where("token = ?", token).First(&user).Error; err != nil {
+		return false
+	}
+
+	// Check token expiry
+	if time.Now().After(user.TokenExpires) {
+		return false
+	}
+
+	return true
 }

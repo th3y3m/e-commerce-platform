@@ -13,6 +13,8 @@ type User struct {
 	Address      string
 	UserType     string
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	Token        string    `gorm:"unique"`
+	TokenExpires time.Time
 	Status       bool
 
 	Orders        []Order        `gorm:"foreignKey:CustomerID"`

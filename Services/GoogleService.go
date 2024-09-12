@@ -10,12 +10,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func HandleGoogleUser(googleUser goth.User) (string, error) {
-	// Log the Google user details for debugging purposes
-	log.Printf("Handling Google user: %+v", googleUser)
+func HandleOAuthUser(user goth.User) (string, error) {
 
 	// Check if the user exists in your database by their email or Google UserID
-	existingUser, err := Repositories.GetUserByEmail(googleUser.Email)
+	existingUser, err := Repositories.GetUserByEmail(user.Email)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		log.Printf("Error retrieving user by email: %v", err)
 		return "", err
@@ -25,14 +23,14 @@ func HandleGoogleUser(googleUser goth.User) (string, error) {
 	if existingUser.UserID == "" {
 		// Create a new user account using the Google user data
 		newUser := BusinessObjects.User{
-			UserID:   googleUser.UserID, // Storing the Google ID
-			Email:    googleUser.Email,
-			Username: googleUser.Name,
+			UserID:   user.UserID, // Storing the Google ID
+			Email:    user.Email,
+			Username: user.Name,
 			// You can set additional user properties like avatar URL, etc.
 		}
 
 		// Create the new user in the database
-		err := Repositories.CreateUser(newUser)
+		createdUser, err := Repositories.CreateUser(newUser)
 		if err != nil {
 			log.Printf("Error creating new user: %v", err)
 			return "", err
@@ -42,6 +40,11 @@ func HandleGoogleUser(googleUser goth.User) (string, error) {
 		token, err := Util.GenerateToken(newUser)
 		if err != nil {
 			log.Printf("Error generating token for new user: %v", err)
+			return "", err
+		}
+
+		if err := Repositories.StoreToken(&createdUser, token); err != nil {
+			log.Printf("Error storing token for new user: %v", err)
 			return "", err
 		}
 

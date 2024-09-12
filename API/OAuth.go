@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
+	"github.com/markbates/goth/providers/facebook"
 	"github.com/markbates/goth/providers/google"
 )
 
@@ -22,6 +23,8 @@ func init() {
 	// Set up environment variables
 	clientID := os.Getenv("GOOGLE_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
+	facebookID, facebookSecret := os.Getenv("FACEBOOK_CLIENT_ID"), os.Getenv("FACEBOOK_CLIENT_SECRET")
+
 	sessionSecret := os.Getenv("SESSION_SECRET")
 
 	// Check if session secret is set
@@ -35,6 +38,7 @@ func init() {
 	// Initialize Goth with the Google provider
 	goth.UseProviders(
 		google.New(clientID, clientSecret, "http://localhost:8080/auth/google/callback"),
+		facebook.New(facebookID, facebookSecret, "http://localhost:8080/auth/facebook/callback"),
 	)
 
 	// Explicitly set Gothic store to use the session store from Gin
@@ -59,7 +63,7 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 	// Handle Google user and generate JWT token
-	token, err := Services.HandleGoogleUser(user)
+	token, err := Services.HandleOAuthUser(user)
 	if err != nil {
 		log.Printf("Error handling Google user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to handle Google user"})
@@ -72,6 +76,44 @@ func GoogleCallback(c *gin.Context) {
 
 // GoogleLogout clears the session
 func GoogleLogout(c *gin.Context) {
+	if err := gothic.Logout(c.Writer, c.Request); err != nil {
+		log.Printf("Error logging out: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to logout"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
+
+// FacebookLogin redirects to Facebook for authentication
+func FacebookLogin(c *gin.Context) {
+	c.Request.URL.RawQuery = "provider=facebook"
+	gothic.BeginAuthHandler(c.Writer, c.Request)
+}
+
+// FacebookCallback handles Facebook OAuth callback
+func FacebookCallback(c *gin.Context) {
+	// Complete the user authentication with Gothic
+	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		log.Printf("Error during authentication: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to authenticate with Facebook"})
+		return
+	}
+
+	// Handle Facebook user and generate JWT token
+	token, err := Services.HandleOAuthUser(user) // This can be renamed to a more generic handler
+	if err != nil {
+		log.Printf("Error handling Facebook user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to handle Facebook user"})
+		return
+	}
+
+	// Respond with the generated JWT token
+	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// FacebookLogout clears the session
+func FacebookLogout(c *gin.Context) {
 	if err := gothic.Logout(c.Writer, c.Request); err != nil {
 		log.Printf("Error logging out: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to logout"})

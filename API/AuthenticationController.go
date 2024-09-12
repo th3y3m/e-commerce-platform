@@ -30,8 +30,14 @@ func Login(c *gin.Context) {
 
 func RegisterCustomer(c *gin.Context) {
 	var request struct {
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
+		Email           string `json:"email" binding:"required"`
+		Password        string `json:"password" binding:"required"`
+		ConfirmPassword string `json:"confirmPassword" binding:"required"`
+	}
+
+	if request.Password != request.ConfirmPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "passwords do not match"})
+		return
 	}
 
 	if err := c.BindJSON(&request); err != nil {
