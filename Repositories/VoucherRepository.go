@@ -127,7 +127,11 @@ func DeleteVoucher(voucherID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.Voucher{}, "voucher_id = ?", voucherID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.Voucher{}, "voucher_id = ?", voucherID).Error; err != nil {
+	// 	return err
+	// }
+
+	if err := db.Model(&BusinessObjects.Voucher{}).Where("voucher_id = ?", voucherID).Update("status", false).Error; err != nil {
 		return err
 	}
 

@@ -140,7 +140,11 @@ func DeleteNew(newsID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.News{}, "news_id = ?", newsID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.News{}, "news_id = ?", newsID).Error; err != nil {
+	// 	return err
+	// }
+
+	if err := db.Model(&BusinessObjects.News{}).Where("news_id = ?", newsID).Update("status", false).Error; err != nil {
 		return err
 	}
 

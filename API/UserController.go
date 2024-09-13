@@ -8,13 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserController is the controller for user management
-func UserController() {
-	router := gin.Default()
-
-	router.Run("localhost:8081") // Separate port for user management
-}
-
 func GetUsers(c *gin.Context) {
 	searchValue := c.DefaultQuery("searchValue", "")
 	sortBy := c.DefaultQuery("sortBy", "")

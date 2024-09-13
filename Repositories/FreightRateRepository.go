@@ -132,7 +132,13 @@ func DeleteFreightRate(rateID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.FreightRate{}, "rate_id = ?", rateID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.FreightRate{}, "rate_id = ?", rateID).Error; err != nil {
+	// 	return err
+	// }
+
+	//Set status to false instead of deleting
+
+	if err := db.Model(&BusinessObjects.FreightRate{}).Where("rate_id = ?", rateID).Update("status", false).Error; err != nil {
 		return err
 	}
 

@@ -37,3 +37,11 @@ func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
 func DeleteCartItem(id string) error {
 	return Repositories.DeleteCartItem(id)
 }
+
+// func AddProductToCart(cartId, productId string, quantity int) error {
+// 	cart, err := Repositories.GetShoppingCartByID(cartId)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// }

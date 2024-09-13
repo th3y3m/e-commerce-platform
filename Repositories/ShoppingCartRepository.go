@@ -59,6 +59,20 @@ func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, page
 	return Util.NewPaginatedList(carts, total, pageIndex, pageSize), nil
 }
 
+func GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return BusinessObjects.ShoppingCart{}, err
+	}
+
+	var cart BusinessObjects.ShoppingCart
+	if err := db.First(&cart, "user_id = ? AND status = ?", userID, true).Error; err != nil {
+		return BusinessObjects.ShoppingCart{}, err
+	}
+
+	return cart, nil
+}
+
 // GetAllShoppingCarts retrieves all shopping carts from the database
 func GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
 	db, err := Util.ConnectToPostgreSQL()
@@ -90,17 +104,17 @@ func GetShoppingCartByID(cartID string) (BusinessObjects.ShoppingCart, error) {
 }
 
 // CreateShoppingCart adds a new shopping cart to the database
-func CreateShoppingCart(cart BusinessObjects.ShoppingCart) error {
+func CreateShoppingCart(cart BusinessObjects.ShoppingCart) (BusinessObjects.ShoppingCart, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		return err
+		return BusinessObjects.ShoppingCart{}, err
 	}
 
 	if err := db.Create(&cart).Error; err != nil {
-		return err
+		return BusinessObjects.ShoppingCart{}, err
 	}
 
-	return nil
+	return cart, nil
 }
 
 // UpdateShoppingCart updates an existing shopping cart

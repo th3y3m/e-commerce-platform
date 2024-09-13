@@ -149,7 +149,11 @@ func DeleteTransaction(transactionID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.Transaction{}, "transaction_id = ?", transactionID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.Transaction{}, "transaction_id = ?", transactionID).Error; err != nil {
+	// 	return err
+	// }
+
+	if err := db.Model(&BusinessObjects.Transaction{}).Where("transaction_id = ?", transactionID).Update("payment_status", "Cancel").Error; err != nil {
 		return err
 	}
 

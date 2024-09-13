@@ -129,8 +129,8 @@ func DeleteProduct(productID string) error {
 	if err != nil {
 		return err
 	}
-
-	if err := db.Delete(&BusinessObjects.Product{}, "product_id = ?", productID).Error; err != nil {
+	// Set product.Status to false
+	if err := db.Model(&BusinessObjects.Product{}).Where("product_id = ?", productID).Update("status", false).Error; err != nil {
 		return err
 	}
 

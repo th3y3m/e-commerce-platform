@@ -140,7 +140,11 @@ func DeleteReview(reviewID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.Review{}, "review_id = ?", reviewID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.Review{}, "review_id = ?", reviewID).Error; err != nil {
+	// 	return err
+	// }
+
+	if err := db.Model(&BusinessObjects.Review{}).Where("review_id = ?", reviewID).Update("status", false).Error; err != nil {
 		return err
 	}
 

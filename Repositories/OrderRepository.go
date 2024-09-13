@@ -141,7 +141,11 @@ func DeleteOrder(orderID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.Order{}, "order_id = ?", orderID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.Order{}, "order_id = ?", orderID).Error; err != nil {
+	// 	return err
+	// }
+
+	if err := db.Model(&BusinessObjects.Order{}).Where("order_id = ?", orderID).Update("order_status", "Cancel").Error; err != nil {
 		return err
 	}
 

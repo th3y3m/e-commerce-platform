@@ -12,3 +12,10 @@ type Review struct {
 	CreatedAt time.Time `gorm:"autoCreateTime;column:created_at"`
 	Status    bool      `gorm:"column:status"`
 }
+
+type NewReview struct {
+	ProductID string
+	UserID    string
+	Rating    int
+	Comment   string
+}

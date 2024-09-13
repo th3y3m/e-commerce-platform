@@ -106,7 +106,12 @@ func DeleteCourier(courierID string) error {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.Courier{}, "courier_id = ?", courierID).Error; err != nil {
+	// if err := db.Delete(&BusinessObjects.Courier{}, "courier_id = ?", courierID).Error; err != nil {
+	// 	return err
+	// }
+
+	// Set status to false
+	if err := db.Model(&BusinessObjects.Courier{}).Where("courier_id = ?", courierID).Update("status", false).Error; err != nil {
 		return err
 	}
 

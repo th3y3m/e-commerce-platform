@@ -21,3 +21,16 @@ type Order struct {
 	OrderDetails []OrderDetail `gorm:"foreignKey:OrderID"`
 	Transactions []Transaction `gorm:"foreignKey:OrderID"`
 }
+
+type NewOrder struct {
+	CustomerID            string
+	TotalAmount           float64
+	ShippingAddress       string
+	CourierID             string
+	FreightPrice          float64
+	EstimatedDeliveryDate time.Time
+	ActualDeliveryDate    time.Time
+	PaymentMethod         string
+	VoucherID             string
+	PaymentStatus         string
+}

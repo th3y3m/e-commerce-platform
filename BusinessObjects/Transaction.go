@@ -11,3 +11,10 @@ type Transaction struct {
 	PaymentMethod   string    `gorm:"column:payment_method"`
 	PaymentStatus   string    `gorm:"column:payment_status"`
 }
+
+type NewTransaction struct {
+	OrderID       string
+	PaymentAmount float64
+	PaymentMethod string
+	PaymentStatus string
+}

@@ -9,7 +9,7 @@ type News struct {
 	Content       string    `gorm:"column:content"`
 	PublishedDate time.Time `gorm:"autoCreateTime;column:published_date"`
 	AuthorID      string    `gorm:"column:author_id"`
-	Status        string    `gorm:"column:status"`
+	Status        bool      `gorm:"column:status"`
 	ImageURL      string    `gorm:"column:image_url"`
 	Category      string    `gorm:"column:category"`
 }
