@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// VerifyUserEmailHandler verifies the user's email and cancels the deletion task
 func VerifyUserEmailHandler(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
@@ -15,26 +16,15 @@ func VerifyUserEmailHandler(c *gin.Context) {
 		return
 	}
 
-	if !Services.VerifyToken(token) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expired or invalid"})
+	err := Services.VerifyUserEmail(token)
+	if err != nil {
+		if err.Error() == "token expired or invalid" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
-
-	// user, err := Repositories.GetUserByToken(token)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
-	// 	return
-	// }
-
-	// Cancel the scheduled delete user task
-	// inspector := asynq.NewInspector(asynq.RedisClientOpt{Addr: "localhost:6379"})
-	// defer inspector.Close()
-
-	// err = inspector.DeleteTask("default", user.UserID)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to cancel task"})
-	// 	return
-	// }
 
 	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully!"})
 }

@@ -44,6 +44,43 @@ func CreateOrder(order BusinessObjects.NewOrder) error {
 	return nil
 }
 
+func PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error {
+	productsList, err := Repositories.GetCartItemByID(cartId)
+	if err != nil {
+		return err
+	}
+
+	totalAmount := 0.0
+	for _, product := range productsList {
+		p, err := Repositories.GetProductByID(product.ProductID)
+		if err != nil {
+			return err
+		}
+
+		totalAmount += p.Price * float64(product.Quantity)
+	}
+
+	newOrder := BusinessObjects.NewOrder{
+		CustomerID:            userId,
+		CourierID:             "",
+		VoucherID:             "",
+		TotalAmount:           totalAmount,
+		PaymentMethod:         "",
+		ShippingAddress:       shipAddress,
+		FreightPrice:          0,
+		EstimatedDeliveryDate: time.Now(),
+		ActualDeliveryDate:    time.Now(),
+		PaymentStatus:         "",
+	}
+
+	err = CreateOrder(newOrder)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func UpdateOrder(order BusinessObjects.Order) error {
 	return Repositories.UpdateOrder(order)
 }
