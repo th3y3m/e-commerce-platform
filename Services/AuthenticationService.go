@@ -29,7 +29,7 @@ func Login(email, password string) (string, error) {
 		return "", err
 	}
 
-	if !Util.CheckPasswordHash(password, user.PasswordHash) {
+	if !Util.CheckPasswordHash(user.PasswordHash, password) {
 		return "", errors.New("invalid password")
 	}
 
@@ -56,12 +56,111 @@ func RegisterCustomer(email, password string) error {
 		return errors.New("user already exists")
 	}
 
-	hash, err := Util.HashPassword(password)
+	newUser, err := CreateUser(email, password, "customer")
 	if err != nil {
-		return fmt.Errorf("error hashing password: %w", err)
+		return fmt.Errorf("error creating user: %w", err)
 	}
 
-	newUser, err := CreateUser(email, hash, "customer")
+	token, err := Util.GenerateToken(newUser)
+	if err != nil {
+		return fmt.Errorf("error generating token: %w", err)
+	}
+
+	if err := Repositories.StoreToken(&newUser, token); err != nil {
+		return fmt.Errorf("error storing token: %w", err)
+	}
+
+	if err := SendMail(newUser.Email, token); err != nil {
+		return fmt.Errorf("error sending mail: %w", err)
+	}
+
+	// Schedule user deletion in 1 minute
+	job, err := scheduler.Every(15).Minutes().StartAt(time.Now().Add(1 * time.Minute)).Do(func() {
+		err := Repositories.DeleteUser(newUser.UserID)
+		if err != nil {
+			fmt.Printf("Error deleting user: %v\n", err)
+		} else {
+			fmt.Printf("User with ID %v deleted due to email verification timeout.\n", newUser.UserID)
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("error scheduling user deletion: %w", err)
+	}
+
+	// Store the job reference so we can cancel it later
+	fmt.Printf("Scheduled delete task for user %v.\n", newUser.UserID)
+	deleteJobs[newUser.UserID] = job
+
+	return nil
+}
+func RegisterSeller(email, password string) error {
+	if email == "" || password == "" {
+		return errors.New("email and password are required")
+	}
+
+	user, err := Repositories.GetUserByEmail(email)
+	if err != nil {
+		return fmt.Errorf("error checking user existence: %w", err)
+	}
+
+	// If the user already exists, prevent registration
+	if user.Email != "" {
+		return errors.New("user already exists")
+	}
+
+	newUser, err := CreateUser(email, password, "seller")
+	if err != nil {
+		return fmt.Errorf("error creating user: %w", err)
+	}
+
+	token, err := Util.GenerateToken(newUser)
+	if err != nil {
+		return fmt.Errorf("error generating token: %w", err)
+	}
+
+	if err := Repositories.StoreToken(&newUser, token); err != nil {
+		return fmt.Errorf("error storing token: %w", err)
+	}
+
+	if err := SendMail(newUser.Email, token); err != nil {
+		return fmt.Errorf("error sending mail: %w", err)
+	}
+
+	// Schedule user deletion in 1 minute
+	job, err := scheduler.Every(15).Minutes().StartAt(time.Now().Add(1 * time.Minute)).Do(func() {
+		err := Repositories.DeleteUser(newUser.UserID)
+		if err != nil {
+			fmt.Printf("Error deleting user: %v\n", err)
+		} else {
+			fmt.Printf("User with ID %v deleted due to email verification timeout.\n", newUser.UserID)
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("error scheduling user deletion: %w", err)
+	}
+
+	// Store the job reference so we can cancel it later
+	fmt.Printf("Scheduled delete task for user %v.\n", newUser.UserID)
+	deleteJobs[newUser.UserID] = job
+
+	return nil
+}
+func RegisterAdmin(email, password string) error {
+	if email == "" || password == "" {
+		return errors.New("email and password are required")
+	}
+
+	user, err := Repositories.GetUserByEmail(email)
+	if err != nil {
+		return fmt.Errorf("error checking user existence: %w", err)
+	}
+
+	// If the user already exists, prevent registration
+	if user.Email != "" {
+		return errors.New("user already exists")
+	}
+
+	newUser, err := CreateUser(email, password, "admin")
 	if err != nil {
 		return fmt.Errorf("error creating user: %w", err)
 	}

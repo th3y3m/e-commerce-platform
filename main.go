@@ -6,46 +6,10 @@ import (
 )
 
 func main() {
-	// Load environment variables from .env file
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatalf("Error loading .env file")
-	// }
-
-	// redisAddr := os.Getenv("REDIS_ADDR")
-	// redisPassword := os.Getenv("REDIS_PASSWORD")
-	// redisDBStr := os.Getenv("REDIS_DB")
-	// redisDB, err := strconv.Atoi(redisDBStr)
-	// if err != nil {
-	// 	log.Fatalf("Invalid REDIS_DB value: %v", err)
-	// }
-
-	// srv := asynq.NewServer(
-	// 	asynq.RedisClientOpt{
-	// 		Addr:         redisAddr,
-	// 		Password:     redisPassword,
-	// 		DB:           redisDB,
-	// 		DialTimeout:  30 * time.Second, // Increase dial timeout
-	// 		ReadTimeout:  30 * time.Second, // Increase read timeout
-	// 		WriteTimeout: 30 * time.Second, // Increase write timeout
-	// 	},
-	// 	asynq.Config{
-	// 		Concurrency: 10,
-	// 	},
-	// )
-
-	// mux := asynq.NewServeMux()
-	// mux.HandleFunc(Services.TypeDeleteUser, Services.HandleDeleteUserTask)
-
-	// // Run the asynq server in a separate goroutine
-	// go func() {
-	// 	if err := srv.Run(mux); err != nil {
-	// 		log.Fatalf("could not run asynq server: %v", err)
-	// 	}
-	// }()
-
 	// Start the Gin server
 	router := API.Controller()
+	log.Println("Starting server on :8080")
+
 	if err := router.Run("localhost:8080"); err != nil {
 		log.Fatalf("could not run Gin server: %v", err)
 	}
