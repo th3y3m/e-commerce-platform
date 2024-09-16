@@ -8,7 +8,6 @@ import (
 func main() {
 	// Start the Gin server
 	router := API.Controller()
-	log.Println("Starting server on :8080")
 
 	if err := router.Run("localhost:8080"); err != nil {
 		log.Fatalf("could not run Gin server: %v", err)

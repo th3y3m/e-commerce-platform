@@ -1,7 +1,7 @@
-# Policy: role, object, action
-p, admin, /admin/*, (GET|POST|PUT|DELETE)
-p, seller, /seller/*, (GET|POST|PUT|DELETE)
-p, customer, /customer/*, GET
-p, customer, /orders, POST
-p, admin, /users, (GET|POST|PUT|DELETE)
-p, admin, /auth/users, GET
+# Policy: role,object,action
+p,admin,/admin/*,(GET|POST|PUT|DELETE)
+p,seller,/seller/*,(GET|POST|PUT|DELETE)
+p,customer,/customer/*,GET
+p,customer,/orders,POST
+p,admin,/users,(GET|POST|PUT|DELETE)
+p,admin,/auth/users,GET

@@ -62,19 +62,23 @@ func PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error 
 
 	newOrder := BusinessObjects.NewOrder{
 		CustomerID:            userId,
-		CourierID:             "",
-		VoucherID:             "",
+		CourierID:             CourierID,
+		VoucherID:             VoucherID,
 		TotalAmount:           totalAmount,
 		PaymentMethod:         "",
 		ShippingAddress:       shipAddress,
 		FreightPrice:          0,
 		EstimatedDeliveryDate: time.Now(),
 		ActualDeliveryDate:    time.Now(),
-		PaymentStatus:         "",
+		PaymentStatus:         "Pending",
 	}
 
 	err = CreateOrder(newOrder)
 	if err != nil {
+		return err
+	}
+
+	if err := UpdateShoppingCartStatus(cartId, false); err != nil {
 		return err
 	}
 

@@ -6,3 +6,8 @@ type CartItem struct {
 	ProductID string `gorm:"primaryKey;column:product_id"`
 	Quantity  int    `gorm:"column:quantity"`
 }
+
+type Item struct {
+	ProductID string
+	Quantity  int
+}

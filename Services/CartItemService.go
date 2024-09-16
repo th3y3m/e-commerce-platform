@@ -34,46 +34,8 @@ func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
 	return Repositories.UpdateCartItem(cartItem)
 }
 
-func DeleteCartItem(id string) error {
-	return Repositories.DeleteCartItem(id)
-}
-
-// func AddProductToCart(cartId, productId string, quantity int) error {
-// 	cart, err := Repositories.GetShoppingCartByID(cartId)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// }
-
-// AddItemToCart adds an item to the shopping cart
-func AddItemToCart(cartId, productId string) error {
-	cartItem, err := Repositories.GetShoppingCartByID(cartId)
-	if err != nil {
-		return err
-	}
-
-	productList := make(map[string]int)
-
-	for _, item := range cartItem.CartItems {
-		productList[item.ProductID] = item.Quantity
-	}
-
-	if quantity, ok := productList[productId]; ok {
-		// Increment the quantity if the product already exists
-		productList[productId] = quantity + 1
-		for i, item := range cartItem.CartItems {
-			if item.ProductID == productId {
-				cartItem.CartItems[i].Quantity = quantity + 1
-				break
-			}
-		}
-	} else {
-		// Add a new product if it doesn't exist
-		cartItem.CartItems = append(cartItem.CartItems, BusinessObjects.CartItem{CartID: cartId, ProductID: productId, Quantity: 1})
-	}
-
-	return Repositories.UpdateShoppingCart(cartItem)
+func DeleteCartItem(cartID, productID string) error {
+	return Repositories.DeleteCartItem(cartID, productID)
 }
 
 // RemoveItemFromCart removes an item from the shopping cart

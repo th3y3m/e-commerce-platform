@@ -3,6 +3,8 @@ package Repositories
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
+
+	"gorm.io/gorm"
 )
 
 func GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.CartItem], error) {
@@ -114,29 +116,42 @@ func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
 }
 
 // DeleteCartItem removes a freight cartItem from the database by its ID
-func DeleteCartItem(cartItemID string) error {
+func DeleteCartItem(cartID, productID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.CartItem{}, "cart_id = ?", cartItemID).Error; err != nil {
+	if err := db.Where("cart_id = ? AND product_id = ?", cartID, productID).Delete(&BusinessObjects.CartItem{}).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func GetUserByToken(token string) (BusinessObjects.User, error) {
+func UpdateOrCreateCartItem(cartItem BusinessObjects.CartItem) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		return BusinessObjects.User{}, err
+		return err
 	}
 
-	var user BusinessObjects.User
-	if err := db.First(&user, "token = ?", token).Error; err != nil {
-		return BusinessObjects.User{}, err
+	var existingCartItem BusinessObjects.CartItem
+	if err := db.Where("cart_id = ? AND product_id = ?", cartItem.CartID, cartItem.ProductID).First(&existingCartItem).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Create new cart item if not found
+			if err := db.Create(&cartItem).Error; err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	} else {
+		// Update existing cart item
+		existingCartItem.Quantity = cartItem.Quantity
+		if err := db.Save(&existingCartItem).Error; err != nil {
+			return err
+		}
 	}
 
-	return user, nil
+	return nil
 }

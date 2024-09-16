@@ -3,6 +3,8 @@ package Repositories
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
+
+	"gorm.io/gorm"
 )
 
 func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.ShoppingCart], error) {
@@ -66,7 +68,19 @@ func GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
 	}
 
 	var cart BusinessObjects.ShoppingCart
-	if err := db.First(&cart, "user_id = ? AND status = ?", userID, true).Error; err != nil {
+	if err := db.Order("created_at DESC").First(&cart, "user_id = ? AND status = ?", userID, true).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Create a new shopping cart if not found
+			newCart := BusinessObjects.ShoppingCart{
+				UserID: userID,
+				Status: true,
+				// Add other necessary fields here
+			}
+			if err := db.Create(&newCart).Error; err != nil {
+				return BusinessObjects.ShoppingCart{}, err
+			}
+			return newCart, nil
+		}
 		return BusinessObjects.ShoppingCart{}, err
 	}
 
@@ -139,6 +153,19 @@ func DeleteShoppingCart(cartID string) error {
 	}
 
 	if err := db.Delete(&BusinessObjects.ShoppingCart{}, "cart_id = ?", cartID).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateShoppingCartStatus(cartID string, status bool) error {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return err
+	}
+
+	if err := db.Model(&BusinessObjects.ShoppingCart{}).Where("cart_id = ?", cartID).Update("status", status).Error; err != nil {
 		return err
 	}
 
