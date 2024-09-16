@@ -8,10 +8,11 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"time"
+
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Repositories"
 	"th3y3m/e-commerce-platform/Util"
-	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -157,6 +158,6 @@ func (s *MoMoService) ValidateTransactionResponse(queryString string) (*Transact
 
 	return &TransactionStatusModel{
 		IsSuccessful: false,
-		RedirectUrl:  fmt.Sprintf("https://localhost:3000/reject?orderId=%s", values.Get("vnp_TxnRef")),
+		RedirectUrl:  fmt.Sprintf("https://localhost:3000/reject?orderId=%s", orderId),
 	}, nil
 }
