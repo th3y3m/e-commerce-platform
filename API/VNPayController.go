@@ -21,7 +21,7 @@ func CreateVNPayUrl(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"paymentUrl": paymentUrl})
 }
 
-func ValidateTransactionResponse(c *gin.Context) {
+func ValidateVNPayResponse(c *gin.Context) {
 	vnpayConfig := Services.NewVnpayService()
 	queryParams := c.Request.URL.Query()
 	fmt.Print(queryParams)

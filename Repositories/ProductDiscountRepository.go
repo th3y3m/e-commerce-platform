@@ -61,15 +61,15 @@ func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
 }
 
 // GetProductDiscountByID retrieves discount rate by its ID
-func GetProductDiscountByID(rateID string) (BusinessObjects.ProductDiscount, error) {
+func GetProductDiscountByID(productID string) ([]BusinessObjects.ProductDiscount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		return BusinessObjects.ProductDiscount{}, err
+		return nil, err
 	}
 
-	var rate BusinessObjects.ProductDiscount
-	if err := db.First(&rate, "product_id = ?", rateID).Error; err != nil {
-		return BusinessObjects.ProductDiscount{}, err
+	var rate []BusinessObjects.ProductDiscount
+	if err := db.Where("product_id = ?", productID).First(&rate).Error; err != nil {
+		return nil, err
 	}
 
 	return rate, nil
@@ -101,13 +101,13 @@ func UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	return nil
 }
 
-func DeleteProductDiscount(rateID string) error {
+func DeleteProductDiscount(productID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
 	}
 
-	if err := db.Delete(&BusinessObjects.ProductDiscount{}, "product_id = ?", rateID).Error; err != nil {
+	if err := db.Delete(&BusinessObjects.ProductDiscount{}, "product_id = ?", productID).Error; err != nil {
 		return err
 	}
 

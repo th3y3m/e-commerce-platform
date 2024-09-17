@@ -54,3 +54,21 @@ func UpdateFreightRate(rateID, courierId string, distanceMinKm, distanceMaxKm in
 func DeleteFreightRate(id string) error {
 	return Repositories.DeleteFreightRate(id)
 }
+func GetFreightRateByCourierID(id string) ([]BusinessObjects.FreightRate, error) {
+	return Repositories.GetFreightRateByCourierID(id)
+}
+
+func CalculateFreightRate(courierId string, distance float64) (float64, error) {
+	rates, err := GetFreightRateByCourierID(courierId)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, rate := range rates {
+		if distance >= float64(rate.DistanceMinKM) && distance <= float64(rate.DistanceMaxKM) {
+			return rate.CostPerKM * distance, nil
+		}
+	}
+
+	return 0, nil
+}

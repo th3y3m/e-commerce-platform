@@ -62,3 +62,31 @@ func UpdateProduct(productID, SellerID, ProductName, Description, CategoryID str
 func DeleteProduct(id string) error {
 	return Repositories.DeleteProduct(id)
 }
+
+func GetProductPriceAfterDiscount(productID string) (float64, error) {
+	product, err := Repositories.GetProductByID(productID)
+	if err != nil {
+		return 0, err
+	}
+
+	discounts, err := GetProductDiscountByID(productID)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, discount := range discounts {
+		discountEvent, err := GetDiscountByID(discount.DiscountID)
+		if err != nil {
+			return 0, err
+		}
+
+		if discountEvent.DiscountType == "Percentage" {
+			product.Price -= product.Price * discountEvent.DiscountValue
+		} else {
+			product.Price -= discountEvent.DiscountValue
+
+		}
+	}
+
+	return product.Price, nil
+}

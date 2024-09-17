@@ -94,6 +94,61 @@ func Controller() *gin.Engine {
 		protected.POST("/auth/couriers", CreateCourier)
 		protected.PUT("/auth/couriers/:id", UpdateCourier)
 		protected.DELETE("/auth/couriers/:id", DeleteCourier)
+
+		protected.GET("/auth/discounts", GetAllDiscounts)
+		protected.GET("/auth/discounts/:id", GetDiscountByID)
+		protected.POST("/auth/discounts", CreateDiscount)
+		protected.PUT("/auth/discounts/:id", UpdateDiscount)
+		protected.DELETE("/auth/discounts/:id", DeleteDiscount)
+
+		protected.GET("/auth/productDiscounts/:id", GetProductDiscountByID)
+
+		protected.GET("/auth/orders", GetPaginatedOrderList)
+		protected.GET("/auth/orders/:id", GetOrderById)
+		protected.POST("/auth/orders", PlaceOrder)
+
+		protected.GET("/auth/vouchers", GetAllVouchers)
+		protected.GET("/auth/vouchers/:id", GetVoucherByID)
+		protected.POST("/auth/vouchers", CreateVoucher)
+		protected.PUT("/auth/vouchers/:id", UpdateVoucher)
+		protected.DELETE("/auth/vouchers/:id", DeleteVoucher)
+
+		protected.GET("/auth/reviews", GetAllReviews)
+		protected.GET("/auth/reviews/:id", GetReviewByID)
+		protected.POST("/auth/reviews", CreateReview)
+		protected.PUT("/auth/reviews/:id", UpdateReview)
+		protected.DELETE("/auth/reviews/:id", DeleteReview)
+
+		protected.GET("/auth/transactions", GetPaginatedTransactionList)
+		protected.GET("/auth/transactions/:id", GetTransactionByID)
+		protected.POST("/auth/transactions", CreateTransaction)
+		protected.PUT("/auth/transactions/:id", UpdateTransaction)
+
+		protected.GET("/auth/shoppingcart/:id", GetShoppingCartByID)
+		protected.GET("/auth/shoppingcart", GetUserShoppingCart)
+		protected.POST("/auth/shoppingcart", AddProductToCart)
+		protected.PUT("/auth/shoppingcart", RemoveProductFromCart)
+		protected.DELETE("/auth/shoppingcart/:id", ClearShoppingCart)
+		protected.GET("/auth/shoppingcart/numberofitems", NumberOfItemsInCart)
+
+		protected.GET("/auth/cookie/:id", DeleteUnitItem)
+		protected.GET("/auth/cookie", RemoveFromCart)
+		protected.POST("/auth/cookie/GetCartItems", GetCartItems)
+		protected.PUT("/auth/cookie/DeleteCartInCookie", DeleteCartInCookie)
+		protected.DELETE("/auth/cookie/NumberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+		protected.GET("/auth/cookie/NumberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+
+		protected.GET("/auth/news", GetAllNews)
+		protected.GET("/auth/news/:id", GetNewsByID)
+		protected.POST("/auth/news", CreateNews)
+		protected.PUT("/auth/news/:id", UpdateNews)
+		protected.DELETE("/auth/news/:id", DeleteNews)
+
+		protected.GET("/auth/vnpay", CreateVNPayUrl)
+		protected.POST("/auth/vnpay", ValidateVNPayResponse)
+
+		protected.GET("/auth/momo", CreateMoMoUrl)
+		protected.POST("/auth/momo", ValidateMoMoResponse)
 	}
 
 	log.Println("Routes registered successfully")

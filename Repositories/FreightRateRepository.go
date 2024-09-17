@@ -96,6 +96,19 @@ func GetFreightRateByID(rateID string) (BusinessObjects.FreightRate, error) {
 
 	return rate, nil
 }
+func GetFreightRateByCourierID(courierID string) ([]BusinessObjects.FreightRate, error) {
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		return nil, err
+	}
+
+	var rates []BusinessObjects.FreightRate
+	if err := db.Find(&rates, "courier_id = ?", courierID).Error; err != nil {
+		return nil, err
+	}
+
+	return rates, nil
+}
 
 // CreateFreightRate adds a new freight rate to the database
 func CreateFreightRate(rate BusinessObjects.FreightRate) error {

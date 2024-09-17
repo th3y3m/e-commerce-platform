@@ -97,3 +97,13 @@ func DeleteProduct(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
+
+func GetProductPriceAfterDiscount(c *gin.Context) {
+	id := c.Param("id")
+	price, err := Services.GetProductPriceAfterDiscount(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"price": price})
+}
