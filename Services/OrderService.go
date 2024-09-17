@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
+func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
 	return Repositories.GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId, pageIndex, pageSize, startDate, endDate, minPrice, maxPrice, status)
 }
 
@@ -45,7 +45,7 @@ func CreateOrder(order BusinessObjects.NewOrder) error {
 }
 
 func PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error {
-	productsList, err := Repositories.GetCartItemByID(cartId)
+	productsList, err := Repositories.GetCartItemByCartID(cartId)
 	if err != nil {
 		return err
 	}

@@ -29,10 +29,18 @@ func GetUserShoppingCart(c *gin.Context) {
 }
 
 func AddProductToCart(c *gin.Context) {
-	userID := c.DefaultQuery("userID", "")
-	productID := c.DefaultQuery("productID", "")
-	quantity, _ := strconv.Atoi(c.DefaultQuery("quantity", "1"))
-	err := Services.AddProductToShoppingCart(userID, productID, quantity)
+	var item struct {
+		UserID    string `json:"userID"`
+		ProductID string `json:"productID"`
+		Quantity  int    `json:"quantity"`
+	}
+
+	// Parse JSON request body
+	if err := c.BindJSON(&item); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+	err := Services.AddProductToShoppingCart(item.UserID, item.ProductID, item.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -41,10 +49,10 @@ func AddProductToCart(c *gin.Context) {
 }
 
 func RemoveProductFromCart(c *gin.Context) {
-	cartID := c.Param("cartID")
+	userID := c.Param("userID")
 	productID := c.Param("productID")
 	quantity, _ := strconv.Atoi(c.DefaultQuery("quantity", "1"))
-	err := Services.RemoveProductFromShoppingCart(cartID, productID, quantity)
+	err := Services.RemoveProductFromShoppingCart(userID, productID, quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -53,8 +61,8 @@ func RemoveProductFromCart(c *gin.Context) {
 }
 
 func ClearShoppingCart(c *gin.Context) {
-	cartID := c.Param("cartID")
-	err := Services.ClearShoppingCart(cartID)
+	userID := c.Param("userID")
+	err := Services.ClearShoppingCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -63,8 +71,8 @@ func ClearShoppingCart(c *gin.Context) {
 }
 
 func NumberOfItemsInCart(c *gin.Context) {
-	cartID := c.Param("cartID")
-	items, err := Services.NumberOfItemsInCart(cartID)
+	userID := c.Param("userID")
+	items, err := Services.NumberOfItemsInCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -33,6 +33,7 @@ func CreateFreightRate(c *gin.Context) {
 		DistanceMinKM int     `json:"distance_min_km" binding:"required"`
 		DistanceMaxKM int     `json:"distance_max_km" binding:"required"`
 		CostPerKM     float64 `json:"cost_per_km" binding:"required"`
+		Status        bool    `json:"status" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&freightRate); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

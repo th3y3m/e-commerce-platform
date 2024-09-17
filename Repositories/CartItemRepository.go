@@ -73,7 +73,7 @@ func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
 }
 
 // GetCartItemByID retrieves a freight cartItem by its ID
-func GetCartItemByID(cartItemID string) ([]BusinessObjects.CartItem, error) {
+func GetCartItemByCartID(cartItemID string) ([]BusinessObjects.CartItem, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err

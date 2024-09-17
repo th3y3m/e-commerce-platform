@@ -61,7 +61,7 @@ func AddProductToShoppingCart(userID, productID string, quantity int) error {
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByID(cart.CartID)
+	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func RemoveProductFromShoppingCart(userID, productID string, quantity int) error
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByID(cart.CartID)
+	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func ClearShoppingCart(userID string) error {
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByID(cart.CartID)
+	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func NumberOfItemsInCart(userID string) (int, error) {
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByID(cart.CartID)
+	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return 0, err
 	}

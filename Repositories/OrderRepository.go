@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
+func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
@@ -31,12 +31,12 @@ func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId str
 		query = query.Where("voucher_id = ?", voucherId)
 	}
 
-	if !startDate.IsZero() {
-		query = query.Where("order_date >= ?", startDate)
+	if startDate != nil {
+		query = query.Where("order_date >= ?", *startDate)
 	}
 
-	if !endDate.IsZero() {
-		query = query.Where("order_date <= ?", endDate)
+	if endDate != nil {
+		query = query.Where("order_date <= ?", *endDate)
 	}
 
 	if minPrice != nil {

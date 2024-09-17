@@ -103,9 +103,19 @@ func Controller() *gin.Engine {
 
 		protected.GET("/auth/productDiscounts/:id", GetProductDiscountByID)
 
+		protected.GET("/auth/cartItems/:id", GetCartItemByCartID)
+
 		protected.GET("/auth/orders", GetPaginatedOrderList)
 		protected.GET("/auth/orders/:id", GetOrderById)
 		protected.POST("/auth/orders", PlaceOrder)
+
+		protected.GET("/auth/orderDetails/:id", GetOrderDetailOfAOrder)
+
+		protected.GET("/auth/freightRates", GetAllFreightRates)
+		protected.GET("/auth/freightRates/:id", GetFreightRateByID)
+		protected.POST("/auth/freightRates", CreateFreightRate)
+		protected.PUT("/auth/freightRates/:id", UpdateFreightRate)
+		protected.DELETE("/auth/freightRates/:id", DeleteFreightRate)
 
 		protected.GET("/auth/vouchers", GetAllVouchers)
 		protected.GET("/auth/vouchers/:id", GetVoucherByID)
@@ -124,19 +134,19 @@ func Controller() *gin.Engine {
 		protected.POST("/auth/transactions", CreateTransaction)
 		protected.PUT("/auth/transactions/:id", UpdateTransaction)
 
-		protected.GET("/auth/shoppingcart/:id", GetShoppingCartByID)
-		protected.GET("/auth/shoppingcart", GetUserShoppingCart)
-		protected.POST("/auth/shoppingcart", AddProductToCart)
-		protected.PUT("/auth/shoppingcart", RemoveProductFromCart)
-		protected.DELETE("/auth/shoppingcart/:id", ClearShoppingCart)
-		protected.GET("/auth/shoppingcart/numberofitems", NumberOfItemsInCart)
+		protected.GET("/auth/shoppingCart/:id", GetShoppingCartByID)
+		protected.GET("/auth/shoppingCart", GetUserShoppingCart)
+		protected.POST("/auth/shoppingCart", AddProductToCart)
+		protected.PUT("/auth/shoppingCart", RemoveProductFromCart)
+		protected.DELETE("/auth/shoppingCart/:id", ClearShoppingCart)
+		protected.GET("/auth/shoppingCart/numberofitems/:id", NumberOfItemsInCart)
 
 		protected.GET("/auth/cookie/:id", DeleteUnitItem)
 		protected.GET("/auth/cookie", RemoveFromCart)
-		protected.POST("/auth/cookie/GetCartItems", GetCartItems)
-		protected.PUT("/auth/cookie/DeleteCartInCookie", DeleteCartInCookie)
-		protected.DELETE("/auth/cookie/NumberOfItemsInCartCookie", NumberOfItemsInCartCookie)
-		protected.GET("/auth/cookie/NumberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+		protected.POST("/auth/cookie/getCartItems", GetCartItems)
+		protected.PUT("/auth/cookie/deleteCartInCookie", DeleteCartInCookie)
+		protected.DELETE("/auth/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+		protected.GET("/auth/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
 
 		protected.GET("/auth/news", GetAllNews)
 		protected.GET("/auth/news/:id", GetNewsByID)

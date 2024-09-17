@@ -20,9 +20,27 @@ func GetPaginatedOrderList(c *gin.Context) {
 	minPrice, _ := strconv.ParseFloat(c.DefaultQuery("minPrice", ""), 64)
 	maxPrice, _ := strconv.ParseFloat(c.DefaultQuery("maxPrice", ""), 64)
 	status := c.DefaultQuery("status", "")
-	startDate, _ := time.Parse(time.RFC3339, c.DefaultQuery("startDate", ""))
-	endDate, _ := time.Parse(time.RFC3339, c.DefaultQuery("endDate", ""))
 
+	// Get date values, check if they are empty or invalid
+	var startDate, endDate *time.Time
+
+	startDateStr := c.DefaultQuery("startDate", "")
+	if startDateStr != "" {
+		parsedStartDate, err := time.Parse(time.RFC3339, startDateStr)
+		if err == nil {
+			startDate = &parsedStartDate // set startDate pointer if valid
+		}
+	}
+
+	endDateStr := c.DefaultQuery("endDate", "")
+	if endDateStr != "" {
+		parsedEndDate, err := time.Parse(time.RFC3339, endDateStr)
+		if err == nil {
+			endDate = &parsedEndDate // set endDate pointer if valid
+		}
+	}
+
+	// Call the service with nil pointers if no valid dates are provided
 	orders, err := Services.GetPaginatedOrderList(sortBy, orderID, customerID, courierId, voucherId, pageIndex, pageSize, startDate, endDate, &minPrice, &maxPrice, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

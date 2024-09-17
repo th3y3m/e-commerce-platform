@@ -1,24 +1,18 @@
 package API
 
-// func AddToCart(c *gin.Context) {
-// 	var productID string
-// 	if err := c.ShouldBindJSON(&productID); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
+import (
+	"net/http"
+	"th3y3m/e-commerce-platform/Services"
 
-// 	cart, err := Services.AddItemToCart(cartItem.UserID)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
+	"github.com/gin-gonic/gin"
+)
 
-// 	cartItem.CartID = cart.CartID
-// 	newCartItem, err := Services.CreateCartItem(cartItem)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, newCartItem)
-// }
+func GetCartItemByCartID(c *gin.Context) {
+	cartID := c.Param("cartID")
+	cartItems, err := Services.GetCartItemByCartID(cartID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, cartItems)
+}

@@ -14,8 +14,8 @@ func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
 	return Repositories.GetAllCartItems()
 }
 
-func GetCartItemByID(id string) ([]BusinessObjects.CartItem, error) {
-	return Repositories.GetCartItemByID(id)
+func GetCartItemByCartID(id string) ([]BusinessObjects.CartItem, error) {
+	return Repositories.GetCartItemByCartID(id)
 }
 
 // func CreateCartItem(cartId, productId string, quantity int) error {
