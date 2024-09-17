@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func GetPaginatedOrderList(sortBy string, orderID string, customerId string, courierId string, voucherId string, pageIndex int, pageSize int, startDate time.Time, endDate time.Time) (Util.PaginatedList[BusinessObjects.Order], error) {
-	return Repositories.GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId, pageIndex, pageSize, startDate, endDate)
+func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
+	return Repositories.GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId, pageIndex, pageSize, startDate, endDate, minPrice, maxPrice, status)
 }
 
 func GetAllOrders() ([]BusinessObjects.Order, error) {

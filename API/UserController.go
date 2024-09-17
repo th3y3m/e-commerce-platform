@@ -28,3 +28,53 @@ func GetUsers(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"users": users})
 }
+
+func GetUserByID(c *gin.Context) {
+	id := c.Param("id")
+	user, err := Services.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
+func UpdateProfile(c *gin.Context) {
+	ID := c.Param("id")
+
+	var info struct {
+		FullName    string `json:"full_name" binding:"required"`
+		PhoneNumber string `json:"phone_number" binding:"required"`
+		Address     string `json:"address" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&info); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err := Services.UpdateProfile(ID, info.FullName, info.PhoneNumber, info.Address)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
+}
+
+func BanUser(c *gin.Context) {
+	id := c.Param("id")
+	err := Services.BanUser(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User banned successfully"})
+}
+
+func UnBanUser(c *gin.Context) {
+	id := c.Param("id")
+	err := Services.UnBanUser(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User unbanned successfully"})
+}

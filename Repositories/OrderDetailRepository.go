@@ -59,7 +59,7 @@ func GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string,
 	return Util.NewPaginatedList(rates, total, pageIndex, pageSize), nil
 }
 
-// GetAllOrderDetails retrieves all freight rates from the database
+// GetAllOrderDetails retrieves all order details
 func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -74,7 +74,7 @@ func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
 	return rates, nil
 }
 
-// GetOrderDetailByID retrieves a freight rate by its ID
+// GetOrderDetailByID retrieves all products of a order
 func GetOrderDetailByID(rateID string) (BusinessObjects.OrderDetail, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -89,7 +89,7 @@ func GetOrderDetailByID(rateID string) (BusinessObjects.OrderDetail, error) {
 	return rate, nil
 }
 
-// CreateOrderDetail adds a new freight rate to the database
+// CreateOrderDetail adds a new order detail to the database
 func CreateOrderDetail(rate BusinessObjects.OrderDetail) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -103,7 +103,7 @@ func CreateOrderDetail(rate BusinessObjects.OrderDetail) error {
 	return nil
 }
 
-// UpdateOrderDetail updates an existing freight rate
+// UpdateOrderDetail updates an existing order detail in the database
 func UpdateOrderDetail(rate BusinessObjects.OrderDetail) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -117,7 +117,7 @@ func UpdateOrderDetail(rate BusinessObjects.OrderDetail) error {
 	return nil
 }
 
-// DeleteOrderDetail removes a freight rate from the database by its ID
+// DeleteOrderDetail removes a order detail from the database
 func DeleteOrderDetail(rateID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {

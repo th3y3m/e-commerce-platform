@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageIndex, pageSize int, minPrice, maxPrice *int, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
+func GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Transaction]{}, err

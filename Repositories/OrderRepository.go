@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Order], error) {
+func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
@@ -39,6 +39,18 @@ func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId str
 		query = query.Where("order_date <= ?", endDate)
 	}
 
+	if minPrice != nil {
+		query = query.Where("total_amount >= ?", *minPrice)
+	}
+
+	if maxPrice != nil {
+		query = query.Where("total_amount <= ?", *maxPrice)
+	}
+
+	if status != "" {
+		query = query.Where("order_status = ?", status)
+	}
+
 	switch sortBy {
 	case "order_id_asc":
 		query = query.Order("order_id ASC")
@@ -48,10 +60,10 @@ func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId str
 		query = query.Order("customer_id ASC")
 	case "customer_id_desc":
 		query = query.Order("customer_id DESC")
-	case "total_price_asc":
-		query = query.Order("total_price ASC")
-	case "total_price_desc":
-		query = query.Order("total_price DESC")
+	case "total_amount_asc":
+		query = query.Order("total_amount ASC")
+	case "total_amount_desc":
+		query = query.Order("total_amount DESC")
 	case "payment_status_asc":
 		query = query.Order("payment_status ASC")
 	case "payment_status_desc":

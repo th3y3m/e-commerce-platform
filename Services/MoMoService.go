@@ -47,9 +47,9 @@ type MoMoService struct {
 }
 
 // CreatePaymentUrl generates a payment URL for the given amount and order details.
-func (s *MoMoService) CreatePaymentUrl(amount float64, orderId, orderInfo string) (string, error) {
+func (s *MoMoService) CreateMoMoUrl(amount float64, orderId string) (string, error) {
 	requestId := Util.GenerateID(10)
-
+	orderInfo := "Customer"
 	formattedAmount := int64(amount * 1000) // Convert to VND
 
 	// Create raw signature string
@@ -97,16 +97,12 @@ func (s *MoMoService) CreatePaymentUrl(amount float64, orderId, orderInfo string
 	return "", errors.New("unexpected response from MoMo API")
 }
 
-func (s *MoMoService) ValidateTransactionResponse(queryString string) (*TransactionStatusModel, error) {
-	values, err := url.ParseQuery(queryString)
-	if err != nil {
-		return nil, err
-	}
+func (s *MoMoService) ValidateMoMoResponse(queryString url.Values) (*TransactionStatusModel, error) {
 
-	orderId := values.Get("orderId")
-	resultCode := values.Get("resultCode")
-	amount := values.Get("amount")
-	signature := values.Get("signature")
+	orderId := queryString.Get("orderId")
+	resultCode := queryString.Get("resultCode")
+	amount := queryString.Get("amount")
+	signature := queryString.Get("signature")
 
 	order, err := Repositories.GetOrderByID(orderId)
 	if err != nil {

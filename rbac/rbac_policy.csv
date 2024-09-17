@@ -1,7 +1,20 @@
 # Policy: role,object,action
-p,admin,/admin/*,(GET|POST|PUT|DELETE)
-p,seller,/seller/*,(GET|POST|PUT|DELETE)
-p,customer,/customer/*,GET
+p,admin,/auth/*,(GET|POST|PUT|DELETE)
+
+p,seller,/auth/users/:id,GET
+p,seller,/auth/products,(GET|POST|PUT|DELETE)
+p,seller,/auth/products/*,(GET|POST|PUT|DELETE)
+p,seller,/auth/categories,GET
+p,seller,/auth/categories/:id,GET
+p,seller,/auth/couriers,GET
+p,seller,/auth/couriers/:id,GET
+
+p,customer,/auth/products,GET
+p,customer,/auth/products/:id,GET
 p,customer,/orders,POST
-p,admin,/users,(GET|POST|PUT|DELETE)
-p,admin,/auth/users,GET
+p,customer,/auth/users/:id,GET
+p,customer,/auth/categories,GET
+p,customer,/auth/categories/:id,GET
+p,customer,/auth/couriers,GET
+p,customer,/auth/couriers/:id,GET
+

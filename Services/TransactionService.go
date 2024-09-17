@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func GetPaginatedTransactionList(sortBy string, transactionID string, orderID string, pageIndex int, pageSize int, minPrice *int, maxPrice *int, status *bool, startDate time.Time, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
+func GetPaginatedTransactionList(sortBy string, transactionID string, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate time.Time, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
 	return Repositories.GetPaginatedTransactionList(sortBy, transactionID, orderID, pageIndex, pageSize, minPrice, maxPrice, status, startDate, endDate)
 }
 

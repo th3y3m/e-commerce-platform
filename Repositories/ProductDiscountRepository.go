@@ -46,7 +46,6 @@ func GetPaginatedProductDiscountList(discountID, sortBy, productID string, pageI
 	return Util.NewPaginatedList(rates, totalCount, pageIndex, pageSize), nil
 }
 
-// GetAllProductDiscounts retrieves all freight rates from the database
 func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -61,7 +60,7 @@ func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
 	return rates, nil
 }
 
-// GetProductDiscountByID retrieves a freight rate by its ID
+// GetProductDiscountByID retrieves discount rate by its ID
 func GetProductDiscountByID(rateID string) (BusinessObjects.ProductDiscount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -76,7 +75,6 @@ func GetProductDiscountByID(rateID string) (BusinessObjects.ProductDiscount, err
 	return rate, nil
 }
 
-// CreateProductDiscount adds a new freight rate to the database
 func CreateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -90,7 +88,6 @@ func CreateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	return nil
 }
 
-// UpdateProductDiscount updates an existing freight rate
 func UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
@@ -104,7 +101,6 @@ func UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	return nil
 }
 
-// DeleteProductDiscount removes a freight rate from the database by its ID
 func DeleteProductDiscount(rateID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {

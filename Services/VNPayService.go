@@ -45,7 +45,7 @@ type VnpayService struct {
 	hashSecret string
 }
 
-func (s *VnpayService) CreateTransactionUrl(amount float64, infor, orderinfor string) (string, error) {
+func (s *VnpayService) CreateVNPayUrl(amount float64, orderinfor string) (string, error) {
 	hostName, err := os.Hostname()
 	if err != nil {
 		return "", err
@@ -65,7 +65,7 @@ func (s *VnpayService) CreateTransactionUrl(amount float64, infor, orderinfor st
 	pay.AddRequestData("vnp_Amount", fmt.Sprintf("%.0f", vnpAmount))
 	pay.AddRequestData("vnp_CreateDate", time.Now().Format("20060102150405"))
 	pay.AddRequestData("vnp_IpAddr", clientIPAddress)
-	pay.AddRequestData("vnp_OrderInfo", infor)
+	pay.AddRequestData("vnp_OrderInfo", "Customer")
 	pay.AddRequestData("vnp_ReturnUrl", s.returnUrl)
 	pay.AddRequestData("vnp_TxnRef", orderinfor)
 
@@ -73,19 +73,15 @@ func (s *VnpayService) CreateTransactionUrl(amount float64, infor, orderinfor st
 	return TransactionUrl, nil
 }
 
-func (s *VnpayService) ValidateTransactionResponse(queryString string) (*TransactionStatusModel, error) {
-	values, err := url.ParseQuery(queryString)
-	if err != nil {
-		return nil, err
-	}
+func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*TransactionStatusModel, error) {
 
-	vnpSecureHash := values.Get("vnp_SecureHash")
-	vnpAmount := values.Get("vnp_Amount")
-	values.Del("vnp_SecureHash")
-	values.Del("vnp_SecureHashType")
+	vnpSecureHash := queryString.Get("vnp_SecureHash")
+	vnpAmount := queryString.Get("vnp_Amount")
+	queryString.Del("vnp_SecureHash")
+	queryString.Del("vnp_SecureHashType")
 
-	rawData := make([]string, 0, len(values))
-	for key, val := range values {
+	rawData := make([]string, 0, len(queryString))
+	for key, val := range queryString {
 		rawData = append(rawData, key+"="+strings.Join(val, ""))
 	}
 	sort.Strings(rawData)
@@ -95,7 +91,7 @@ func (s *VnpayService) ValidateTransactionResponse(queryString string) (*Transac
 		return &TransactionStatusModel{IsSuccessful: false, RedirectUrl: "LINK_INVALID"}, nil
 	}
 
-	order, err := Repositories.GetOrderByID(values.Get("vnp_TxnRef"))
+	order, err := Repositories.GetOrderByID(queryString.Get("vnp_TxnRef"))
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +103,8 @@ func (s *VnpayService) ValidateTransactionResponse(queryString string) (*Transac
 		}, nil
 	}
 
-	vnpResponseCode := values.Get("vnp_ResponseCode")
-	if vnpResponseCode == "00" && values.Get("vnp_TransactionStatus") == "00" {
+	vnpResponseCode := queryString.Get("vnp_ResponseCode")
+	if vnpResponseCode == "00" && queryString.Get("vnp_TransactionStatus") == "00" {
 		order.OrderStatus = "Complete"
 		err = Repositories.UpdateOrder(order)
 		if err != nil {
@@ -126,7 +122,7 @@ func (s *VnpayService) ValidateTransactionResponse(queryString string) (*Transac
 			TransactionDate:  time.Now().In(TimeZoneAsiaHoChiMinh),
 			PaymentAmount:    paymentAmount,
 			PaymentStatus:    "Complete",
-			PaymentSignature: values.Get("vnp_BankTranNo"),
+			PaymentSignature: queryString.Get("vnp_BankTranNo"),
 			PaymentMethod:    "VNPay",
 		}
 		err = Repositories.CreateTransaction(*Transaction)
@@ -148,7 +144,7 @@ func (s *VnpayService) ValidateTransactionResponse(queryString string) (*Transac
 
 	return &TransactionStatusModel{
 		IsSuccessful: false,
-		RedirectUrl:  fmt.Sprintf("https://localhost:3000/reject?orderId=%s", values.Get("vnp_TxnRef")),
+		RedirectUrl:  fmt.Sprintf("https://localhost:3000/reject?orderId=%s", queryString.Get("vnp_TxnRef")),
 	}, nil
 }
 

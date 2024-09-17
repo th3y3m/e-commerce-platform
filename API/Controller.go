@@ -72,6 +72,28 @@ func Controller() *gin.Engine {
 	protected.Use(Middleware.AuthMiddleware(enforcer))
 	{
 		protected.GET("/auth/users", GetUsers)
+		protected.GET("/auth/users/:id", GetUserByID)
+		protected.PUT("/auth/users/UpdateProfile/:id", UpdateProfile)
+		protected.PUT("/auth/users/Ban/:id", BanUser)
+		protected.PUT("/auth/users/UnBan/:id", UnBanUser)
+
+		protected.GET("/auth/products", GetPaginatedProductList)
+		protected.GET("/auth/products/:id", GetProductByID)
+		protected.POST("/auth/products", CreateProduct)
+		protected.PUT("/auth/products/:id", UpdateProduct)
+		protected.DELETE("/auth/products/:id", DeleteProduct)
+
+		protected.GET("/auth/categories", GetAllCategories)
+		protected.GET("/auth/categories/:id", GetCategoryByID)
+		protected.POST("/auth/categories", CreateCategory)
+		protected.PUT("/auth/categories/:id", UpdateCategory)
+		protected.DELETE("/auth/categories/:id", DeleteCategory)
+
+		protected.GET("/auth/couriers", GetAllCouriers)
+		protected.GET("/auth/couriers/:id", GetCourierByID)
+		protected.POST("/auth/couriers", CreateCourier)
+		protected.PUT("/auth/couriers/:id", UpdateCourier)
+		protected.DELETE("/auth/couriers/:id", DeleteCourier)
 	}
 
 	log.Println("Routes registered successfully")
