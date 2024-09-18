@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,23 +48,51 @@ func GetProductByID(c *gin.Context) {
 
 func CreateProduct(c *gin.Context) {
 	var product struct {
-		SellerID    string  `json:"seller_id" binding:"required"`
-		ProductName string  `json:"product_name" binding:"required"`
-		Description string  `json:"description" binding:"required"`
-		CategoryID  string  `json:"category_id" binding:"required"`
-		Price       float64 `json:"price" binding:"required"`
-		Quantity    int     `json:"quantity" binding:"required"`
+		SellerID    string  `form:"seller_id" binding:"required"`
+		ProductName string  `form:"product_name" binding:"required"`
+		Description string  `form:"description" binding:"required"`
+		CategoryID  string  `form:"category_id" binding:"required"`
+		Price       float64 `form:"price" binding:"required"`
+		Quantity    int     `form:"quantity" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&product); err != nil {
+
+	// Bind form data
+	if err := c.ShouldBind(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.CreateProduct(product.SellerID, product.ProductName, product.Description, product.CategoryID, product.Price, product.Quantity)
+
+	// Retrieve the file from the form data
+	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload failed"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Product created successfully"})
+
+	// Save the file temporarily
+	tempFilePath := "./uploads/" + file.Filename
+	if err := c.SaveUploadedFile(file, tempFilePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		return
+	}
+
+	// Upload the file to Firebase
+	bucketName := "sendo-a5204.appspot.com"
+	objectName := "products/" + file.Filename
+	publicURL, err := Util.UploadFileToFireBase(bucketName, objectName, tempFilePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to Firebase"})
+		return
+	}
+
+	// Call the service to create the product
+	err = Services.CreateProduct(product.SellerID, product.ProductName, product.Description, product.CategoryID, publicURL, product.Price, product.Quantity)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Product created successfully", "file_url": publicURL})
 }
 
 func UpdateProduct(c *gin.Context) {

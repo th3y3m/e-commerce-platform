@@ -289,3 +289,6 @@ sketch
 
 # Ignore .env files
 .env
+
+# Ignore Firebase credentials
+config/sendo-a5204-firebase-adminsdk-y71bb-fb00e1e6e0.json

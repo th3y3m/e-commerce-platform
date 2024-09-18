@@ -13,7 +13,7 @@ import (
 func UploadFileToFireBase(bucketName, objectName, filePath string) (string, error) {
 	ctx := context.Background()
 
-	client, err := storage.NewClient(ctx, option.WithCredentialsFile("path/to/firebase_credentials.json"))
+	client, err := storage.NewClient(ctx, option.WithCredentialsFile("config/sendo-a5204-firebase-adminsdk-y71bb-fb00e1e6e0.json"))
 	if err != nil {
 		return "", fmt.Errorf("failed to create client: %v", err)
 	}
@@ -40,6 +40,11 @@ func UploadFileToFireBase(bucketName, objectName, filePath string) (string, erro
 	// Close the writer to complete the upload
 	if err := wc.Close(); err != nil {
 		return "", fmt.Errorf("failed to close writer: %v", err)
+	}
+
+	// Make the object publicly accessible
+	if err := bucket.Object(objectName).ACL().Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
+		return "", fmt.Errorf("failed to set object ACL: %v", err)
 	}
 
 	// Construct the public URL of the uploaded file

@@ -19,7 +19,7 @@ func GetProductByID(id string) (BusinessObjects.Product, error) {
 	return Repositories.GetProductByID(id)
 }
 
-func CreateProduct(SellerID, ProductName, Description, CategoryID string, Price float64, Quantity int) error {
+func CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error {
 	product := BusinessObjects.Product{
 		ProductID:   "PROD" + Util.GenerateID(10),
 		SellerID:    SellerID,
@@ -27,6 +27,7 @@ func CreateProduct(SellerID, ProductName, Description, CategoryID string, Price 
 		Description: Description,
 		CategoryID:  CategoryID,
 		Price:       Price,
+		ImageURL:    ImageURL,
 		Quantity:    Quantity,
 		Status:      true,
 		UpdatedAt:   time.Now(),
