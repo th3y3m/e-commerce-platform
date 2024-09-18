@@ -1,12 +1,15 @@
 package API
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"th3y3m/e-commerce-platform/Services"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func GetPaginatedProductList(c *gin.Context) {
@@ -47,6 +50,12 @@ func GetProductByID(c *gin.Context) {
 }
 
 func CreateProduct(c *gin.Context) {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+	firebase := os.Getenv("FIREBASE")
+
 	var product struct {
 		SellerID    string  `form:"seller_id" binding:"required"`
 		ProductName string  `form:"product_name" binding:"required"`
@@ -77,7 +86,7 @@ func CreateProduct(c *gin.Context) {
 	}
 
 	// Upload the file to Firebase
-	bucketName := "sendo-a5204.appspot.com"
+	bucketName := firebase
 	objectName := "products/" + file.Filename
 	publicURL, err := Util.UploadFileToFireBase(bucketName, objectName, tempFilePath)
 	if err != nil {
@@ -97,19 +106,50 @@ func CreateProduct(c *gin.Context) {
 
 func UpdateProduct(c *gin.Context) {
 	id := c.Param("id")
-	var product struct {
-		SellerID    string  `json:"seller_id" binding:"required"`
-		ProductName string  `json:"product_name" binding:"required"`
-		Description string  `json:"description" binding:"required"`
-		CategoryID  string  `json:"category_id" binding:"required"`
-		Price       float64 `json:"price" binding:"required"`
-		Quantity    int     `json:"quantity" binding:"required"`
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
 	}
-	if err := c.ShouldBindJSON(&product); err != nil {
+	firebase := os.Getenv("FIREBASE")
+
+	var product struct {
+		SellerID    string  `form:"seller_id" binding:"required"`
+		ProductName string  `form:"product_name" binding:"required"`
+		Description string  `form:"description" binding:"required"`
+		CategoryID  string  `form:"category_id" binding:"required"`
+		Price       float64 `form:"price" binding:"required"`
+		Quantity    int     `form:"quantity" binding:"required"`
+	}
+
+	// Bind form data
+	if err := c.ShouldBind(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.UpdateProduct(id, product.SellerID, product.ProductName, product.Description, product.CategoryID, product.Price, product.Quantity)
+
+	// Retrieve the file from the form data
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload failed"})
+		return
+	}
+
+	// Save the file temporarily
+	tempFilePath := "./uploads/" + file.Filename
+	if err := c.SaveUploadedFile(file, tempFilePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		return
+	}
+
+	// Upload the file to Firebase
+	bucketName := firebase
+	objectName := "products/" + file.Filename
+	publicURL, err := Util.UploadFileToFireBase(bucketName, objectName, tempFilePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to Firebase"})
+		return
+	}
+	err = Services.UpdateProduct(id, product.SellerID, product.ProductName, product.Description, product.CategoryID, publicURL, product.Price, product.Quantity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

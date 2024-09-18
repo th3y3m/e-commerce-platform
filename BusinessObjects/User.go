@@ -12,6 +12,7 @@ type User struct {
 	PhoneNumber  string
 	Address      string
 	UserType     string
+	ImageURL     string
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	Token        string    `gorm:"unique"`
 	TokenExpires time.Time

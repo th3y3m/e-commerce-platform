@@ -15,6 +15,11 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
+// init initializes the OAuth providers and sets up the session store.
+type JWTResponse struct {
+	Token string `json:"token"`
+}
+
 func init() {
 	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
@@ -47,13 +52,26 @@ func init() {
 	gothic.Store = store
 }
 
-// GoogleLogin redirects to Google for authentication
+// GoogleLogin redirects to Google for authentication.
+// @Summary Google OAuth login
+// @Description Redirects the user to Google's OAuth2 login page.
+// @Tags OAuth
+// @Produce json
+// @Success 307 {string} string "Redirecting to Google"
+// @Router /auth/google [get]
 func GoogleLogin(c *gin.Context) {
 	c.Request.URL.RawQuery = "provider=google"
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
 
-// GoogleCallback handles Google OAuth callback
+// GoogleCallback handles Google OAuth callback.
+// @Summary Google OAuth callback
+// @Description Handles the callback from Google after the user has authenticated.
+// @Tags OAuth
+// @Produce json
+// @Success 200 {object} API.JWTResponse "JWT token for the authenticated user"
+// @Failure 500 {object} API.ErrorResponse
+// @Router /auth/google/callback [get]
 func GoogleCallback(c *gin.Context) {
 	// Complete the user authentication with Gothic
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
@@ -74,7 +92,14 @@ func GoogleCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-// GoogleLogout clears the session
+// GoogleLogout logs the user out of Google session.
+// @Summary Google OAuth logout
+// @Description Logs the user out of the Google session.
+// @Tags OAuth
+// @Produce json
+// @Success 200 {object} API.SuccessResponse "Logged out successfully"
+// @Failure 500 {object} API.ErrorResponse
+// @Router /auth/google/logout [get]
 func GoogleLogout(c *gin.Context) {
 	if err := gothic.Logout(c.Writer, c.Request); err != nil {
 		log.Printf("Error logging out: %v", err)
@@ -84,13 +109,26 @@ func GoogleLogout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
 
-// FacebookLogin redirects to Facebook for authentication
+// FacebookLogin redirects to Facebook for authentication.
+// @Summary Facebook OAuth login
+// @Description Redirects the user to Facebook's OAuth2 login page.
+// @Tags OAuth
+// @Produce json
+// @Success 307 {string} string "Redirecting to Facebook"
+// @Router /auth/facebook [get]
 func FacebookLogin(c *gin.Context) {
 	c.Request.URL.RawQuery = "provider=facebook"
 	gothic.BeginAuthHandler(c.Writer, c.Request)
 }
 
-// FacebookCallback handles Facebook OAuth callback
+// FacebookCallback handles Facebook OAuth callback.
+// @Summary Facebook OAuth callback
+// @Description Handles the callback from Facebook after the user has authenticated.
+// @Tags OAuth
+// @Produce json
+// @Success 200 {object} API.JWTResponse "JWT token for the authenticated user"
+// @Failure 500 {object} API.ErrorResponse
+// @Router /auth/facebook/callback [get]
 func FacebookCallback(c *gin.Context) {
 	// Complete the user authentication with Gothic
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
@@ -101,7 +139,7 @@ func FacebookCallback(c *gin.Context) {
 	}
 
 	// Handle Facebook user and generate JWT token
-	token, err := Services.HandleOAuthUser(user) // This can be renamed to a more generic handler
+	token, err := Services.HandleOAuthUser(user)
 	if err != nil {
 		log.Printf("Error handling Facebook user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to handle Facebook user"})
@@ -112,7 +150,14 @@ func FacebookCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-// FacebookLogout clears the session
+// FacebookLogout logs the user out of Facebook session.
+// @Summary Facebook OAuth logout
+// @Description Logs the user out of the Facebook session.
+// @Tags OAuth
+// @Produce json
+// @Success 200 {object} API.SuccessResponse "Logged out successfully"
+// @Failure 500 {object} API.ErrorResponse
+// @Router /auth/facebook/logout [get]
 func FacebookLogout(c *gin.Context) {
 	if err := gothic.Logout(c.Writer, c.Request); err != nil {
 		log.Printf("Error logging out: %v", err)

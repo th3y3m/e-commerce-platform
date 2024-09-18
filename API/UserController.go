@@ -1,11 +1,15 @@
 package API
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func GetUsers(c *gin.Context) {
@@ -42,16 +46,45 @@ func GetUserByID(c *gin.Context) {
 func UpdateProfile(c *gin.Context) {
 	ID := c.Param("id")
 
-	var info struct {
-		FullName    string `json:"full_name" binding:"required"`
-		PhoneNumber string `json:"phone_number" binding:"required"`
-		Address     string `json:"address" binding:"required"`
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
 	}
-	if err := c.ShouldBindJSON(&info); err != nil {
+	firebase := os.Getenv("FIREBASE")
+
+	var info struct {
+		FullName    string `form:"full_name" binding:"required"`
+		PhoneNumber string `form:"phone_number" binding:"required"`
+		Address     string `form:"address" binding:"required"`
+	}
+	if err := c.ShouldBind(&info); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.UpdateProfile(ID, info.FullName, info.PhoneNumber, info.Address)
+
+	// Retrieve the file from the form data
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload failed"})
+		return
+	}
+
+	// Save the file temporarily
+	tempFilePath := "./uploads/" + file.Filename
+	if err := c.SaveUploadedFile(file, tempFilePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		return
+	}
+
+	// Upload the file to Firebase
+	bucketName := firebase
+	objectName := "products/" + file.Filename
+	publicURL, err := Util.UploadFileToFireBase(bucketName, objectName, tempFilePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to Firebase"})
+		return
+	}
+	err = Services.UpdateProfile(ID, info.FullName, info.PhoneNumber, info.Address, publicURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

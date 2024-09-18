@@ -1,0 +1,890 @@
+definitions:
+  API.CartItem:
+    properties:
+      cart_id:
+        type: string
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  API.Category:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+    type: object
+  API.CategoryRequest:
+    properties:
+      category_name:
+        type: string
+    required:
+    - category_name
+    type: object
+  API.CourierResponse:
+    properties:
+      courier_name:
+        type: string
+      id:
+        type: string
+      status:
+        type: boolean
+    type: object
+  API.CreateCourierRequest:
+    properties:
+      courier_name:
+        type: string
+    required:
+    - courier_name
+    type: object
+  API.CreateDiscountRequest:
+    properties:
+      discount_type:
+        type: string
+      discount_value:
+        type: number
+      end_date:
+        type: string
+      start_date:
+        type: string
+    required:
+    - discount_type
+    - discount_value
+    - end_date
+    - start_date
+    type: object
+  API.DiscountResponse:
+    properties:
+      discount_type:
+        type: string
+      discount_value:
+        type: number
+      end_date:
+        type: string
+      id:
+        type: string
+      start_date:
+        type: string
+      status:
+        type: boolean
+    type: object
+  API.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  API.FreightRate:
+    properties:
+      cost_per_km:
+        type: number
+      courier_id:
+        type: string
+      distance_max_km:
+        type: integer
+      distance_min_km:
+        type: integer
+      rate_id:
+        type: string
+      status:
+        type: boolean
+    type: object
+  API.JWTResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  API.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  API.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  API.RegisterRequest:
+    properties:
+      confirmPassword:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - confirmPassword
+    - email
+    - password
+    type: object
+  API.RegisterResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  API.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  API.UpdateCourierRequest:
+    properties:
+      courier_name:
+        type: string
+      status:
+        type: boolean
+    required:
+    - courier_name
+    - status
+    type: object
+  API.UpdateDiscountRequest:
+    properties:
+      discount_type:
+        type: string
+      discount_value:
+        type: number
+      end_date:
+        type: string
+      start_date:
+        type: string
+    required:
+    - discount_type
+    - discount_value
+    - end_date
+    - start_date
+    type: object
+  BusinessObjects.CartItem:
+    properties:
+      cartID:
+        type: string
+      productID:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  BusinessObjects.Category:
+    properties:
+      categoryID:
+        type: string
+      categoryName:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/BusinessObjects.Product'
+        type: array
+    type: object
+  BusinessObjects.OrderDetail:
+    properties:
+      orderID:
+        type: string
+      productID:
+        type: string
+      quantity:
+        type: integer
+      unitPrice:
+        type: number
+    type: object
+  BusinessObjects.Product:
+    properties:
+      cartItems:
+        items:
+          $ref: '#/definitions/BusinessObjects.CartItem'
+        type: array
+      categoryID:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      imageURL:
+        type: string
+      orderDetails:
+        items:
+          $ref: '#/definitions/BusinessObjects.OrderDetail'
+        type: array
+      price:
+        type: number
+      productDiscounts:
+        items:
+          $ref: '#/definitions/BusinessObjects.ProductDiscount'
+        type: array
+      productID:
+        type: string
+      productName:
+        type: string
+      quantity:
+        type: integer
+      reviews:
+        items:
+          $ref: '#/definitions/BusinessObjects.Review'
+        type: array
+      sellerID:
+        type: string
+      status:
+        type: boolean
+      updatedAt:
+        type: string
+    type: object
+  BusinessObjects.ProductDiscount:
+    properties:
+      discountID:
+        type: string
+      productID:
+        type: string
+    type: object
+  BusinessObjects.Review:
+    properties:
+      comment:
+        type: string
+      createdAt:
+        type: string
+      productID:
+        type: string
+      rating:
+        type: integer
+      reviewID:
+        type: string
+      status:
+        type: boolean
+      userID:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/facebook:
+    get:
+      description: Redirects the user to Facebook's OAuth2 login page.
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Redirecting to Facebook
+          schema:
+            type: string
+      summary: Facebook OAuth login
+      tags:
+      - OAuth
+  /auth/facebook/callback:
+    get:
+      description: Handles the callback from Facebook after the user has authenticated.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token for the authenticated user
+          schema:
+            $ref: '#/definitions/API.JWTResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Facebook OAuth callback
+      tags:
+      - OAuth
+  /auth/facebook/logout:
+    get:
+      description: Logs the user out of the Facebook session.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged out successfully
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Facebook OAuth logout
+      tags:
+      - OAuth
+  /auth/google:
+    get:
+      description: Redirects the user to Google's OAuth2 login page.
+      produces:
+      - application/json
+      responses:
+        "307":
+          description: Redirecting to Google
+          schema:
+            type: string
+      summary: Google OAuth login
+      tags:
+      - OAuth
+  /auth/google/callback:
+    get:
+      description: Handles the callback from Google after the user has authenticated.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token for the authenticated user
+          schema:
+            $ref: '#/definitions/API.JWTResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Google OAuth callback
+      tags:
+      - OAuth
+  /auth/google/logout:
+    get:
+      description: Logs the user out of the Google session.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logged out successfully
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Google OAuth logout
+      tags:
+      - OAuth
+  /cartItems/{cartID}:
+    get:
+      description: Retrieves all items in the cart by providing the cart ID.
+      parameters:
+      - description: Cart ID
+        in: path
+        name: cartID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.CartItem'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get cart items by cart ID
+      tags:
+      - Cart
+  /categories:
+    get:
+      description: Retrieves all product categories.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/BusinessObjects.Category'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get all categories
+      tags:
+      - Categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product category.
+      parameters:
+      - description: Category Name
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/API.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Create a new category
+      tags:
+      - Categories
+  /categories/{id}:
+    delete:
+      description: Deletes an existing category by providing the category ID.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Delete category by ID
+      tags:
+      - Categories
+    get:
+      description: Retrieves category details by providing the category ID.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.Category'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get category by ID
+      tags:
+      - Categories
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing category by providing category ID and new data.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Category Data
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/API.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Update category by ID
+      tags:
+      - Categories
+  /couriers:
+    get:
+      description: Retrieves a list of all available couriers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.CourierResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get all couriers
+      tags:
+      - Couriers
+    post:
+      consumes:
+      - application/json
+      description: Adds a new courier by providing the courier's name.
+      parameters:
+      - description: Courier name
+        in: body
+        name: courier
+        required: true
+        schema:
+          $ref: '#/definitions/API.CreateCourierRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Create a new courier
+      tags:
+      - Couriers
+  /couriers/{id}:
+    delete:
+      description: Deletes a specific courier by providing the courier ID.
+      parameters:
+      - description: Courier ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Delete courier by ID
+      tags:
+      - Couriers
+    get:
+      description: Retrieves a specific courier by providing the courier ID.
+      parameters:
+      - description: Courier ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.CourierResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get courier by ID
+      tags:
+      - Couriers
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing courier by providing courier ID, name, and
+        status.
+      parameters:
+      - description: Courier ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated courier data
+        in: body
+        name: courier
+        required: true
+        schema:
+          $ref: '#/definitions/API.UpdateCourierRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Update courier by ID
+      tags:
+      - Couriers
+  /discounts:
+    get:
+      description: Retrieves a list of all discounts.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.DiscountResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get all discounts
+      tags:
+      - Discounts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new discount by providing discount details.
+      parameters:
+      - description: Discount details
+        in: body
+        name: discount
+        required: true
+        schema:
+          $ref: '#/definitions/API.CreateDiscountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Create a new discount
+      tags:
+      - Discounts
+  /discounts/{id}:
+    delete:
+      description: Deletes a discount by providing the discount ID.
+      parameters:
+      - description: Discount ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Delete discount by ID
+      tags:
+      - Discounts
+    get:
+      description: Retrieves a discount by providing the discount ID.
+      parameters:
+      - description: Discount ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.DiscountResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get discount by ID
+      tags:
+      - Discounts
+    put:
+      consumes:
+      - application/json
+      description: Updates a discount by providing the discount ID and new discount
+        details.
+      parameters:
+      - description: Discount ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated discount details
+        in: body
+        name: discount
+        required: true
+        schema:
+          $ref: '#/definitions/API.UpdateDiscountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Update discount by ID
+      tags:
+      - Discounts
+  /discounts/paginated:
+    get:
+      description: Retrieves a list of discounts with pagination and filtering options.
+      parameters:
+      - description: Search value
+        in: query
+        name: searchValue
+        type: string
+      - description: Sort by field
+        in: query
+        name: sortBy
+        type: string
+      - default: 1
+        description: Page index
+        in: query
+        name: pageIndex
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      - description: Discount status
+        in: query
+        name: status
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.DiscountResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get paginated list of discounts
+      tags:
+      - Discounts
+  /freightRates:
+    get:
+      description: Retrieves a list of freight rates for couriers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/API.FreightRate'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get all freight rates
+      tags:
+      - Freight
+  /freightRates/{id}:
+    get:
+      description: Retrieves a specific freight rate by its ID.
+      parameters:
+      - description: Freight Rate ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.FreightRate'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Get freight rate by ID
+      tags:
+      - Freight
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user by email and password.
+      parameters:
+      - description: User credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/API.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/API.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: User login
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new customer by providing user details.
+      parameters:
+      - description: Customer details
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/API.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/API.RegisterResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/API.ErrorResponse'
+      summary: Register a new customer
+      tags:
+      - auth
+swagger: "2.0"

@@ -7,6 +7,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type FreightRate struct {
+	RateID        string  `json:"rate_id"`
+	CourierID     string  `json:"courier_id"`
+	DistanceMinKM int     `json:"distance_min_km"`
+	DistanceMaxKM int     `json:"distance_max_km"`
+	CostPerKM     float64 `json:"cost_per_km"`
+	Status        bool    `json:"status"`
+}
+
+// GetAllFreightRates retrieves all freight rates.
+// @Summary Get all freight rates
+// @Description Retrieves a list of freight rates for couriers.
+// @Tags Freight
+// @Produce json
+// @Success 200 {object} []FreightRate
+// @Failure 500 {object} API.ErrorResponse
+// @Router /freightRates [get]
 func GetAllFreightRates(c *gin.Context) {
 	freightRates, err := Services.GetAllFreightRates()
 	if err != nil {
@@ -16,8 +33,16 @@ func GetAllFreightRates(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"freightRates": freightRates})
 }
 
+// GetFreightRateByID retrieves freight rate by ID.
+// @Summary Get freight rate by ID
+// @Description Retrieves a specific freight rate by its ID.
+// @Tags Freight
+// @Produce json
+// @Param id path string true "Freight Rate ID"
+// @Success 200 {object} FreightRate
+// @Failure 500 {object} API.ErrorResponse
+// @Router /freightRates/{id} [get]
 func GetFreightRateByID(c *gin.Context) {
-
 	id := c.Param("id")
 	freightRate, err := Services.GetFreightRateByID(id)
 	if err != nil {

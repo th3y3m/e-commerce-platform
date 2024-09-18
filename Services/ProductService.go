@@ -42,7 +42,7 @@ func CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL stri
 	return nil
 }
 
-func UpdateProduct(productID, SellerID, ProductName, Description, CategoryID string, Price float64, Quantity int) error {
+func UpdateProduct(productID, SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error {
 
 	product, err := Repositories.GetProductByID(productID)
 	if err != nil {
@@ -54,6 +54,7 @@ func UpdateProduct(productID, SellerID, ProductName, Description, CategoryID str
 	product.Description = Description
 	product.CategoryID = CategoryID
 	product.Price = Price
+	product.ImageURL = ImageURL
 	product.Quantity = Quantity
 	product.UpdatedAt = time.Now()
 

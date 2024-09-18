@@ -1,32 +1,3 @@
-// package API
-
-// import (
-// 	"github.com/gin-gonic/gin"
-// )
-
-// func Controller() *gin.Engine {
-// 	router := gin.Default()
-
-// 	// sessionSecret := os.Getenv("SESSION_SECRET")
-// 	// store := cookie.NewStore([]byte(sessionSecret), []byte(sessionSecret))
-// 	// router.Use(sessions.Sessions("mysession", store))
-
-// 	// Define routes
-// 	router.POST("/login", Login)
-// 	router.POST("/register", RegisterCustomer)
-// 	router.GET("/verify", VerifyUserEmailHandler)
-
-// 	router.GET("/auth/google", GoogleLogin)
-// 	router.GET("/auth/google/callback", GoogleCallback)
-// 	router.GET("/auth/google/logout", GoogleLogout)
-
-// 	router.GET("/auth/facebook", FacebookLogin)
-// 	router.GET("/auth/facebook/callback", FacebookCallback)
-// 	router.GET("/auth/facebook/logout", FacebookLogout)
-
-// 	return router
-// }
-
 package API
 
 import (
@@ -35,10 +6,19 @@ import (
 	"path/filepath"
 	"th3y3m/e-commerce-platform/Middleware"
 
+	_ "th3y3m/e-commerce-platform/docs" // Import generated docs
+
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title E-Commerce Platform API
+// @version 1.0
+// @description This is an e-commerce platform API.
+// @host localhost:8080
+// @BasePath /
 func Controller() *gin.Engine {
 	router := gin.Default()
 
@@ -56,6 +36,9 @@ func Controller() *gin.Engine {
 	}
 	log.Println("Casbin enforcer loaded successfully")
 
+	// Swagger route
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// Public routes
 	router.POST("/login", Login)
 	router.POST("/register", RegisterCustomer)
@@ -66,99 +49,99 @@ func Controller() *gin.Engine {
 	router.GET("/auth/facebook", FacebookLogin)
 	router.GET("/auth/facebook/callback", FacebookCallback)
 	router.GET("/auth/facebook/logout", FacebookLogout)
+	router.GET("/couriers", GetAllCouriers)
 
 	// Protected routes with JWT and Casbin middleware
-	protected := router.Group("/")
+	protected := router.Group("/auth")
 	protected.Use(Middleware.AuthMiddleware(enforcer))
 	{
-		protected.GET("/auth/users", GetUsers)
-		protected.GET("/auth/users/:id", GetUserByID)
-		protected.PUT("/auth/users/UpdateProfile/:id", UpdateProfile)
-		protected.PUT("/auth/users/Ban/:id", BanUser)
-		protected.PUT("/auth/users/UnBan/:id", UnBanUser)
+		protected.GET("/users", GetUsers)
+		protected.GET("/users/:id", GetUserByID)
+		protected.PUT("/users/UpdateProfile/:id", UpdateProfile)
+		protected.PUT("/users/Ban/:id", BanUser)
+		protected.PUT("/users/UnBan/:id", UnBanUser)
 
-		protected.GET("/auth/products", GetPaginatedProductList)
-		protected.GET("/auth/products/:id", GetProductByID)
-		protected.POST("/auth/products", CreateProduct)
-		protected.PUT("/auth/products/:id", UpdateProduct)
-		protected.DELETE("/auth/products/:id", DeleteProduct)
+		protected.GET("/products", GetPaginatedProductList)
+		protected.GET("/products/:id", GetProductByID)
+		protected.POST("/products", CreateProduct)
+		protected.PUT("/products/:id", UpdateProduct)
+		protected.DELETE("/products/:id", DeleteProduct)
 
-		protected.GET("/auth/categories", GetAllCategories)
-		protected.GET("/auth/categories/:id", GetCategoryByID)
-		protected.POST("/auth/categories", CreateCategory)
-		protected.PUT("/auth/categories/:id", UpdateCategory)
-		protected.DELETE("/auth/categories/:id", DeleteCategory)
+		protected.GET("/categories", GetAllCategories)
+		protected.GET("/categories/:id", GetCategoryByID)
+		protected.POST("/categories", CreateCategory)
+		protected.PUT("/categories/:id", UpdateCategory)
+		protected.DELETE("/categories/:id", DeleteCategory)
 
-		protected.GET("/auth/couriers", GetAllCouriers)
-		protected.GET("/auth/couriers/:id", GetCourierByID)
-		protected.POST("/auth/couriers", CreateCourier)
-		protected.PUT("/auth/couriers/:id", UpdateCourier)
-		protected.DELETE("/auth/couriers/:id", DeleteCourier)
+		protected.GET("/couriers/:id", GetCourierByID)
+		protected.POST("/couriers", CreateCourier)
+		protected.PUT("/couriers/:id", UpdateCourier)
+		protected.DELETE("/couriers/:id", DeleteCourier)
 
-		protected.GET("/auth/discounts", GetAllDiscounts)
-		protected.GET("/auth/discounts/:id", GetDiscountByID)
-		protected.POST("/auth/discounts", CreateDiscount)
-		protected.PUT("/auth/discounts/:id", UpdateDiscount)
-		protected.DELETE("/auth/discounts/:id", DeleteDiscount)
+		protected.GET("/discounts", GetAllDiscounts)
+		protected.GET("/discounts/:id", GetDiscountByID)
+		protected.POST("/discounts", CreateDiscount)
+		protected.PUT("/discounts/:id", UpdateDiscount)
+		protected.DELETE("/discounts/:id", DeleteDiscount)
 
-		protected.GET("/auth/productDiscounts/:id", GetProductDiscountByID)
+		protected.GET("/productDiscounts/:id", GetProductDiscountByID)
 
-		protected.GET("/auth/cartItems/:id", GetCartItemByCartID)
+		protected.GET("/cartItems/:id", GetCartItemByCartID)
 
-		protected.GET("/auth/orders", GetPaginatedOrderList)
-		protected.GET("/auth/orders/:id", GetOrderById)
-		protected.POST("/auth/orders", PlaceOrder)
+		protected.GET("/orders", GetPaginatedOrderList)
+		protected.GET("/orders/:id", GetOrderById)
+		protected.POST("/orders", PlaceOrder)
 
-		protected.GET("/auth/orderDetails/:id", GetOrderDetailOfAOrder)
+		protected.GET("/orderDetails/:id", GetOrderDetailOfAOrder)
 
-		protected.GET("/auth/freightRates", GetAllFreightRates)
-		protected.GET("/auth/freightRates/:id", GetFreightRateByID)
-		protected.POST("/auth/freightRates", CreateFreightRate)
-		protected.PUT("/auth/freightRates/:id", UpdateFreightRate)
-		protected.DELETE("/auth/freightRates/:id", DeleteFreightRate)
+		protected.GET("/freightRates", GetAllFreightRates)
+		protected.GET("/freightRates/:id", GetFreightRateByID)
+		protected.POST("/freightRates", CreateFreightRate)
+		protected.PUT("/freightRates/:id", UpdateFreightRate)
+		protected.DELETE("/freightRates/:id", DeleteFreightRate)
 
-		protected.GET("/auth/vouchers", GetAllVouchers)
-		protected.GET("/auth/vouchers/:id", GetVoucherByID)
-		protected.POST("/auth/vouchers", CreateVoucher)
-		protected.PUT("/auth/vouchers/:id", UpdateVoucher)
-		protected.DELETE("/auth/vouchers/:id", DeleteVoucher)
+		protected.GET("/vouchers", GetAllVouchers)
+		protected.GET("/vouchers/:id", GetVoucherByID)
+		protected.POST("/vouchers", CreateVoucher)
+		protected.PUT("/vouchers/:id", UpdateVoucher)
+		protected.DELETE("/vouchers/:id", DeleteVoucher)
 
-		protected.GET("/auth/reviews", GetAllReviews)
-		protected.GET("/auth/reviews/:id", GetReviewByID)
-		protected.POST("/auth/reviews", CreateReview)
-		protected.PUT("/auth/reviews/:id", UpdateReview)
-		protected.DELETE("/auth/reviews/:id", DeleteReview)
+		protected.GET("/reviews", GetAllReviews)
+		protected.GET("/reviews/:id", GetReviewByID)
+		protected.POST("/reviews", CreateReview)
+		protected.PUT("/reviews/:id", UpdateReview)
+		protected.DELETE("/reviews/:id", DeleteReview)
 
-		protected.GET("/auth/transactions", GetPaginatedTransactionList)
-		protected.GET("/auth/transactions/:id", GetTransactionByID)
-		protected.POST("/auth/transactions", CreateTransaction)
-		protected.PUT("/auth/transactions/:id", UpdateTransaction)
+		protected.GET("/transactions", GetPaginatedTransactionList)
+		protected.GET("/transactions/:id", GetTransactionByID)
+		protected.POST("/transactions", CreateTransaction)
+		protected.PUT("/transactions/:id", UpdateTransaction)
 
-		protected.GET("/auth/shoppingCart/:id", GetShoppingCartByID)
-		protected.GET("/auth/shoppingCart", GetUserShoppingCart)
-		protected.POST("/auth/shoppingCart", AddProductToCart)
-		protected.PUT("/auth/shoppingCart", RemoveProductFromCart)
-		protected.DELETE("/auth/shoppingCart/:id", ClearShoppingCart)
-		protected.GET("/auth/shoppingCart/numberofitems/:id", NumberOfItemsInCart)
+		protected.GET("/shoppingCart/:id", GetShoppingCartByID)
+		protected.GET("/shoppingCart", GetUserShoppingCart)
+		protected.POST("/shoppingCart", AddProductToCart)
+		protected.PUT("/shoppingCart", RemoveProductFromCart)
+		protected.DELETE("/shoppingCart/:id", ClearShoppingCart)
+		protected.GET("/shoppingCart/numberofitems/:id", NumberOfItemsInCart)
 
-		protected.GET("/auth/cookie/:id", DeleteUnitItem)
-		protected.GET("/auth/cookie", RemoveFromCart)
-		protected.POST("/auth/cookie/getCartItems", GetCartItems)
-		protected.PUT("/auth/cookie/deleteCartInCookie", DeleteCartInCookie)
-		protected.DELETE("/auth/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
-		protected.GET("/auth/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+		protected.GET("/cookie/:id", DeleteUnitItem)
+		protected.GET("/cookie", RemoveFromCart)
+		protected.POST("/cookie/getCartItems", GetCartItems)
+		protected.PUT("/cookie/deleteCartInCookie", DeleteCartInCookie)
+		protected.DELETE("/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+		protected.GET("/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
 
-		protected.GET("/auth/news", GetAllNews)
-		protected.GET("/auth/news/:id", GetNewsByID)
-		protected.POST("/auth/news", CreateNews)
-		protected.PUT("/auth/news/:id", UpdateNews)
-		protected.DELETE("/auth/news/:id", DeleteNews)
+		protected.GET("/news", GetAllNews)
+		protected.GET("/news/:id", GetNewsByID)
+		protected.POST("/news", CreateNews)
+		protected.PUT("/news/:id", UpdateNews)
+		protected.DELETE("/news/:id", DeleteNews)
 
-		protected.GET("/auth/vnpay", CreateVNPayUrl)
-		protected.POST("/auth/vnpay", ValidateVNPayResponse)
+		protected.GET("/vnpay", CreateVNPayUrl)
+		protected.POST("/vnpay", ValidateVNPayResponse)
 
-		protected.GET("/auth/momo", CreateMoMoUrl)
-		protected.POST("/auth/momo", ValidateMoMoResponse)
+		protected.GET("/momo", CreateMoMoUrl)
+		protected.POST("/momo", ValidateMoMoResponse)
 	}
 
 	log.Println("Routes registered successfully")

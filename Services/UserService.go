@@ -33,6 +33,7 @@ func CreateUser(email, password, role string) (BusinessObjects.User, error) {
 		Username:     email,
 		PasswordHash: passwordHash,
 		UserType:     role,
+		ImageURL:     `https://firebasestorage.googleapis.com/v0/b/sendo-a5204.appspot.com/o/users%2FOIP.jpeg?alt=media&token=438c9b2b-2ed0-4252-a3e1-24045ea76b7e`,
 		CreatedAt:    time.Now(),
 		Status:       true,
 	}
@@ -71,7 +72,7 @@ func UnBanUser(id string) error {
 	return nil
 }
 
-func UpdateProfile(id, fullname, phonenumber, address string) error {
+func UpdateProfile(id, fullname, phonenumber, address, ImageURL string) error {
 	user, err := GetUserByID(id)
 	if err != nil {
 		return err
@@ -80,6 +81,7 @@ func UpdateProfile(id, fullname, phonenumber, address string) error {
 	user.FullName = fullname
 	user.PhoneNumber = phonenumber
 	user.Address = address
+	user.ImageURL = ImageURL
 
 	if err := Repositories.UpdateUser(user); err != nil {
 		return err
