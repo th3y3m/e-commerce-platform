@@ -2,14 +2,14 @@ package API
 
 import (
 	"net/http"
-	"strconv"
 	"th3y3m/e-commerce-platform/Services"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetShoppingCartByID(c *gin.Context) {
-	cartID := c.Param("cartID")
+	cartID := c.Param("id")
+
 	cart, err := Services.GetShoppingCartByID(cartID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -19,7 +19,8 @@ func GetShoppingCartByID(c *gin.Context) {
 }
 
 func GetUserShoppingCart(c *gin.Context) {
-	userID := c.Param("userID")
+	userID := c.Param("id")
+
 	cart, err := Services.GetUserShoppingCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -30,16 +31,16 @@ func GetUserShoppingCart(c *gin.Context) {
 
 func AddProductToCart(c *gin.Context) {
 	var item struct {
-		UserID    string `json:"userID"`
-		ProductID string `json:"productID"`
-		Quantity  int    `json:"quantity"`
+		UserID    string `json:"userID" binding:"required"`
+		ProductID string `json:"productID" binding:"required"`
+		Quantity  int    `json:"quantity" binding:"required"`
 	}
 
-	// Parse JSON request body
-	if err := c.BindJSON(&item); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+	if err := c.ShouldBindJSON(&item); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	err := Services.AddProductToShoppingCart(item.UserID, item.ProductID, item.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -49,10 +50,18 @@ func AddProductToCart(c *gin.Context) {
 }
 
 func RemoveProductFromCart(c *gin.Context) {
-	userID := c.Param("userID")
-	productID := c.Param("productID")
-	quantity, _ := strconv.Atoi(c.DefaultQuery("quantity", "1"))
-	err := Services.RemoveProductFromShoppingCart(userID, productID, quantity)
+	var item struct {
+		UserID    string `json:"userID" binding:"required"`
+		ProductID string `json:"productID" binding:"required"`
+		Quantity  int    `json:"quantity" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&item); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := Services.RemoveProductFromShoppingCart(item.UserID, item.ProductID, item.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -61,7 +70,8 @@ func RemoveProductFromCart(c *gin.Context) {
 }
 
 func ClearShoppingCart(c *gin.Context) {
-	userID := c.Param("userID")
+	userID := c.Param("id")
+
 	err := Services.ClearShoppingCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -71,7 +81,8 @@ func ClearShoppingCart(c *gin.Context) {
 }
 
 func NumberOfItemsInCart(c *gin.Context) {
-	userID := c.Param("userID")
+	userID := c.Param("id")
+
 	items, err := Services.NumberOfItemsInCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -80,11 +91,12 @@ func NumberOfItemsInCart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"items": items})
 }
 
-//Cookie
+// Cookie handlers...
 
 func DeleteUnitItem(c *gin.Context) {
-	productID := c.Param("productID")
-	userID := c.Param("userID")
+	productID := c.Query("productID")
+	userID := c.Query("userID")
+
 	err := Services.DeleteUnitItem(c.Writer, c.Request, productID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -94,8 +106,9 @@ func DeleteUnitItem(c *gin.Context) {
 }
 
 func RemoveFromCart(c *gin.Context) {
-	productID := c.Param("productID")
-	userID := c.Param("userID")
+	productID := c.Query("productID")
+	userID := c.Query("userID")
+
 	err := Services.RemoveFromCart(c.Writer, c.Request, productID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -105,7 +118,8 @@ func RemoveFromCart(c *gin.Context) {
 }
 
 func GetCartItems(c *gin.Context) {
-	userID := c.Param("userID")
+	userID := c.Param("id")
+
 	items, err := Services.GetCart(c.Request, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -115,8 +129,9 @@ func GetCartItems(c *gin.Context) {
 }
 
 func DeleteCartInCookie(c *gin.Context) {
-	userId := c.Param("userId")
-	err := Services.DeleteCartInCookie(c.Writer, userId)
+	userID := c.Param("id")
+
+	err := Services.DeleteCartInCookie(c.Writer, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -125,8 +140,9 @@ func DeleteCartInCookie(c *gin.Context) {
 }
 
 func NumberOfItemsInCartCookie(c *gin.Context) {
-	userId := c.Param("userId")
-	items, err := Services.NumberOfItemsInCartCookie(c.Request, userId)
+	userID := c.Param("id")
+
+	items, err := Services.NumberOfItemsInCartCookie(c.Request, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -135,9 +151,10 @@ func NumberOfItemsInCartCookie(c *gin.Context) {
 }
 
 func SaveCartToCookieHandler(c *gin.Context) {
-	userId := c.Param("userId")
-	productId := c.Param("productId")
-	err := Services.SaveCartToCookieHandler(c.Writer, c.Request, productId, userId)
+	userID := c.Query("userID")
+	productID := c.Query("productID")
+
+	err := Services.SaveCartToCookieHandler(c.Writer, c.Request, productID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

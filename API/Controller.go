@@ -49,13 +49,14 @@ func Controller() *gin.Engine {
 	router.GET("/auth/facebook", FacebookLogin)
 	router.GET("/auth/facebook/callback", FacebookCallback)
 	router.GET("/auth/facebook/logout", FacebookLogout)
+
 	router.GET("/couriers", GetAllCouriers)
+	router.GET("/users", GetUsers)
 
 	// Protected routes with JWT and Casbin middleware
 	protected := router.Group("/auth")
 	protected.Use(Middleware.AuthMiddleware(enforcer))
 	{
-		protected.GET("/users", GetUsers)
 		protected.GET("/users/:id", GetUserByID)
 		protected.PUT("/users/UpdateProfile/:id", UpdateProfile)
 		protected.PUT("/users/Ban/:id", BanUser)
@@ -124,12 +125,12 @@ func Controller() *gin.Engine {
 		protected.DELETE("/shoppingCart/:id", ClearShoppingCart)
 		protected.GET("/shoppingCart/numberofitems/:id", NumberOfItemsInCart)
 
-		protected.GET("/cookie/:id", DeleteUnitItem)
-		protected.GET("/cookie", RemoveFromCart)
-		protected.POST("/cookie/getCartItems", GetCartItems)
-		protected.PUT("/cookie/deleteCartInCookie", DeleteCartInCookie)
-		protected.DELETE("/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
-		protected.GET("/cookie/numberOfItemsInCartCookie", NumberOfItemsInCartCookie)
+		protected.PUT("/cookie/deleteUnitItem", DeleteUnitItem)
+		protected.PUT("/cookie/removeFromCart", RemoveFromCart)
+		protected.GET("/cookie/getCartItems/:id", GetCartItems)
+		protected.PUT("/cookie/deleteCartInCookie/:id", DeleteCartInCookie)
+		protected.GET("/cookie/numberOfItemsInCartCookie/:id", NumberOfItemsInCartCookie)
+		protected.POST("/cookie/saveCartToCookieHandler", SaveCartToCookieHandler)
 
 		protected.GET("/news", GetAllNews)
 		protected.GET("/news/:id", GetNewsByID)
