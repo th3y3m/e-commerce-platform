@@ -36,8 +36,9 @@ export const Register = createAsyncThunk(
     }
 );
 
+const token = localStorage.getItem('authToken');
 const initialState = {
-    token: localStorage.getItem('authToken') || "",
+    token: token !== null ? token : "",
     status: "",
 };
 

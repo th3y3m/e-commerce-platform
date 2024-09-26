@@ -22,7 +22,7 @@ instance.interceptors.request.use(
 // Response interceptor as usual
 instance.interceptors.response.use(
     function (response) {
-        return response.data;
+        return response;
     },
     function (error) {
         let res = {

@@ -6,8 +6,7 @@ export const fetchCategories = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await getAllCategories();
-
-            return response.categories;
+            return response;
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -19,7 +18,7 @@ export const fetchCategoryById = createAsyncThunk(
     async (id: string, { rejectWithValue }) => {
         try {
             const response = await getCategoryById(id);
-            return response.category;
+            return response;
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -31,7 +30,7 @@ export const createNewCategory = createAsyncThunk(
     async (category_name: string, { rejectWithValue }) => {
         try {
             const response = await createCategory(category_name);
-            return response; // response is already returned by the interceptor
+            return response;
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -43,7 +42,7 @@ export const updateCategoryByID = createAsyncThunk(
     async ({ id, category_name }: { id: string, category_name: string }, { rejectWithValue }) => {
         try {
             const response = await updateCategory(id, category_name);
-            return response; // response is already returned by the interceptor
+            return response;
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -55,7 +54,7 @@ export const deleteCategoryByID = createAsyncThunk(
     async (id: string, { rejectWithValue }) => {
         try {
             const response = await deleteCategory(id);
-            return response; // response is already returned by the interceptor
+            return response;
         } catch (error) {
             return rejectWithValue(error);
         }
@@ -84,21 +83,18 @@ const CategorySlice = createSlice({
                 state.status = "loading";
             })
             .addCase(fetchCategories.fulfilled, (state, action) => {
-                console.log(action.payload);
-                state.categories = action.payload; // action.payload is the data directly
+                state.categories = action.payload;
                 state.status = "success";
             })
             .addCase(fetchCategories.rejected, (state) => {
                 state.status = "failed";
             })
-
             // Fetch category by ID
             .addCase(fetchCategoryById.pending, (state) => {
                 state.status = "loading";
             })
             .addCase(fetchCategoryById.fulfilled, (state, action) => {
-                console.log(action.payload);
-                state.category = action.payload; // action.payload is the data directly
+                state.category = action.payload;
                 state.status = "success";
             })
             .addCase(fetchCategoryById.rejected, (state) => {
