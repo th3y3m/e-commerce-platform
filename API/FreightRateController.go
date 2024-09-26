@@ -2,7 +2,7 @@ package API
 
 import (
 	"net/http"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +25,8 @@ type FreightRate struct {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /freightRates [get]
 func GetAllFreightRates(c *gin.Context) {
-	freightRates, err := Services.GetAllFreightRates()
+	module := DependencyInjection.NewFreightRateServiceProvider()
+	freightRates, err := module.GetAllFreightRates()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -44,7 +45,9 @@ func GetAllFreightRates(c *gin.Context) {
 // @Router /freightRates/{id} [get]
 func GetFreightRateByID(c *gin.Context) {
 	id := c.Param("id")
-	freightRate, err := Services.GetFreightRateByID(id)
+	module := DependencyInjection.NewFreightRateServiceProvider()
+
+	freightRate, err := module.GetFreightRateByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -64,8 +67,9 @@ func CreateFreightRate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	module := DependencyInjection.NewFreightRateServiceProvider()
 
-	err := Services.CreateFreightRate(freightRate.CourierID, freightRate.DistanceMinKM, freightRate.DistanceMaxKM, freightRate.CostPerKM)
+	err := module.CreateFreightRate(freightRate.CourierID, freightRate.DistanceMinKM, freightRate.DistanceMaxKM, freightRate.CostPerKM)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
@@ -85,9 +89,10 @@ func UpdateFreightRate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	module := DependencyInjection.NewFreightRateServiceProvider()
 
 	id := c.Param("id")
-	err := Services.UpdateFreightRate(id, freightRate.CourierID, freightRate.DistanceMinKM, freightRate.DistanceMaxKM, freightRate.CostPerKM, freightRate.Status)
+	err := module.UpdateFreightRate(id, freightRate.CourierID, freightRate.DistanceMinKM, freightRate.DistanceMaxKM, freightRate.CostPerKM, freightRate.Status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
@@ -96,7 +101,9 @@ func UpdateFreightRate(c *gin.Context) {
 
 func DeleteFreightRate(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.DeleteFreightRate(id)
+	module := DependencyInjection.NewFreightRateServiceProvider()
+
+	err := module.DeleteFreightRate(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}

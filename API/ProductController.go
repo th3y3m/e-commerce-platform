@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,9 @@ func GetPaginatedProductList(c *gin.Context) {
 		status = &statusValue
 	}
 
-	products, err := Services.GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID, pageIndex, pageSize, status)
+	module := DependencyInjection.NewProductServiceProvider()
+
+	products, err := module.GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID, pageIndex, pageSize, status)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -41,7 +43,9 @@ func GetPaginatedProductList(c *gin.Context) {
 
 func GetProductByID(c *gin.Context) {
 	id := c.Param("id")
-	product, err := Services.GetProductByID(id)
+	module := DependencyInjection.NewProductServiceProvider()
+
+	product, err := module.GetProductByID(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -50,6 +54,8 @@ func GetProductByID(c *gin.Context) {
 }
 
 func CreateProduct(c *gin.Context) {
+	module := DependencyInjection.NewProductServiceProvider()
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
@@ -95,7 +101,7 @@ func CreateProduct(c *gin.Context) {
 	}
 
 	// Call the service to create the product
-	err = Services.CreateProduct(product.SellerID, product.ProductName, product.Description, product.CategoryID, publicURL, product.Price, product.Quantity)
+	err = module.CreateProduct(product.SellerID, product.ProductName, product.Description, product.CategoryID, publicURL, product.Price, product.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -149,7 +155,10 @@ func UpdateProduct(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to Firebase"})
 		return
 	}
-	err = Services.UpdateProduct(id, product.SellerID, product.ProductName, product.Description, product.CategoryID, publicURL, product.Price, product.Quantity)
+
+	module := DependencyInjection.NewProductServiceProvider()
+
+	err = module.UpdateProduct(id, product.SellerID, product.ProductName, product.Description, product.CategoryID, publicURL, product.Price, product.Quantity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -159,7 +168,9 @@ func UpdateProduct(c *gin.Context) {
 
 func DeleteProduct(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.DeleteProduct(id)
+	module := DependencyInjection.NewProductServiceProvider()
+
+	err := module.DeleteProduct(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -169,7 +180,9 @@ func DeleteProduct(c *gin.Context) {
 
 func GetProductPriceAfterDiscount(c *gin.Context) {
 	id := c.Param("id")
-	price, err := Services.GetProductPriceAfterDiscount(id)
+	module := DependencyInjection.NewProductServiceProvider()
+
+	price, err := module.GetProductPriceAfterDiscount(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

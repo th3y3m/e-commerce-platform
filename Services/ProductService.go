@@ -2,24 +2,38 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
 
-func GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
-	return Repositories.GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID, pageIndex, pageSize, status)
+type ProductService struct {
+	productRepository      Interface.IProductRepository
+	discountService        Interface.IDiscountService
+	productDiscountService Interface.IProductDiscountService
 }
 
-func GetAllProducts() ([]BusinessObjects.Product, error) {
-	return Repositories.GetAllProducts()
+func NewProductService(productRepository Interface.IProductRepository, discountService Interface.IDiscountService, ProductDiscountService Interface.IProductDiscountService) Interface.IProductService {
+	return &ProductService{
+		productRepository:      productRepository,
+		discountService:        discountService,
+		productDiscountService: ProductDiscountService,
+	}
 }
 
-func GetProductByID(id string) (BusinessObjects.Product, error) {
-	return Repositories.GetProductByID(id)
+func (p *ProductService) GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
+	return p.productRepository.GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID, pageIndex, pageSize, status)
 }
 
-func CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error {
+func (p *ProductService) GetAllProducts() ([]BusinessObjects.Product, error) {
+	return p.productRepository.GetAllProducts()
+}
+
+func (p *ProductService) GetProductByID(id string) (BusinessObjects.Product, error) {
+	return p.productRepository.GetProductByID(id)
+}
+
+func (p *ProductService) CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error {
 	product := BusinessObjects.Product{
 		ProductID:   "PROD" + Util.GenerateID(10),
 		SellerID:    SellerID,
@@ -34,7 +48,7 @@ func CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL stri
 		CreatedAt:   time.Now(),
 	}
 
-	err := Repositories.CreateProduct(product)
+	err := p.productRepository.CreateProduct(product)
 	if err != nil {
 		return err
 	}
@@ -42,9 +56,9 @@ func CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL stri
 	return nil
 }
 
-func UpdateProduct(productID, SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error {
+func (p *ProductService) UpdateProduct(productID, SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error {
 
-	product, err := Repositories.GetProductByID(productID)
+	product, err := p.productRepository.GetProductByID(productID)
 	if err != nil {
 		return err
 	}
@@ -58,26 +72,26 @@ func UpdateProduct(productID, SellerID, ProductName, Description, CategoryID, Im
 	product.Quantity = Quantity
 	product.UpdatedAt = time.Now()
 
-	return Repositories.UpdateProduct(product)
+	return p.productRepository.UpdateProduct(product)
 }
 
-func DeleteProduct(id string) error {
-	return Repositories.DeleteProduct(id)
+func (p *ProductService) DeleteProduct(id string) error {
+	return p.productRepository.DeleteProduct(id)
 }
 
-func GetProductPriceAfterDiscount(productID string) (float64, error) {
-	product, err := Repositories.GetProductByID(productID)
+func (p *ProductService) GetProductPriceAfterDiscount(productID string) (float64, error) {
+	product, err := p.productRepository.GetProductByID(productID)
 	if err != nil {
 		return 0, err
 	}
 
-	discounts, err := GetProductDiscountByID(productID)
+	discounts, err := p.productDiscountService.GetProductDiscountByID(productID)
 	if err != nil {
 		return 0, err
 	}
 
 	for _, discount := range discounts {
-		discountEvent, err := GetDiscountByID(discount.DiscountID)
+		discountEvent, err := p.discountService.GetDiscountByID(discount.DiscountID)
 		if err != nil {
 			return 0, err
 		}

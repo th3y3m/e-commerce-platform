@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Courier], error) {
+type CourierRepository struct {
+	log *logrus.Logger
+}
+
+func NewCourierRepository(log *logrus.Logger) Interface.ICourierRepository {
+	return &CourierRepository{log}
+}
+
+func (c *CourierRepository) GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Courier], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Courier]{}, err
@@ -42,7 +53,7 @@ func GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int
 }
 
 // GetAllCouriers retrieves all couriers from the database
-func GetAllCouriers() ([]BusinessObjects.Courier, error) {
+func (c *CourierRepository) GetAllCouriers() ([]BusinessObjects.Courier, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -57,7 +68,7 @@ func GetAllCouriers() ([]BusinessObjects.Courier, error) {
 }
 
 // GetCourierByID retrieves a courier by its ID
-func GetCourierByID(courierID string) (BusinessObjects.Courier, error) {
+func (c *CourierRepository) GetCourierByID(courierID string) (BusinessObjects.Courier, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Courier{}, err
@@ -72,7 +83,7 @@ func GetCourierByID(courierID string) (BusinessObjects.Courier, error) {
 }
 
 // CreateCourier adds a new courier to the database
-func CreateCourier(courier BusinessObjects.Courier) error {
+func (c *CourierRepository) CreateCourier(courier BusinessObjects.Courier) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -86,7 +97,7 @@ func CreateCourier(courier BusinessObjects.Courier) error {
 }
 
 // UpdateCourier updates an existing courier
-func UpdateCourier(courier BusinessObjects.Courier) error {
+func (c *CourierRepository) UpdateCourier(courier BusinessObjects.Courier) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -100,7 +111,7 @@ func UpdateCourier(courier BusinessObjects.Courier) error {
 }
 
 // DeleteCourier removes a courier from the database by its ID
-func DeleteCourier(courierID string) error {
+func (c *CourierRepository) DeleteCourier(courierID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

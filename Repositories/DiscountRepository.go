@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedDiscountList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Discount], error) {
+type DiscountRepository struct {
+	log *logrus.Logger
+}
+
+func NewDiscountRepository(log *logrus.Logger) Interface.IDiscountRepository {
+	return &DiscountRepository{log: log}
+}
+
+func (d *DiscountRepository) GetPaginatedDiscountList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Discount], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Discount]{}, err
@@ -56,7 +67,7 @@ func GetPaginatedDiscountList(searchValue, sortBy string, pageIndex, pageSize in
 }
 
 // GetAllDiscounts retrieves all discounts from the database
-func GetAllDiscounts() ([]BusinessObjects.Discount, error) {
+func (d *DiscountRepository) GetAllDiscounts() ([]BusinessObjects.Discount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -71,7 +82,7 @@ func GetAllDiscounts() ([]BusinessObjects.Discount, error) {
 }
 
 // GetDiscountByID retrieves a discount by its ID
-func GetDiscountByID(discountID string) (BusinessObjects.Discount, error) {
+func (d *DiscountRepository) GetDiscountByID(discountID string) (BusinessObjects.Discount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Discount{}, err
@@ -86,7 +97,7 @@ func GetDiscountByID(discountID string) (BusinessObjects.Discount, error) {
 }
 
 // CreateDiscount adds a new discount to the database
-func CreateDiscount(discount BusinessObjects.Discount) error {
+func (d *DiscountRepository) CreateDiscount(discount BusinessObjects.Discount) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -100,7 +111,7 @@ func CreateDiscount(discount BusinessObjects.Discount) error {
 }
 
 // UpdateDiscount updates an existing discount
-func UpdateDiscount(discount BusinessObjects.Discount) error {
+func (d *DiscountRepository) UpdateDiscount(discount BusinessObjects.Discount) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -114,7 +125,7 @@ func UpdateDiscount(discount BusinessObjects.Discount) error {
 }
 
 // DeleteDiscount removes a discount from the database by its ID
-func DeleteDiscount(discountID string) error {
+func (d *DiscountRepository) DeleteDiscount(discountID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

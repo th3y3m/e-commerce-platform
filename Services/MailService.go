@@ -6,13 +6,23 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 
 	"github.com/joho/godotenv"
 )
 
+type MailService struct {
+	repository Interface.IUserRepository
+}
+
+func NewMailService(repository Interface.IUserRepository) Interface.IMailService {
+	return &MailService{
+		repository: repository,
+	}
+}
+
 // SendMail sends the email to the user
-func SendMail(to string, token string) error {
+func (m *MailService) SendMail(to string, token string) error {
 	// Load environment variables
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -55,6 +65,6 @@ func SendMail(to string, token string) error {
 }
 
 // VerifyToken checks if the token is valid
-func VerifyToken(token string) bool {
-	return Repositories.VerifyToken(token)
+func (m *MailService) VerifyToken(token string) bool {
+	return m.repository.VerifyToken(token)
 }

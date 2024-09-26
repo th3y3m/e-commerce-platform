@@ -2,7 +2,7 @@ package API
 
 import (
 	"net/http"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,8 +46,9 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "email and password are required"})
 		return
 	}
+	service := DependencyInjection.NewNewAuthenticationServiceProvider()
 
-	token, err := Services.Login(request.Email, request.Password)
+	token, err := service.Login(request.Email, request.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -78,8 +79,9 @@ func RegisterCustomer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "email and password are required"})
 		return
 	}
+	service := DependencyInjection.NewNewAuthenticationServiceProvider()
 
-	err := Services.RegisterCustomer(request.Email, request.Password)
+	err := service.RegisterCustomer(request.Email, request.Password)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

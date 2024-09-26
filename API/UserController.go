@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +25,9 @@ func GetUsers(c *gin.Context) {
 		status = &statusValue
 	}
 
-	users, err := Services.GetPaginatedUserList(searchValue, sortBy, pageIndex, pageSize, status)
+	service := DependencyInjection.NewUserServiceProvider()
+
+	users, err := service.GetPaginatedUserList(searchValue, sortBy, pageIndex, pageSize, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -35,7 +37,10 @@ func GetUsers(c *gin.Context) {
 
 func GetUserByID(c *gin.Context) {
 	id := c.Param("id")
-	user, err := Services.GetUserByID(id)
+
+	service := DependencyInjection.NewUserServiceProvider()
+
+	user, err := service.GetUserByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -84,7 +89,9 @@ func UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to Firebase"})
 		return
 	}
-	err = Services.UpdateProfile(ID, info.FullName, info.PhoneNumber, info.Address, publicURL)
+	service := DependencyInjection.NewUserServiceProvider()
+
+	err = service.UpdateProfile(ID, info.FullName, info.PhoneNumber, info.Address, publicURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -94,7 +101,9 @@ func UpdateProfile(c *gin.Context) {
 
 func BanUser(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.BanUser(id)
+	service := DependencyInjection.NewUserServiceProvider()
+
+	err := service.BanUser(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -104,7 +113,9 @@ func BanUser(c *gin.Context) {
 
 func UnBanUser(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.UnBanUser(id)
+	service := DependencyInjection.NewUserServiceProvider()
+
+	err := service.UnBanUser(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

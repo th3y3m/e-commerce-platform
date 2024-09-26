@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedFreightRateList(searchValue, sortBy, courierID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.FreightRate], error) {
+type FreightRateRepository struct {
+	log *logrus.Logger
+}
+
+func NewFreightRateRepository(log *logrus.Logger) Interface.IFreightRateRepository {
+	return &FreightRateRepository{log}
+}
+
+func (c *FreightRateRepository) GetPaginatedFreightRateList(searchValue, sortBy, courierID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.FreightRate], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.FreightRate]{}, err
@@ -68,7 +79,7 @@ func GetPaginatedFreightRateList(searchValue, sortBy, courierID string, pageInde
 }
 
 // GetAllFreightRates retrieves all freight rates from the database
-func GetAllFreightRates() ([]BusinessObjects.FreightRate, error) {
+func (c *FreightRateRepository) GetAllFreightRates() ([]BusinessObjects.FreightRate, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -83,7 +94,7 @@ func GetAllFreightRates() ([]BusinessObjects.FreightRate, error) {
 }
 
 // GetFreightRateByID retrieves a freight rate by its ID
-func GetFreightRateByID(rateID string) (BusinessObjects.FreightRate, error) {
+func (c *FreightRateRepository) GetFreightRateByID(rateID string) (BusinessObjects.FreightRate, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.FreightRate{}, err
@@ -96,7 +107,7 @@ func GetFreightRateByID(rateID string) (BusinessObjects.FreightRate, error) {
 
 	return rate, nil
 }
-func GetFreightRateByCourierID(courierID string) ([]BusinessObjects.FreightRate, error) {
+func (c *FreightRateRepository) GetFreightRateByCourierID(courierID string) ([]BusinessObjects.FreightRate, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -111,7 +122,7 @@ func GetFreightRateByCourierID(courierID string) ([]BusinessObjects.FreightRate,
 }
 
 // CreateFreightRate adds a new freight rate to the database
-func CreateFreightRate(rate BusinessObjects.FreightRate) error {
+func (c *FreightRateRepository) CreateFreightRate(rate BusinessObjects.FreightRate) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -125,7 +136,7 @@ func CreateFreightRate(rate BusinessObjects.FreightRate) error {
 }
 
 // UpdateFreightRate updates an existing freight rate
-func UpdateFreightRate(rate BusinessObjects.FreightRate) error {
+func (c *FreightRateRepository) UpdateFreightRate(rate BusinessObjects.FreightRate) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -139,7 +150,7 @@ func UpdateFreightRate(rate BusinessObjects.FreightRate) error {
 }
 
 // DeleteFreightRate removes a freight rate from the database by its ID
-func DeleteFreightRate(rateID string) error {
+func (c *FreightRateRepository) DeleteFreightRate(rateID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

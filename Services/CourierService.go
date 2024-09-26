@@ -2,30 +2,38 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Courier], error) {
-	return Repositories.GetPaginatedCourierList(searchValue, sortBy, pageIndex, pageSize, status)
+type CourierService struct {
+	courierRepository Interface.ICourierRepository
 }
 
-func GetAllCouriers() ([]BusinessObjects.Courier, error) {
-	return Repositories.GetAllCouriers()
+func NewCourierService(courierRepository Interface.ICourierRepository) Interface.ICourierService {
+	return &CourierService{courierRepository}
 }
 
-func GetCourierByID(id string) (BusinessObjects.Courier, error) {
-	return Repositories.GetCourierByID(id)
+func (c *CourierService) GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Courier], error) {
+	return c.courierRepository.GetPaginatedCourierList(searchValue, sortBy, pageIndex, pageSize, status)
 }
 
-func CreateCourier(CourierName string) error {
+func (c *CourierService) GetAllCouriers() ([]BusinessObjects.Courier, error) {
+	return c.courierRepository.GetAllCouriers()
+}
+
+func (c *CourierService) GetCourierByID(id string) (BusinessObjects.Courier, error) {
+	return c.courierRepository.GetCourierByID(id)
+}
+
+func (c *CourierService) CreateCourier(CourierName string) error {
 	courier := BusinessObjects.Courier{
 		CourierID: "COUR" + Util.GenerateID(10),
 		Courier:   CourierName,
 		Status:    true,
 	}
 
-	err := Repositories.CreateCourier(courier)
+	err := c.courierRepository.CreateCourier(courier)
 	if err != nil {
 		return err
 	}
@@ -33,8 +41,8 @@ func CreateCourier(CourierName string) error {
 	return nil
 }
 
-func UpdateCourier(courierID, CourierName string, status bool) error {
-	courier, err := Repositories.GetCourierByID(courierID)
+func (c *CourierService) UpdateCourier(courierID, CourierName string, status bool) error {
+	courier, err := c.courierRepository.GetCourierByID(courierID)
 	if err != nil {
 		return err
 	}
@@ -42,9 +50,9 @@ func UpdateCourier(courierID, CourierName string, status bool) error {
 	courier.Courier = CourierName
 	courier.Status = status
 
-	return Repositories.UpdateCourier(courier)
+	return c.courierRepository.UpdateCourier(courier)
 }
 
-func DeleteCourier(id string) error {
-	return Repositories.DeleteCourier(id)
+func (c *CourierService) DeleteCourier(id string) error {
+	return c.courierRepository.DeleteCourier(id)
 }

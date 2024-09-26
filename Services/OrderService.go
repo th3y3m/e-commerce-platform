@@ -2,24 +2,41 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
 
-func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
-	return Repositories.GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId, pageIndex, pageSize, startDate, endDate, minPrice, maxPrice, status)
+type OrderService struct {
+	orderRepository     Interface.IOrderRepository
+	cartItemRepository  Interface.ICartItemRepository
+	productRepository   Interface.IProductRepository
+	shoppingCartService Interface.IShoppingCartService
 }
 
-func GetAllOrders() ([]BusinessObjects.Order, error) {
-	return Repositories.GetAllOrders()
+func NewOrderService(orderRepository Interface.IOrderRepository, cartItemRepository Interface.ICartItemRepository, productRepository Interface.IProductRepository, shoppingCartService Interface.IShoppingCartService,
+) Interface.IOrderService {
+	return &OrderService{
+		orderRepository:     orderRepository,
+		cartItemRepository:  cartItemRepository,
+		productRepository:   productRepository,
+		shoppingCartService: shoppingCartService,
+	}
 }
 
-func GetOrderById(id string) (BusinessObjects.Order, error) {
-	return Repositories.GetOrderByID(id)
+func (o *OrderService) GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
+	return o.orderRepository.GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId, pageIndex, pageSize, startDate, endDate, minPrice, maxPrice, status)
 }
 
-func CreateOrder(order BusinessObjects.NewOrder) error {
+func (o *OrderService) GetAllOrders() ([]BusinessObjects.Order, error) {
+	return o.orderRepository.GetAllOrders()
+}
+
+func (o *OrderService) GetOrderById(id string) (BusinessObjects.Order, error) {
+	return o.orderRepository.GetOrderByID(id)
+}
+
+func (o *OrderService) CreateOrder(order BusinessObjects.NewOrder) error {
 	newOrder := BusinessObjects.Order{
 		OrderID:               "ORD" + Util.GenerateID(10),
 		CustomerID:            order.CustomerID,
@@ -36,7 +53,7 @@ func CreateOrder(order BusinessObjects.NewOrder) error {
 		PaymentStatus:         order.PaymentStatus,
 	}
 
-	err := Repositories.CreateOrder(newOrder)
+	err := o.orderRepository.CreateOrder(newOrder)
 	if err != nil {
 		return err
 	}
@@ -44,15 +61,15 @@ func CreateOrder(order BusinessObjects.NewOrder) error {
 	return nil
 }
 
-func PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error {
-	productsList, err := Repositories.GetCartItemByCartID(cartId)
+func (o *OrderService) PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error {
+	productsList, err := o.cartItemRepository.GetCartItemByCartID(cartId)
 	if err != nil {
 		return err
 	}
 
 	totalAmount := 0.0
 	for _, product := range productsList {
-		p, err := Repositories.GetProductByID(product.ProductID)
+		p, err := o.productRepository.GetProductByID(product.ProductID)
 		if err != nil {
 			return err
 		}
@@ -73,22 +90,22 @@ func PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error 
 		PaymentStatus:         "Pending",
 	}
 
-	err = CreateOrder(newOrder)
+	err = o.CreateOrder(newOrder)
 	if err != nil {
 		return err
 	}
 
-	if err := UpdateShoppingCartStatus(cartId, false); err != nil {
+	if err := o.shoppingCartService.UpdateShoppingCartStatus(cartId, false); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func UpdateOrder(order BusinessObjects.Order) error {
-	return Repositories.UpdateOrder(order)
+func (o *OrderService) UpdateOrder(order BusinessObjects.Order) error {
+	return o.orderRepository.UpdateOrder(order)
 }
 
-func CancelOrder(id string) error {
-	return Repositories.DeleteOrder(id)
+func (o *OrderService) CancelOrder(id string) error {
+	return o.orderRepository.DeleteOrder(id)
 }

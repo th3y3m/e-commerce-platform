@@ -2,29 +2,37 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
-	return Repositories.GetPaginatedategoryList(searchValue, sortBy, pageIndex, pageSize, status)
+type CategoryService struct {
+	categoryRepository Interface.ICategoryRepository
 }
 
-func GetAllCategories() ([]BusinessObjects.Category, error) {
-	return Repositories.GetAllCategories()
+func NewCategoryService(categoryRepository Interface.ICategoryRepository) *CategoryService {
+	return &CategoryService{categoryRepository}
 }
 
-func GetCategoryByID(id string) (BusinessObjects.Category, error) {
-	return Repositories.GetCategoryByID(id)
+func (c *CategoryService) GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
+	return c.categoryRepository.GetPaginatedategoryList(searchValue, sortBy, pageIndex, pageSize, status)
 }
 
-func CreateCategory(CategoryName string) error {
+func (c *CategoryService) GetAllCategories() ([]BusinessObjects.Category, error) {
+	return c.categoryRepository.GetAllCategories()
+}
+
+func (c *CategoryService) GetCategoryByID(id string) (BusinessObjects.Category, error) {
+	return c.categoryRepository.GetCategoryByID(id)
+}
+
+func (c *CategoryService) CreateCategory(CategoryName string) error {
 	category := BusinessObjects.Category{
 		CategoryID:   "CAT" + Util.GenerateID(10),
 		CategoryName: CategoryName,
 	}
 
-	err := Repositories.CreateCategory(category)
+	err := c.categoryRepository.CreateCategory(category)
 	if err != nil {
 		return err
 	}
@@ -32,17 +40,17 @@ func CreateCategory(CategoryName string) error {
 	return nil
 }
 
-func UpdateCategory(categoryID, CategoryName string) error {
-	category, err := Repositories.GetCategoryByID(categoryID)
+func (c *CategoryService) UpdateCategory(categoryID, CategoryName string) error {
+	category, err := c.categoryRepository.GetCategoryByID(categoryID)
 	if err != nil {
 		return err
 	}
 
 	category.CategoryName = CategoryName
 
-	return Repositories.UpdateCategory(category)
+	return c.categoryRepository.UpdateCategory(category)
 }
 
-func DeleteCategory(id string) error {
-	return Repositories.DeleteCategory(id)
+func (c *CategoryService) DeleteCategory(id string) error {
+	return c.categoryRepository.DeleteCategory(id)
 }

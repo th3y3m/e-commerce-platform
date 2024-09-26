@@ -2,7 +2,7 @@ package API
 
 import (
 	"net/http"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +10,9 @@ import (
 func GetShoppingCartByID(c *gin.Context) {
 	cartID := c.Param("id")
 
-	cart, err := Services.GetShoppingCartByID(cartID)
+	module := DependencyInjection.NewShoppingCartServiceProvider()
+
+	cart, err := module.GetShoppingCartByID(cartID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -21,7 +23,9 @@ func GetShoppingCartByID(c *gin.Context) {
 func GetUserShoppingCart(c *gin.Context) {
 	userID := c.Param("id")
 
-	cart, err := Services.GetUserShoppingCart(userID)
+	module := DependencyInjection.NewShoppingCartServiceProvider()
+
+	cart, err := module.GetUserShoppingCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -40,8 +44,9 @@ func AddProductToCart(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.AddProductToShoppingCart(item.UserID, item.ProductID, item.Quantity)
+	err := module.AddProductToShoppingCart(item.UserID, item.ProductID, item.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -60,8 +65,9 @@ func RemoveProductFromCart(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.RemoveProductFromShoppingCart(item.UserID, item.ProductID, item.Quantity)
+	err := module.RemoveProductFromShoppingCart(item.UserID, item.ProductID, item.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,8 +77,9 @@ func RemoveProductFromCart(c *gin.Context) {
 
 func ClearShoppingCart(c *gin.Context) {
 	userID := c.Param("id")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.ClearShoppingCart(userID)
+	err := module.ClearShoppingCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -82,8 +89,9 @@ func ClearShoppingCart(c *gin.Context) {
 
 func NumberOfItemsInCart(c *gin.Context) {
 	userID := c.Param("id")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	items, err := Services.NumberOfItemsInCart(userID)
+	items, err := module.NumberOfItemsInCart(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -96,8 +104,9 @@ func NumberOfItemsInCart(c *gin.Context) {
 func DeleteUnitItem(c *gin.Context) {
 	productID := c.Query("productID")
 	userID := c.Query("userID")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.DeleteUnitItem(c.Writer, c.Request, productID, userID)
+	err := module.DeleteUnitItem(c.Writer, c.Request, productID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -108,8 +117,9 @@ func DeleteUnitItem(c *gin.Context) {
 func RemoveFromCart(c *gin.Context) {
 	productID := c.Query("productID")
 	userID := c.Query("userID")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.RemoveFromCart(c.Writer, c.Request, productID, userID)
+	err := module.RemoveFromCart(c.Writer, c.Request, productID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -119,8 +129,9 @@ func RemoveFromCart(c *gin.Context) {
 
 func GetCartItems(c *gin.Context) {
 	userID := c.Param("id")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	items, err := Services.GetCart(c.Request, userID)
+	items, err := module.GetCart(c.Request, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -130,8 +141,9 @@ func GetCartItems(c *gin.Context) {
 
 func DeleteCartInCookie(c *gin.Context) {
 	userID := c.Param("id")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.DeleteCartInCookie(c.Writer, userID)
+	err := module.DeleteCartInCookie(c.Writer, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -141,8 +153,9 @@ func DeleteCartInCookie(c *gin.Context) {
 
 func NumberOfItemsInCartCookie(c *gin.Context) {
 	userID := c.Param("id")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	items, err := Services.NumberOfItemsInCartCookie(c.Request, userID)
+	items, err := module.NumberOfItemsInCartCookie(c.Request, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -153,8 +166,9 @@ func NumberOfItemsInCartCookie(c *gin.Context) {
 func SaveCartToCookieHandler(c *gin.Context) {
 	userID := c.Query("userID")
 	productID := c.Query("productID")
+	module := DependencyInjection.NewShoppingCartServiceProvider()
 
-	err := Services.SaveCartToCookieHandler(c.Writer, c.Request, productID, userID)
+	err := module.SaveCartToCookieHandler(c.Writer, c.Request, productID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

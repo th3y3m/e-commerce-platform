@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
+type CategoryRepository struct {
+	log *logrus.Logger
+}
+
+func NewCategoryRepository(log *logrus.Logger) Interface.ICategoryRepository {
+	return &CategoryRepository{log}
+}
+
+func (c *CategoryRepository) GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Category]{}, err
@@ -42,7 +53,7 @@ func GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int
 }
 
 // GetAllCategories retrieves all categories from the database
-func GetAllCategories() ([]BusinessObjects.Category, error) {
+func (c *CategoryRepository) GetAllCategories() ([]BusinessObjects.Category, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -57,7 +68,7 @@ func GetAllCategories() ([]BusinessObjects.Category, error) {
 }
 
 // GetCategoryByID retrieves a category by its ID
-func GetCategoryByID(categoryID string) (BusinessObjects.Category, error) {
+func (c *CategoryRepository) GetCategoryByID(categoryID string) (BusinessObjects.Category, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Category{}, err
@@ -72,7 +83,7 @@ func GetCategoryByID(categoryID string) (BusinessObjects.Category, error) {
 }
 
 // CreateCategory adds a new category to the database
-func CreateCategory(category BusinessObjects.Category) error {
+func (c *CategoryRepository) CreateCategory(category BusinessObjects.Category) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -86,7 +97,7 @@ func CreateCategory(category BusinessObjects.Category) error {
 }
 
 // UpdateCategory updates an existing category
-func UpdateCategory(category BusinessObjects.Category) error {
+func (c *CategoryRepository) UpdateCategory(category BusinessObjects.Category) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -100,7 +111,7 @@ func UpdateCategory(category BusinessObjects.Category) error {
 }
 
 // DeleteCategory removes a category from the database by its ID
-func DeleteCategory(categoryID string) error {
+func (c *CategoryRepository) DeleteCategory(categoryID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

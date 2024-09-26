@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedProductDiscountList(discountID, sortBy, productID string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.ProductDiscount], error) {
+type ProductDiscountRepository struct {
+	log *logrus.Logger
+}
+
+func NewProductDiscountRepository(log *logrus.Logger) Interface.IProductDiscountRepository {
+	return &ProductDiscountRepository{log: log}
+}
+
+func (p *ProductDiscountRepository) GetPaginatedProductDiscountList(discountID, sortBy, productID string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.ProductDiscount], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.ProductDiscount]{}, err
@@ -46,7 +57,7 @@ func GetPaginatedProductDiscountList(discountID, sortBy, productID string, pageI
 	return Util.NewPaginatedList(rates, totalCount, pageIndex, pageSize), nil
 }
 
-func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
+func (p *ProductDiscountRepository) GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -61,7 +72,7 @@ func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
 }
 
 // GetProductDiscountByID retrieves discount rate by its ID
-func GetProductDiscountByID(productID string) ([]BusinessObjects.ProductDiscount, error) {
+func (p *ProductDiscountRepository) GetProductDiscountByID(productID string) ([]BusinessObjects.ProductDiscount, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -75,7 +86,7 @@ func GetProductDiscountByID(productID string) ([]BusinessObjects.ProductDiscount
 	return rate, nil
 }
 
-func CreateProductDiscount(rate BusinessObjects.ProductDiscount) error {
+func (p *ProductDiscountRepository) CreateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -88,7 +99,7 @@ func CreateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	return nil
 }
 
-func UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
+func (p *ProductDiscountRepository) UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -101,7 +112,7 @@ func UpdateProductDiscount(rate BusinessObjects.ProductDiscount) error {
 	return nil
 }
 
-func DeleteProductDiscount(productID string) error {
+func (p *ProductDiscountRepository) DeleteProductDiscount(productID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

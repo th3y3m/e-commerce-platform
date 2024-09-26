@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
+type ProductRepository struct {
+	log *logrus.Logger
+}
+
+func NewProductRepository(log *logrus.Logger) Interface.IProductRepository {
+	return &ProductRepository{log: log}
+}
+
+func (p *ProductRepository) GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Product]{}, err
@@ -66,7 +77,7 @@ func GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryI
 }
 
 // GetAllProducts retrieves all products from the database
-func GetAllProducts() ([]BusinessObjects.Product, error) {
+func (p *ProductRepository) GetAllProducts() ([]BusinessObjects.Product, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -81,7 +92,7 @@ func GetAllProducts() ([]BusinessObjects.Product, error) {
 }
 
 // GetProductByID retrieves a product by its ID
-func GetProductByID(productID string) (BusinessObjects.Product, error) {
+func (p *ProductRepository) GetProductByID(productID string) (BusinessObjects.Product, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Product{}, err
@@ -96,7 +107,7 @@ func GetProductByID(productID string) (BusinessObjects.Product, error) {
 }
 
 // CreateProduct adds a new product to the database
-func CreateProduct(product BusinessObjects.Product) error {
+func (p *ProductRepository) CreateProduct(product BusinessObjects.Product) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -110,7 +121,7 @@ func CreateProduct(product BusinessObjects.Product) error {
 }
 
 // UpdateProduct updates an existing product
-func UpdateProduct(product BusinessObjects.Product) error {
+func (p *ProductRepository) UpdateProduct(product BusinessObjects.Product) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -124,7 +135,7 @@ func UpdateProduct(product BusinessObjects.Product) error {
 }
 
 // DeleteProduct removes a product from the database by its ID
-func DeleteProduct(productID string) error {
+func (p *ProductRepository) DeleteProduct(productID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

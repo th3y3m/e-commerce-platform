@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,8 @@ func GetPaginatedVoucherList(c *gin.Context) {
 	startDate, _ := time.Parse(time.RFC3339, c.DefaultQuery("startDate", ""))
 	endDate, _ := time.Parse(time.RFC3339, c.DefaultQuery("endDate", ""))
 
-	vouchers, err := Services.GetPaginatedVoucherList(sortBy, voucherID, pageIndex, pageSize, &status, startDate, endDate)
+	module := DependencyInjection.NewVoucherServiceProvider()
+	vouchers, err := module.GetPaginatedVoucherList(sortBy, voucherID, pageIndex, pageSize, &status, startDate, endDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -28,7 +29,9 @@ func GetPaginatedVoucherList(c *gin.Context) {
 }
 
 func GetAllVouchers(c *gin.Context) {
-	vouchers, err := Services.GetAllVouchers()
+	module := DependencyInjection.NewVoucherServiceProvider()
+
+	vouchers, err := module.GetAllVouchers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -38,7 +41,9 @@ func GetAllVouchers(c *gin.Context) {
 
 func GetVoucherByID(c *gin.Context) {
 	id := c.Param("id")
-	voucher, err := Services.GetVoucherByID(id)
+	module := DependencyInjection.NewVoucherServiceProvider()
+
+	voucher, err := module.GetVoucherByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -52,7 +57,9 @@ func CreateVoucher(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.CreateVoucher(newVoucher)
+	module := DependencyInjection.NewVoucherServiceProvider()
+
+	err := module.CreateVoucher(newVoucher)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -66,7 +73,9 @@ func UpdateVoucher(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.UpdateVoucher(updateVoucher)
+	module := DependencyInjection.NewVoucherServiceProvider()
+
+	err := module.UpdateVoucher(updateVoucher)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -76,7 +85,9 @@ func UpdateVoucher(c *gin.Context) {
 
 func DeleteVoucher(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.DeleteVoucher(id)
+	module := DependencyInjection.NewVoucherServiceProvider()
+
+	err := module.DeleteVoucher(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

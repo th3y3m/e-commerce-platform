@@ -2,26 +2,39 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
-func GetAllUsers() ([]BusinessObjects.User, error) {
-	return Repositories.GetAllUsers()
+type UserService struct {
+	userRepository Interface.IUserRepository
+	log            *logrus.Logger
 }
 
-func GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.User], error) {
-	return Repositories.GetPaginatedUserList(searchValue, sortBy, pageIndex, pageSize, status)
+func NewUserService(userRepository Interface.IUserRepository, log *logrus.Logger) Interface.IUserService {
+	return &UserService{
+		userRepository: userRepository,
+		log:            log,
+	}
 }
 
-func GetUserByID(id string) (BusinessObjects.User, error) {
-	return Repositories.GetUserByID(id)
+func (r *UserService) GetAllUsers() ([]BusinessObjects.User, error) {
+	return r.userRepository.GetAllUsers()
 }
 
-func CreateUser(email, password, role string) (BusinessObjects.User, error) {
+func (r *UserService) GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.User], error) {
+	return r.userRepository.GetPaginatedUserList(searchValue, sortBy, pageIndex, pageSize, status)
+}
+
+func (r *UserService) GetUserByID(id string) (BusinessObjects.User, error) {
+	return r.userRepository.GetUserByID(id)
+}
+
+func (r *UserService) CreateUser(email, password, role string) (BusinessObjects.User, error) {
 	passwordHash, err := Util.HashPassword(password)
 	if err != nil {
 		return BusinessObjects.User{}, err
@@ -38,7 +51,7 @@ func CreateUser(email, password, role string) (BusinessObjects.User, error) {
 		Status:       true,
 	}
 
-	newUser, err := Repositories.CreateUser(user)
+	newUser, err := r.userRepository.CreateUser(user)
 	if err != nil {
 		return BusinessObjects.User{}, err
 	}
@@ -46,34 +59,34 @@ func CreateUser(email, password, role string) (BusinessObjects.User, error) {
 	return newUser, nil
 }
 
-func BanUser(id string) error {
-	user, err := GetUserByID(id)
+func (r *UserService) BanUser(id string) error {
+	user, err := r.userRepository.GetUserByID(id)
 	if err != nil {
 		return err
 	}
 
 	user.Status = false
-	if err := Repositories.UpdateUser(user); err != nil {
+	if err := r.userRepository.UpdateUser(user); err != nil {
 		return err
 	}
 	return nil
 }
 
-func UnBanUser(id string) error {
-	user, err := GetUserByID(id)
+func (r *UserService) UnBanUser(id string) error {
+	user, err := r.userRepository.GetUserByID(id)
 	if err != nil {
 		return err
 	}
 
 	user.Status = true
-	if err := Repositories.UpdateUser(user); err != nil {
+	if err := r.userRepository.UpdateUser(user); err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateProfile(id, fullname, phonenumber, address, ImageURL string) error {
-	user, err := GetUserByID(id)
+func (r *UserService) UpdateProfile(id, fullname, phonenumber, address, ImageURL string) error {
+	user, err := r.userRepository.GetUserByID(id)
 	if err != nil {
 		return err
 	}
@@ -83,7 +96,7 @@ func UpdateProfile(id, fullname, phonenumber, address, ImageURL string) error {
 	user.Address = address
 	user.ImageURL = ImageURL
 
-	if err := Repositories.UpdateUser(user); err != nil {
+	if err := r.userRepository.UpdateUser(user); err != nil {
 		return err
 	}
 	return nil

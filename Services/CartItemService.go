@@ -2,23 +2,35 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.CartItem], error) {
-	return Repositories.GetPaginatedCartItemList(searchValue, sortBy, cartId, productId, pageIndex, pageSize)
+type CartItemService struct {
+	cartItemRepository Interface.ICartItemRepository
+	shoppingRepository Interface.IShoppingCartRepository
 }
 
-func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
-	return Repositories.GetAllCartItems()
+func NewCartItemService(cartItemRepository Interface.ICartItemRepository, shoppingRepository Interface.IShoppingCartRepository) Interface.ICartItemService {
+	return &CartItemService{
+		cartItemRepository: cartItemRepository,
+		shoppingRepository: shoppingRepository,
+	}
 }
 
-func GetCartItemByCartID(id string) ([]BusinessObjects.CartItem, error) {
-	return Repositories.GetCartItemByCartID(id)
+func (c *CartItemService) GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.CartItem], error) {
+	return c.cartItemRepository.GetPaginatedCartItemList(searchValue, sortBy, cartId, productId, pageIndex, pageSize)
 }
 
-// func CreateCartItem(cartId, productId string, quantity int) error {
+func (c *CartItemService) GetAllCartItems() ([]BusinessObjects.CartItem, error) {
+	return c.cartItemRepository.GetAllCartItems()
+}
+
+func (c *CartItemService) GetCartItemByCartID(id string) ([]BusinessObjects.CartItem, error) {
+	return c.cartItemRepository.GetCartItemByCartID(id)
+}
+
+// func  (c *CartItemService) CreateCartItem(cartId, productId string, quantity int) error {
 // 	cartItem := BusinessObjects.CartItem{
 // 		CartItemID: Util.GenerateUUID(),
 // 		CartID:     cartId,
@@ -30,17 +42,17 @@ func GetCartItemByCartID(id string) ([]BusinessObjects.CartItem, error) {
 // 	return Repositories.CreateCartItem(cartItem)
 // }
 
-func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
-	return Repositories.UpdateCartItem(cartItem)
+func (c *CartItemService) UpdateCartItem(cartItem BusinessObjects.CartItem) error {
+	return c.cartItemRepository.UpdateCartItem(cartItem)
 }
 
-func DeleteCartItem(cartID, productID string) error {
-	return Repositories.DeleteCartItem(cartID, productID)
+func (c *CartItemService) DeleteCartItem(cartID, productID string) error {
+	return c.cartItemRepository.DeleteCartItem(cartID, productID)
 }
 
 // RemoveItemFromCart removes an item from the shopping cart
-func RemoveItemFromCart(cartId, productId string) error {
-	cartItem, err := Repositories.GetShoppingCartByID(cartId)
+func (c *CartItemService) RemoveItemFromCart(cartId, productId string) error {
+	cartItem, err := c.shoppingRepository.GetShoppingCartByID(cartId)
 	if err != nil {
 		return err
 	}
@@ -72,5 +84,5 @@ func RemoveItemFromCart(cartId, productId string) error {
 		}
 	}
 
-	return Repositories.UpdateShoppingCart(cartItem)
+	return c.shoppingRepository.UpdateShoppingCart(cartItem)
 }

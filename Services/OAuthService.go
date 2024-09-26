@@ -3,17 +3,27 @@ package Services
 import (
 	"log"
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/markbates/goth"
 	"gorm.io/gorm"
 )
 
-func HandleOAuthUser(user goth.User) (string, error) {
+type OAuthService struct {
+	userRepository Interface.IUserRepository
+}
+
+func NewOAuthService(userRepository Interface.IUserRepository) Interface.IOAuthService {
+	return &OAuthService{
+		userRepository: userRepository,
+	}
+}
+
+func (o *OAuthService) HandleOAuthUser(user goth.User) (string, error) {
 
 	// Check if the user exists in your database by their email or Google UserID
-	existingUser, err := Repositories.GetUserByEmail(user.Email)
+	existingUser, err := o.userRepository.GetUserByEmail(user.Email)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		log.Printf("Error retrieving user by email: %v", err)
 		return "", err
@@ -30,7 +40,7 @@ func HandleOAuthUser(user goth.User) (string, error) {
 		}
 
 		// Create the new user in the database
-		createdUser, err := Repositories.CreateUser(newUser)
+		createdUser, err := o.userRepository.CreateUser(newUser)
 		if err != nil {
 			log.Printf("Error creating new user: %v", err)
 			return "", err
@@ -43,7 +53,7 @@ func HandleOAuthUser(user goth.User) (string, error) {
 			return "", err
 		}
 
-		if err := Repositories.StoreToken(&createdUser, token); err != nil {
+		if err := o.userRepository.StoreToken(&createdUser, token); err != nil {
 			log.Printf("Error storing token for new user: %v", err)
 			return "", err
 		}

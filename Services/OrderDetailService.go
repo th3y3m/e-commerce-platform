@@ -2,23 +2,31 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.OrderDetail], error) {
-	return Repositories.GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId, pageIndex, pageSize)
+type OrderDetailService struct {
+	orderDetailRepository Interface.IOrderDetailRepository
 }
 
-func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
-	return Repositories.GetAllOrderDetails()
+func NewOrderDetailService(orderDetailRepository Interface.IOrderDetailRepository) Interface.IOrderDetailService {
+	return &OrderDetailService{orderDetailRepository}
 }
 
-func GetOrderDetailByID(id string) ([]BusinessObjects.OrderDetail, error) {
-	return Repositories.GetOrderDetailByID(id)
+func (o *OrderDetailService) GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.OrderDetail], error) {
+	return o.orderDetailRepository.GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId, pageIndex, pageSize)
 }
 
-func CreateOrderDetail(orderId, productId string, quantity int, unitPrice float64) error {
+func (o *OrderDetailService) GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
+	return o.orderDetailRepository.GetAllOrderDetails()
+}
+
+func (o *OrderDetailService) GetOrderDetailByID(id string) ([]BusinessObjects.OrderDetail, error) {
+	return o.orderDetailRepository.GetOrderDetailByID(id)
+}
+
+func (o *OrderDetailService) CreateOrderDetail(orderId, productId string, quantity int, unitPrice float64) error {
 	orderDetail := BusinessObjects.OrderDetail{
 		OrderID:   orderId,
 		ProductID: productId,
@@ -26,13 +34,13 @@ func CreateOrderDetail(orderId, productId string, quantity int, unitPrice float6
 		UnitPrice: unitPrice,
 	}
 
-	return Repositories.CreateOrderDetail(orderDetail)
+	return o.orderDetailRepository.CreateOrderDetail(orderDetail)
 }
 
-func UpdateOrderDetail(orderDetail BusinessObjects.OrderDetail) error {
-	return Repositories.UpdateOrderDetail(orderDetail)
+func (o *OrderDetailService) UpdateOrderDetail(orderDetail BusinessObjects.OrderDetail) error {
+	return o.orderDetailRepository.UpdateOrderDetail(orderDetail)
 }
 
-func DeleteOrderDetail(id string) error {
-	return Repositories.DeleteOrderDetail(id)
+func (o *OrderDetailService) DeleteOrderDetail(id string) error {
+	return o.orderDetailRepository.DeleteOrderDetail(id)
 }

@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedReviewList(sortBy, reviewID, userID, productID string, pageIndex, pageSize int, minRating, maxRating *int, status *bool) (Util.PaginatedList[BusinessObjects.Review], error) {
+type ReviewRepository struct {
+	log *logrus.Logger
+}
+
+func NewReviewRepository(log *logrus.Logger) Interface.IReviewRepository {
+	return &ReviewRepository{log}
+}
+
+func (r *ReviewRepository) GetPaginatedReviewList(sortBy, reviewID, userID, productID string, pageIndex, pageSize int, minRating, maxRating *int, status *bool) (Util.PaginatedList[BusinessObjects.Review], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Review]{}, err
@@ -76,7 +87,7 @@ func GetPaginatedReviewList(sortBy, reviewID, userID, productID string, pageInde
 }
 
 // GetAllReviews retrieves all freight reviews from the database
-func GetAllReviews() ([]BusinessObjects.Review, error) {
+func (r *ReviewRepository) GetAllReviews() ([]BusinessObjects.Review, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -91,7 +102,7 @@ func GetAllReviews() ([]BusinessObjects.Review, error) {
 }
 
 // GetReviewByID retrieves a freight review by its ID
-func GetReviewByID(reviewID string) (BusinessObjects.Review, error) {
+func (r *ReviewRepository) GetReviewByID(reviewID string) (BusinessObjects.Review, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Review{}, err
@@ -106,7 +117,7 @@ func GetReviewByID(reviewID string) (BusinessObjects.Review, error) {
 }
 
 // CreateReview adds a new freight review to the database
-func CreateReview(review BusinessObjects.Review) error {
+func (r *ReviewRepository) CreateReview(review BusinessObjects.Review) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -120,7 +131,7 @@ func CreateReview(review BusinessObjects.Review) error {
 }
 
 // UpdateReview updates an existing freight review
-func UpdateReview(review BusinessObjects.Review) error {
+func (r *ReviewRepository) UpdateReview(review BusinessObjects.Review) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -134,7 +145,7 @@ func UpdateReview(review BusinessObjects.Review) error {
 }
 
 // DeleteReview removes a freight review from the database by its ID
-func DeleteReview(reviewID string) error {
+func (r *ReviewRepository) DeleteReview(reviewID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

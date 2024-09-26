@@ -2,11 +2,22 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
+type TransactionRepository struct {
+	log *logrus.Logger
+}
+
+func NewTransactionRepository(log *logrus.Logger) Interface.ITransactionRepository {
+	return &TransactionRepository{log}
+}
+
+func (t *TransactionRepository) GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Transaction]{}, err
@@ -85,7 +96,7 @@ func GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageInde
 }
 
 // GetAllTransactions retrieves all freight transactions from the database
-func GetAllTransactions() ([]BusinessObjects.Transaction, error) {
+func (t *TransactionRepository) GetAllTransactions() ([]BusinessObjects.Transaction, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -100,7 +111,7 @@ func GetAllTransactions() ([]BusinessObjects.Transaction, error) {
 }
 
 // GetTransactionByID retrieves a freight transaction by its ID
-func GetTransactionByID(transactionID string) (BusinessObjects.Transaction, error) {
+func (t *TransactionRepository) GetTransactionByID(transactionID string) (BusinessObjects.Transaction, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Transaction{}, err
@@ -115,7 +126,7 @@ func GetTransactionByID(transactionID string) (BusinessObjects.Transaction, erro
 }
 
 // CreateTransaction adds a new freight transaction to the database
-func CreateTransaction(transaction BusinessObjects.Transaction) error {
+func (t *TransactionRepository) CreateTransaction(transaction BusinessObjects.Transaction) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -129,7 +140,7 @@ func CreateTransaction(transaction BusinessObjects.Transaction) error {
 }
 
 // UpdateTransaction updates an existing freight transaction
-func UpdateTransaction(transaction BusinessObjects.Transaction) error {
+func (t *TransactionRepository) UpdateTransaction(transaction BusinessObjects.Transaction) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -143,7 +154,7 @@ func UpdateTransaction(transaction BusinessObjects.Transaction) error {
 }
 
 // DeleteTransaction removes a freight transaction from the database by its ID
-func DeleteTransaction(transactionID string) error {
+func (t *TransactionRepository) DeleteTransaction(transactionID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

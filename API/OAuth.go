@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -80,8 +80,10 @@ func GoogleCallback(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to authenticate with Google"})
 		return
 	}
+	service := DependencyInjection.NewOAuthServiceProvider()
+
 	// Handle Google user and generate JWT token
-	token, err := Services.HandleOAuthUser(user)
+	token, err := service.HandleOAuthUser(user)
 	if err != nil {
 		log.Printf("Error handling Google user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to handle Google user"})
@@ -137,9 +139,10 @@ func FacebookCallback(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to authenticate with Facebook"})
 		return
 	}
+	service := DependencyInjection.NewOAuthServiceProvider()
 
 	// Handle Facebook user and generate JWT token
-	token, err := Services.HandleOAuthUser(user)
+	token, err := service.HandleOAuthUser(user)
 	if err != nil {
 		log.Printf("Error handling Facebook user: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to handle Facebook user"})

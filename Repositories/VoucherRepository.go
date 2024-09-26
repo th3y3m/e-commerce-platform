@@ -2,11 +2,22 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedVoucherList(sortBy, voucherID string, pageIndex, pageSize int, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Voucher], error) {
+type VoucherRepository struct {
+	log *logrus.Logger
+}
+
+func NewVoucherRepository(log *logrus.Logger) Interface.IVoucherRepository {
+	return &VoucherRepository{log}
+}
+
+func (v *VoucherRepository) GetPaginatedVoucherList(sortBy, voucherID string, pageIndex, pageSize int, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Voucher], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Voucher]{}, err
@@ -63,7 +74,7 @@ func GetPaginatedVoucherList(sortBy, voucherID string, pageIndex, pageSize int, 
 }
 
 // GetAllVouchers retrieves all vouchers from the database
-func GetAllVouchers() ([]BusinessObjects.Voucher, error) {
+func (v *VoucherRepository) GetAllVouchers() ([]BusinessObjects.Voucher, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -78,7 +89,7 @@ func GetAllVouchers() ([]BusinessObjects.Voucher, error) {
 }
 
 // GetVoucherByID retrieves a voucher by its ID
-func GetVoucherByID(voucherID string) (BusinessObjects.Voucher, error) {
+func (v *VoucherRepository) GetVoucherByID(voucherID string) (BusinessObjects.Voucher, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Voucher{}, err
@@ -93,7 +104,7 @@ func GetVoucherByID(voucherID string) (BusinessObjects.Voucher, error) {
 }
 
 // CreateVoucher adds a new voucher to the database
-func CreateVoucher(voucher BusinessObjects.Voucher) error {
+func (v *VoucherRepository) CreateVoucher(voucher BusinessObjects.Voucher) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -107,7 +118,7 @@ func CreateVoucher(voucher BusinessObjects.Voucher) error {
 }
 
 // UpdateVoucher updates an existing voucher
-func UpdateVoucher(voucher BusinessObjects.Voucher) error {
+func (v *VoucherRepository) UpdateVoucher(voucher BusinessObjects.Voucher) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -121,7 +132,7 @@ func UpdateVoucher(voucher BusinessObjects.Voucher) error {
 }
 
 // DeleteVoucher removes a voucher from the database by its ID
-func DeleteVoucher(voucherID string) error {
+func (v *VoucherRepository) DeleteVoucher(voucherID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

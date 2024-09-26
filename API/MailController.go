@@ -2,8 +2,7 @@ package API
 
 import (
 	"net/http"
-
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,8 +14,9 @@ func VerifyUserEmailHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Token is missing"})
 		return
 	}
+	service := DependencyInjection.NewNewAuthenticationServiceProvider()
 
-	err := Services.VerifyUserEmail(token)
+	err := service.VerifyUserEmail(token)
 	if err != nil {
 		if err.Error() == "token expired or invalid" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})

@@ -3,45 +3,53 @@ package Services
 import (
 	"errors"
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/thoas/go-funk"
 )
 
-func GetPaginatedProductDiscountList(discountID string, sortBy string, productID string, pageIndex int, pageSize int) (Util.PaginatedList[BusinessObjects.ProductDiscount], error) {
-	return Repositories.GetPaginatedProductDiscountList(discountID, sortBy, productID, pageIndex, pageSize)
+type ProductDiscountService struct {
+	productDiscountRepository Interface.IProductDiscountRepository
 }
 
-func GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
-	return Repositories.GetAllProductDiscounts()
+func NewProductDiscountService(productDiscountRepository Interface.IProductDiscountRepository) Interface.IProductDiscountService {
+	return &ProductDiscountService{productDiscountRepository}
 }
 
-func GetProductDiscountByID(id string) ([]BusinessObjects.ProductDiscount, error) {
-	return Repositories.GetProductDiscountByID(id)
+func (p *ProductDiscountService) GetPaginatedProductDiscountList(discountID string, sortBy string, productID string, pageIndex int, pageSize int) (Util.PaginatedList[BusinessObjects.ProductDiscount], error) {
+	return p.productDiscountRepository.GetPaginatedProductDiscountList(discountID, sortBy, productID, pageIndex, pageSize)
 }
 
-func CreateProductDiscount(productID string, discountID string, discount float64) error {
+func (p *ProductDiscountService) GetAllProductDiscounts() ([]BusinessObjects.ProductDiscount, error) {
+	return p.productDiscountRepository.GetAllProductDiscounts()
+}
+
+func (p *ProductDiscountService) GetProductDiscountByID(id string) ([]BusinessObjects.ProductDiscount, error) {
+	return p.productDiscountRepository.GetProductDiscountByID(id)
+}
+
+func (p *ProductDiscountService) CreateProductDiscount(productID string, discountID string, discount float64) error {
 	productDiscount := BusinessObjects.ProductDiscount{
 		ProductID:  productID,
 		DiscountID: discountID,
 	}
 
-	return Repositories.CreateProductDiscount(productDiscount)
+	return p.productDiscountRepository.CreateProductDiscount(productDiscount)
 }
 
-func UpdateProductDiscount(productDiscount BusinessObjects.ProductDiscount) error {
-	return Repositories.UpdateProductDiscount(productDiscount)
+func (p *ProductDiscountService) UpdateProductDiscount(productDiscount BusinessObjects.ProductDiscount) error {
+	return p.productDiscountRepository.UpdateProductDiscount(productDiscount)
 }
 
-func DeleteProductDiscount(id string) error {
-	return Repositories.DeleteProductDiscount(id)
+func (p *ProductDiscountService) DeleteProductDiscount(id string) error {
+	return p.productDiscountRepository.DeleteProductDiscount(id)
 }
 
 // GetProductsOfDiscount filters products based on the provided discountID using go-funk
-func GetProductsOfDiscount(discountID string) ([]BusinessObjects.ProductDiscount, error) {
+func (p *ProductDiscountService) GetProductsOfDiscount(discountID string) ([]BusinessObjects.ProductDiscount, error) {
 	// Retrieve all ProductDiscounts
-	products, err := GetAllProductDiscounts()
+	products, err := p.GetAllProductDiscounts()
 	if err != nil {
 		return nil, err
 	}

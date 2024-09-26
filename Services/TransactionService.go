@@ -2,24 +2,32 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
 
-func GetPaginatedTransactionList(sortBy string, transactionID string, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate time.Time, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
-	return Repositories.GetPaginatedTransactionList(sortBy, transactionID, orderID, pageIndex, pageSize, minPrice, maxPrice, status, startDate, endDate)
+type TransactionService struct {
+	transactionRepository Interface.ITransactionRepository
 }
 
-func GetAllTransactions() ([]BusinessObjects.Transaction, error) {
-	return Repositories.GetAllTransactions()
+func NewTransactionService(transactionRepository Interface.ITransactionRepository) Interface.ITransactionService {
+	return &TransactionService{transactionRepository}
 }
 
-func GetTransactionByID(id string) (BusinessObjects.Transaction, error) {
-	return Repositories.GetTransactionByID(id)
+func (t *TransactionService) GetPaginatedTransactionList(sortBy string, transactionID string, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate time.Time, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
+	return t.transactionRepository.GetPaginatedTransactionList(sortBy, transactionID, orderID, pageIndex, pageSize, minPrice, maxPrice, status, startDate, endDate)
 }
 
-func CreateTransaction(transaction BusinessObjects.NewTransaction) error {
+func (t *TransactionService) GetAllTransactions() ([]BusinessObjects.Transaction, error) {
+	return t.transactionRepository.GetAllTransactions()
+}
+
+func (t *TransactionService) GetTransactionByID(id string) (BusinessObjects.Transaction, error) {
+	return t.transactionRepository.GetTransactionByID(id)
+}
+
+func (t *TransactionService) CreateTransaction(transaction BusinessObjects.NewTransaction) error {
 	newTransaction := BusinessObjects.Transaction{
 		TransactionID:   "TRX" + Util.GenerateID(10),
 		OrderID:         transaction.OrderID,
@@ -28,7 +36,7 @@ func CreateTransaction(transaction BusinessObjects.NewTransaction) error {
 		PaymentStatus:   transaction.PaymentStatus,
 	}
 
-	err := Repositories.CreateTransaction(newTransaction)
+	err := t.transactionRepository.CreateTransaction(newTransaction)
 	if err != nil {
 		return err
 	}
@@ -36,10 +44,10 @@ func CreateTransaction(transaction BusinessObjects.NewTransaction) error {
 	return nil
 }
 
-func UpdateTransaction(transaction BusinessObjects.Transaction) error {
-	return Repositories.UpdateTransaction(transaction)
+func (t *TransactionService) UpdateTransaction(transaction BusinessObjects.Transaction) error {
+	return t.transactionRepository.UpdateTransaction(transaction)
 }
 
-func DeleteTransaction(id string) error {
-	return Repositories.DeleteTransaction(id)
+func (t *TransactionService) DeleteTransaction(id string) error {
+	return t.transactionRepository.DeleteTransaction(id)
 }

@@ -5,13 +5,23 @@ import (
 	"fmt"
 	"strings"
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.User], error) {
+type UserRepository struct {
+	log *logrus.Logger
+}
+
+func NewUserRepository(log *logrus.Logger) Interface.IUserRepository {
+	return &UserRepository{log: log}
+}
+
+func (r *UserRepository) GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.User], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.User]{}, err
@@ -89,7 +99,7 @@ func GetPaginatedUserList(searchValue, sortBy string, pageIndex, pageSize int, s
 	return paginatedList, nil
 }
 
-func GetAllUsers() ([]BusinessObjects.User, error) {
+func (r *UserRepository) GetAllUsers() ([]BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -103,7 +113,7 @@ func GetAllUsers() ([]BusinessObjects.User, error) {
 	return users, nil
 }
 
-func GetUserByID(userID string) (BusinessObjects.User, error) {
+func (r *UserRepository) GetUserByID(userID string) (BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.User{}, err
@@ -117,7 +127,7 @@ func GetUserByID(userID string) (BusinessObjects.User, error) {
 	return user, nil
 }
 
-func CreateUser(user BusinessObjects.User) (BusinessObjects.User, error) {
+func (r *UserRepository) CreateUser(user BusinessObjects.User) (BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.User{}, err
@@ -130,7 +140,7 @@ func CreateUser(user BusinessObjects.User) (BusinessObjects.User, error) {
 	return user, nil
 }
 
-func UpdateUser(user BusinessObjects.User) error {
+func (r *UserRepository) UpdateUser(user BusinessObjects.User) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -143,7 +153,7 @@ func UpdateUser(user BusinessObjects.User) error {
 	return nil
 }
 
-func DeleteUser(userID string) error {
+func (r *UserRepository) DeleteUser(userID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -156,7 +166,7 @@ func DeleteUser(userID string) error {
 	return nil
 }
 
-func GetUserByEmail(email string) (BusinessObjects.User, error) {
+func (r *UserRepository) GetUserByEmail(email string) (BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.User{}, fmt.Errorf("database connection failed: %w", err)
@@ -175,7 +185,7 @@ func GetUserByEmail(email string) (BusinessObjects.User, error) {
 	return user, nil
 }
 
-func StoreToken(user *BusinessObjects.User, token string) error {
+func (r *UserRepository) StoreToken(user *BusinessObjects.User, token string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -188,7 +198,7 @@ func StoreToken(user *BusinessObjects.User, token string) error {
 	return db.Save(user).Error
 }
 
-func SetToken(user *BusinessObjects.User, token string) error {
+func (r *UserRepository) SetToken(user *BusinessObjects.User, token string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -201,7 +211,7 @@ func SetToken(user *BusinessObjects.User, token string) error {
 	return db.Save(user).Error
 }
 
-func VerifyToken(token string) bool {
+func (r *UserRepository) VerifyToken(token string) bool {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return false
@@ -220,7 +230,7 @@ func VerifyToken(token string) bool {
 	return true
 }
 
-func GetUserByToken(token string) (BusinessObjects.User, error) {
+func (r *UserRepository) GetUserByToken(token string) (BusinessObjects.User, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.User{}, err

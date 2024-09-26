@@ -2,12 +2,22 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.ShoppingCart], error) {
+type ShoppingCartRepository struct {
+	log *logrus.Logger
+}
+
+func NewShoppingCartRepository(log *logrus.Logger) Interface.IShoppingCartRepository {
+	return &ShoppingCartRepository{log: log}
+}
+
+func (s *ShoppingCartRepository) GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.ShoppingCart], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.ShoppingCart]{}, err
@@ -61,7 +71,7 @@ func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, page
 	return Util.NewPaginatedList(carts, total, pageIndex, pageSize), nil
 }
 
-func GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
+func (s *ShoppingCartRepository) GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.ShoppingCart{}, err
@@ -88,7 +98,7 @@ func GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
 }
 
 // GetAllShoppingCarts retrieves all shopping carts from the database
-func GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
+func (s *ShoppingCartRepository) GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -103,7 +113,7 @@ func GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
 }
 
 // GetShoppingCartByID retrieves a shopping cart by its ID
-func GetShoppingCartByID(cartID string) (BusinessObjects.ShoppingCart, error) {
+func (s *ShoppingCartRepository) GetShoppingCartByID(cartID string) (BusinessObjects.ShoppingCart, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.ShoppingCart{}, err
@@ -118,7 +128,7 @@ func GetShoppingCartByID(cartID string) (BusinessObjects.ShoppingCart, error) {
 }
 
 // CreateShoppingCart adds a new shopping cart to the database
-func CreateShoppingCart(cart BusinessObjects.ShoppingCart) (BusinessObjects.ShoppingCart, error) {
+func (s *ShoppingCartRepository) CreateShoppingCart(cart BusinessObjects.ShoppingCart) (BusinessObjects.ShoppingCart, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.ShoppingCart{}, err
@@ -132,7 +142,7 @@ func CreateShoppingCart(cart BusinessObjects.ShoppingCart) (BusinessObjects.Shop
 }
 
 // UpdateShoppingCart updates an existing shopping cart
-func UpdateShoppingCart(cart BusinessObjects.ShoppingCart) error {
+func (s *ShoppingCartRepository) UpdateShoppingCart(cart BusinessObjects.ShoppingCart) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -146,7 +156,7 @@ func UpdateShoppingCart(cart BusinessObjects.ShoppingCart) error {
 }
 
 // DeleteShoppingCart removes a shopping cart from the database by its ID
-func DeleteShoppingCart(cartID string) error {
+func (s *ShoppingCartRepository) DeleteShoppingCart(cartID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -159,7 +169,7 @@ func DeleteShoppingCart(cartID string) error {
 	return nil
 }
 
-func UpdateShoppingCartStatus(cartID string, status bool) error {
+func (s *ShoppingCartRepository) UpdateShoppingCartStatus(cartID string, status bool) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

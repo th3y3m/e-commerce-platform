@@ -36,7 +36,10 @@ export const Register = createAsyncThunk(
     }
 );
 
-const token = localStorage.getItem('authToken');
+const isClient = typeof window !== "undefined";
+
+const token = isClient ? localStorage.getItem('authToken') : null;
+
 const initialState = {
     token: token !== null ? token : "",
     status: "",
@@ -48,7 +51,9 @@ const AuthenticationSlice = createSlice({
     reducers: {
         logout: (state) => {
             state.token = "";
-            localStorage.removeItem('authToken');
+            if (isClient) {
+                localStorage.removeItem('authToken');
+            }
         },
     },
     extraReducers: (builder) => {
@@ -59,7 +64,9 @@ const AuthenticationSlice = createSlice({
             .addCase(Login.fulfilled, (state, action) => {
                 state.token = action.payload.token;
                 state.status = "success";
-                localStorage.setItem('authToken', JSON.stringify(action.payload.token));
+                if (isClient) {
+                    localStorage.setItem('authToken', JSON.stringify(action.payload.token));
+                }
             })
             .addCase(Login.rejected, (state) => {
                 state.status = "failed";

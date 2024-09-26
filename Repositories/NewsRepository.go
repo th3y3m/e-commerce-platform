@@ -2,10 +2,21 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error) {
+type NewsRepository struct {
+	log *logrus.Logger
+}
+
+func NewNewsRepository(log *logrus.Logger) Interface.INewsRepository {
+	return &NewsRepository{log: log}
+}
+
+func (n *NewsRepository) GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.News]{}, err
@@ -76,7 +87,7 @@ func GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex
 }
 
 // GetAllNews retrieves all freight news from the database
-func GetAllNews() ([]BusinessObjects.News, error) {
+func (n *NewsRepository) GetAllNews() ([]BusinessObjects.News, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -91,7 +102,7 @@ func GetAllNews() ([]BusinessObjects.News, error) {
 }
 
 // GetNewByID retrieves a freight news by its ID
-func GetNewByID(newsID string) (BusinessObjects.News, error) {
+func (n *NewsRepository) GetNewByID(newsID string) (BusinessObjects.News, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.News{}, err
@@ -106,7 +117,7 @@ func GetNewByID(newsID string) (BusinessObjects.News, error) {
 }
 
 // CreateNew adds a new freight news to the database
-func CreateNew(news BusinessObjects.News) error {
+func (n *NewsRepository) CreateNew(news BusinessObjects.News) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -120,7 +131,7 @@ func CreateNew(news BusinessObjects.News) error {
 }
 
 // UpdateNew updates an existing freight news
-func UpdateNew(news BusinessObjects.News) error {
+func (n *NewsRepository) UpdateNew(news BusinessObjects.News) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -134,7 +145,7 @@ func UpdateNew(news BusinessObjects.News) error {
 }
 
 // DeleteNew removes a freight news from the database by its ID
-func DeleteNew(newsID string) error {
+func (n *NewsRepository) DeleteNew(newsID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

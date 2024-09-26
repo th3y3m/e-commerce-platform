@@ -3,7 +3,7 @@ package API
 import (
 	"net/http"
 	"strconv"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -49,13 +49,14 @@ type UpdateDiscountRequest struct {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /discounts/paginated [get]
 func GetPaginatedDiscountList(c *gin.Context) {
+	module := DependencyInjection.NewDiscountServiceProvider()
 	searchValue := c.DefaultQuery("searchValue", "")
 	sortBy := c.DefaultQuery("sortBy", "")
 	pageIndex, _ := strconv.Atoi(c.DefaultQuery("pageIndex", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
 	status, _ := strconv.ParseBool(c.DefaultQuery("status", ""))
 
-	discounts, err := Services.GetPaginatedDiscountList(searchValue, sortBy, pageIndex, pageSize, &status)
+	discounts, err := module.GetPaginatedDiscountList(searchValue, sortBy, pageIndex, pageSize, &status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -72,7 +73,8 @@ func GetPaginatedDiscountList(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /discounts [get]
 func GetAllDiscounts(c *gin.Context) {
-	discounts, err := Services.GetAllDiscounts()
+	module := DependencyInjection.NewDiscountServiceProvider()
+	discounts, err := module.GetAllDiscounts()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,8 +92,9 @@ func GetAllDiscounts(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /discounts/{id} [get]
 func GetDiscountByID(c *gin.Context) {
+	module := DependencyInjection.NewDiscountServiceProvider()
 	id := c.Param("id")
-	discount, err := Services.GetDiscountByID(id)
+	discount, err := module.GetDiscountByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -111,6 +114,7 @@ func GetDiscountByID(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /discounts [post]
 func CreateDiscount(c *gin.Context) {
+	module := DependencyInjection.NewDiscountServiceProvider()
 	var discount struct {
 		DiscountType  string    `json:"discount_type" binding:"required"`
 		DiscountValue float64   `json:"discount_value" binding:"required"`
@@ -122,7 +126,7 @@ func CreateDiscount(c *gin.Context) {
 		return
 	}
 
-	err := Services.CreateDiscount(discount.DiscountType, discount.DiscountValue, discount.StartDate, discount.EndDate)
+	err := module.CreateDiscount(discount.DiscountType, discount.DiscountValue, discount.StartDate, discount.EndDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -143,6 +147,7 @@ func CreateDiscount(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /discounts/{id} [put]
 func UpdateDiscount(c *gin.Context) {
+	module := DependencyInjection.NewDiscountServiceProvider()
 	id := c.Param("id")
 
 	var discount struct {
@@ -156,7 +161,7 @@ func UpdateDiscount(c *gin.Context) {
 		return
 	}
 
-	err := Services.UpdateDiscount(id, discount.DiscountType, discount.DiscountValue, discount.StartDate, discount.EndDate)
+	err := module.UpdateDiscount(id, discount.DiscountType, discount.DiscountValue, discount.StartDate, discount.EndDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -174,8 +179,9 @@ func UpdateDiscount(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /discounts/{id} [delete]
 func DeleteDiscount(c *gin.Context) {
+	module := DependencyInjection.NewDiscountServiceProvider()
 	id := c.Param("id")
-	err := Services.DeleteDiscount(id)
+	err := module.DeleteDiscount(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

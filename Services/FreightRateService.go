@@ -2,23 +2,31 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 )
 
-func GetPaginatedFreightRateList(searchValue, sortBy, courierId string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.FreightRate], error) {
-	return Repositories.GetPaginatedFreightRateList(searchValue, sortBy, courierId, pageIndex, pageSize, status)
+type FreightRateService struct {
+	freightRateRepository Interface.IFreightRateRepository
 }
 
-func GetAllFreightRates() ([]BusinessObjects.FreightRate, error) {
-	return Repositories.GetAllFreightRates()
+func NewFreightRateService(freightRateRepository Interface.IFreightRateRepository) Interface.IFreightRateService {
+	return &FreightRateService{freightRateRepository}
 }
 
-func GetFreightRateByID(id string) (BusinessObjects.FreightRate, error) {
-	return Repositories.GetFreightRateByID(id)
+func (c *FreightRateService) GetPaginatedFreightRateList(searchValue, sortBy, courierId string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.FreightRate], error) {
+	return c.freightRateRepository.GetPaginatedFreightRateList(searchValue, sortBy, courierId, pageIndex, pageSize, status)
 }
 
-func CreateFreightRate(courierId string, distanceMinKm, distanceMaxKm int, costPerKm float64) error {
+func (c *FreightRateService) GetAllFreightRates() ([]BusinessObjects.FreightRate, error) {
+	return c.freightRateRepository.GetAllFreightRates()
+}
+
+func (c *FreightRateService) GetFreightRateByID(id string) (BusinessObjects.FreightRate, error) {
+	return c.freightRateRepository.GetFreightRateByID(id)
+}
+
+func (c *FreightRateService) CreateFreightRate(courierId string, distanceMinKm, distanceMaxKm int, costPerKm float64) error {
 	freightRate := BusinessObjects.FreightRate{
 		RateID:        "FR" + Util.GenerateID(10),
 		CourierID:     courierId,
@@ -28,7 +36,7 @@ func CreateFreightRate(courierId string, distanceMinKm, distanceMaxKm int, costP
 		Status:        true,
 	}
 
-	err := Repositories.CreateFreightRate(freightRate)
+	err := c.freightRateRepository.CreateFreightRate(freightRate)
 	if err != nil {
 		return err
 	}
@@ -36,8 +44,8 @@ func CreateFreightRate(courierId string, distanceMinKm, distanceMaxKm int, costP
 	return nil
 }
 
-func UpdateFreightRate(rateID, courierId string, distanceMinKm, distanceMaxKm int, costPerKm float64, status bool) error {
-	freightRate, err := Repositories.GetFreightRateByID(rateID)
+func (c *FreightRateService) UpdateFreightRate(rateID, courierId string, distanceMinKm, distanceMaxKm int, costPerKm float64, status bool) error {
+	freightRate, err := c.freightRateRepository.GetFreightRateByID(rateID)
 	if err != nil {
 		return err
 	}
@@ -48,18 +56,18 @@ func UpdateFreightRate(rateID, courierId string, distanceMinKm, distanceMaxKm in
 	freightRate.CostPerKM = costPerKm
 	freightRate.Status = status
 
-	return Repositories.UpdateFreightRate(freightRate)
+	return c.freightRateRepository.UpdateFreightRate(freightRate)
 }
 
-func DeleteFreightRate(id string) error {
-	return Repositories.DeleteFreightRate(id)
+func (c *FreightRateService) DeleteFreightRate(id string) error {
+	return c.freightRateRepository.DeleteFreightRate(id)
 }
-func GetFreightRateByCourierID(id string) ([]BusinessObjects.FreightRate, error) {
-	return Repositories.GetFreightRateByCourierID(id)
+func (c *FreightRateService) GetFreightRateByCourierID(id string) ([]BusinessObjects.FreightRate, error) {
+	return c.freightRateRepository.GetFreightRateByCourierID(id)
 }
 
-func CalculateFreightRate(courierId string, distance float64) (float64, error) {
-	rates, err := GetFreightRateByCourierID(courierId)
+func (c *FreightRateService) CalculateFreightRate(courierId string, distance float64) (float64, error) {
+	rates, err := c.GetFreightRateByCourierID(courierId)
 	if err != nil {
 		return 0, err
 	}

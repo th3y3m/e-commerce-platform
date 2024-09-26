@@ -2,12 +2,22 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.CartItem], error) {
+type CartItemRepository struct {
+	log *logrus.Logger
+}
+
+func NewCartItemRepository(log *logrus.Logger) Interface.ICartItemRepository {
+	return &CartItemRepository{log: log}
+}
+
+func (c *CartItemRepository) GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.CartItem], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.CartItem]{}, err
@@ -58,7 +68,7 @@ func GetPaginatedCartItemList(searchValue, sortBy, cartId, productId string, pag
 }
 
 // GetAllCartItems retrieves all freight cartItems from the database
-func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
+func (c *CartItemRepository) GetAllCartItems() ([]BusinessObjects.CartItem, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -73,7 +83,7 @@ func GetAllCartItems() ([]BusinessObjects.CartItem, error) {
 }
 
 // GetCartItemByID retrieves a freight cartItem by its ID
-func GetCartItemByCartID(cartItemID string) ([]BusinessObjects.CartItem, error) {
+func (c *CartItemRepository) GetCartItemByCartID(cartItemID string) ([]BusinessObjects.CartItem, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -88,7 +98,7 @@ func GetCartItemByCartID(cartItemID string) ([]BusinessObjects.CartItem, error) 
 }
 
 // CreateCartItem adds a new freight cartItem to the database
-func CreateCartItem(cartItem BusinessObjects.CartItem) error {
+func (c *CartItemRepository) CreateCartItem(cartItem BusinessObjects.CartItem) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -102,7 +112,7 @@ func CreateCartItem(cartItem BusinessObjects.CartItem) error {
 }
 
 // UpdateCartItem updates an existing freight cartItem
-func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
+func (c *CartItemRepository) UpdateCartItem(cartItem BusinessObjects.CartItem) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -116,7 +126,7 @@ func UpdateCartItem(cartItem BusinessObjects.CartItem) error {
 }
 
 // DeleteCartItem removes a freight cartItem from the database by its ID
-func DeleteCartItem(cartID, productID string) error {
+func (c *CartItemRepository) DeleteCartItem(cartID, productID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -129,7 +139,7 @@ func DeleteCartItem(cartID, productID string) error {
 	return nil
 }
 
-func UpdateOrCreateCartItem(cartItem BusinessObjects.CartItem) error {
+func (c *CartItemRepository) UpdateOrCreateCartItem(cartItem BusinessObjects.CartItem) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

@@ -3,13 +3,14 @@ package API
 import (
 	"net/http"
 	"strconv"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetPaginatedOrderList(c *gin.Context) {
+	module := DependencyInjection.NewOrderServiceProvider()
 	sortBy := c.DefaultQuery("sortBy", "")
 	orderID := c.DefaultQuery("orderID", "")
 	customerID := c.DefaultQuery("customerID", "")
@@ -41,7 +42,7 @@ func GetPaginatedOrderList(c *gin.Context) {
 	}
 
 	// Call the service with nil pointers if no valid dates are provided
-	orders, err := Services.GetPaginatedOrderList(sortBy, orderID, customerID, courierId, voucherId, pageIndex, pageSize, startDate, endDate, &minPrice, &maxPrice, status)
+	orders, err := module.GetPaginatedOrderList(sortBy, orderID, customerID, courierId, voucherId, pageIndex, pageSize, startDate, endDate, &minPrice, &maxPrice, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -50,7 +51,8 @@ func GetPaginatedOrderList(c *gin.Context) {
 }
 
 func GetAllOrders(c *gin.Context) {
-	orders, err := Services.GetAllOrders()
+	module := DependencyInjection.NewOrderServiceProvider()
+	orders, err := module.GetAllOrders()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -59,8 +61,9 @@ func GetAllOrders(c *gin.Context) {
 }
 
 func GetOrderById(c *gin.Context) {
+	module := DependencyInjection.NewOrderServiceProvider()
 	id := c.Param("id")
-	order, err := Services.GetOrderById(id)
+	order, err := module.GetOrderById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,13 +72,14 @@ func GetOrderById(c *gin.Context) {
 }
 
 func PlaceOrder(c *gin.Context) {
+	module := DependencyInjection.NewOrderServiceProvider()
 	userId := c.DefaultQuery("userId", "")
 	cartId := c.DefaultQuery("cartId", "")
 	shipAddress := c.DefaultQuery("shipAddress", "")
 	courierId := c.DefaultQuery("courierId", "")
 	voucherId := c.DefaultQuery("voucherId", "")
 
-	err := Services.PlaceOrder(userId, cartId, shipAddress, courierId, voucherId)
+	err := module.PlaceOrder(userId, cartId, shipAddress, courierId, voucherId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}

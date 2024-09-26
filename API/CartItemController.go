@@ -2,7 +2,7 @@ package API
 
 import (
 	"net/http"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +24,9 @@ type CartItem struct {
 // @Router /cartItems/{cartID} [get]
 func GetCartItemByCartID(c *gin.Context) {
 	cartID := c.Param("cartID")
-	cartItems, err := Services.GetCartItemByCartID(cartID)
+
+	module := DependencyInjection.NewCartItemServiceProvider()
+	cartItems, err := module.GetCartItemByCartID(cartID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

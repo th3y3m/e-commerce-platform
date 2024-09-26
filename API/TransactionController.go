@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,8 @@ func GetPaginatedTransactionList(c *gin.Context) {
 	startDate, _ := time.Parse(time.RFC3339, c.DefaultQuery("startDate", ""))
 	endDate, _ := time.Parse(time.RFC3339, c.DefaultQuery("endDate", ""))
 
-	transactions, err := Services.GetPaginatedTransactionList(sortBy, transactionID, orderID, pageIndex, pageSize, &minPrice, &maxPrice, &status, startDate, endDate)
+	module := DependencyInjection.NewTransactionServiceProvider()
+	transactions, err := module.GetPaginatedTransactionList(sortBy, transactionID, orderID, pageIndex, pageSize, &minPrice, &maxPrice, &status, startDate, endDate)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -31,7 +32,9 @@ func GetPaginatedTransactionList(c *gin.Context) {
 }
 
 func GetAllTransactions(c *gin.Context) {
-	transactions, err := Services.GetAllTransactions()
+	module := DependencyInjection.NewTransactionServiceProvider()
+
+	transactions, err := module.GetAllTransactions()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -41,7 +44,9 @@ func GetAllTransactions(c *gin.Context) {
 
 func GetTransactionByID(c *gin.Context) {
 	id := c.Param("id")
-	transaction, err := Services.GetTransactionByID(id)
+	module := DependencyInjection.NewTransactionServiceProvider()
+
+	transaction, err := module.GetTransactionByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -55,7 +60,9 @@ func CreateTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.CreateTransaction(newTransaction)
+	module := DependencyInjection.NewTransactionServiceProvider()
+
+	err := module.CreateTransaction(newTransaction)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,7 +76,9 @@ func UpdateTransaction(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.UpdateTransaction(transaction)
+	module := DependencyInjection.NewTransactionServiceProvider()
+
+	err := module.UpdateTransaction(transaction)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -79,7 +88,9 @@ func UpdateTransaction(c *gin.Context) {
 
 func DeleteTransaction(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.DeleteTransaction(id)
+	module := DependencyInjection.NewTransactionServiceProvider()
+
+	err := module.DeleteTransaction(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

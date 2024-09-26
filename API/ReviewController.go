@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +20,8 @@ func GetPaginatedReviewList(c *gin.Context) {
 	maxRating, _ := strconv.Atoi(c.DefaultQuery("maxRating", "5"))
 	status, _ := strconv.ParseBool(c.DefaultQuery("status", ""))
 
-	reviews, err := Services.GetPaginatedReviewList(sortBy, reviewID, userID, productID, pageIndex, pageSize, &minRating, &maxRating, &status)
+	module := DependencyInjection.NewReviewServiceProvider()
+	reviews, err := module.GetPaginatedReviewList(sortBy, reviewID, userID, productID, pageIndex, pageSize, &minRating, &maxRating, &status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -29,7 +30,9 @@ func GetPaginatedReviewList(c *gin.Context) {
 }
 
 func GetAllReviews(c *gin.Context) {
-	reviews, err := Services.GetAllReviews()
+	module := DependencyInjection.NewReviewServiceProvider()
+
+	reviews, err := module.GetAllReviews()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -40,7 +43,9 @@ func GetAllReviews(c *gin.Context) {
 func GetReviewByID(c *gin.Context) {
 
 	id := c.Param("id")
-	review, err := Services.GetReviewByID(id)
+	module := DependencyInjection.NewReviewServiceProvider()
+
+	review, err := module.GetReviewByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -54,8 +59,9 @@ func CreateReview(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	module := DependencyInjection.NewReviewServiceProvider()
 
-	err := Services.CreateReview(review)
+	err := module.CreateReview(review)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -74,8 +80,9 @@ func UpdateReview(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	module := DependencyInjection.NewReviewServiceProvider()
 
-	err := Services.UpdateReview(id, review.Comment, review.Rating)
+	err := module.UpdateReview(id, review.Comment, review.Rating)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -85,7 +92,9 @@ func UpdateReview(c *gin.Context) {
 
 func DeleteReview(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.DeleteReview(id)
+	module := DependencyInjection.NewReviewServiceProvider()
+
+	err := module.DeleteReview(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

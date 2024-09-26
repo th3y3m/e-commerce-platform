@@ -2,11 +2,22 @@ package Repositories
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
+type OrderRepository struct {
+	log *logrus.Logger
+}
+
+func NewOrderRepository(log *logrus.Logger) Interface.IOrderRepository {
+	return &OrderRepository{log: log}
+}
+
+func (o *OrderRepository) GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
@@ -89,7 +100,7 @@ func GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId str
 }
 
 // GetAllOrders retrieves all orders from the database
-func GetAllOrders() ([]BusinessObjects.Order, error) {
+func (o *OrderRepository) GetAllOrders() ([]BusinessObjects.Order, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -104,7 +115,7 @@ func GetAllOrders() ([]BusinessObjects.Order, error) {
 }
 
 // GetOrderByID retrieves an order by its ID
-func GetOrderByID(orderID string) (BusinessObjects.Order, error) {
+func (o *OrderRepository) GetOrderByID(orderID string) (BusinessObjects.Order, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return BusinessObjects.Order{}, err
@@ -119,7 +130,7 @@ func GetOrderByID(orderID string) (BusinessObjects.Order, error) {
 }
 
 // CreateOrder adds a new order to the database
-func CreateOrder(order BusinessObjects.Order) error {
+func (o *OrderRepository) CreateOrder(order BusinessObjects.Order) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -133,7 +144,7 @@ func CreateOrder(order BusinessObjects.Order) error {
 }
 
 // UpdateOrder updates an existing order
-func UpdateOrder(order BusinessObjects.Order) error {
+func (o *OrderRepository) UpdateOrder(order BusinessObjects.Order) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -147,7 +158,7 @@ func UpdateOrder(order BusinessObjects.Order) error {
 }
 
 // DeleteOrder removes an order from the database by its ID
-func DeleteOrder(orderID string) error {
+func (o *OrderRepository) DeleteOrder(orderID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

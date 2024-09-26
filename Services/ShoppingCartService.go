@@ -4,28 +4,40 @@ import (
 	"fmt"
 	"net/http"
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
 
-func GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.ShoppingCart], error) {
-	return Repositories.GetPaginatedShoppingCartList(sortBy, cartID, userID, pageIndex, pageSize, status)
+type ShoppingCartService struct {
+	shoppingCartRepository Interface.IShoppingCartRepository
+	cartItemRepository     Interface.ICartItemRepository
 }
 
-func GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
-	return Repositories.GetAllShoppingCarts()
+func NewShoppingCartService(shoppingCartRepository Interface.IShoppingCartRepository, cartItemRepository Interface.ICartItemRepository) Interface.IShoppingCartService {
+	return &ShoppingCartService{
+		shoppingCartRepository: shoppingCartRepository,
+		cartItemRepository:     cartItemRepository,
+	}
 }
 
-func GetShoppingCartByID(id string) (BusinessObjects.ShoppingCart, error) {
-	return Repositories.GetShoppingCartByID(id)
+func (s *ShoppingCartService) GetPaginatedShoppingCartList(sortBy, cartID, userID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.ShoppingCart], error) {
+	return s.shoppingCartRepository.GetPaginatedShoppingCartList(sortBy, cartID, userID, pageIndex, pageSize, status)
 }
 
-func UpdateShoppingCartStatus(cartID string, status bool) error {
-	return Repositories.UpdateShoppingCartStatus(cartID, status)
+func (s *ShoppingCartService) GetAllShoppingCarts() ([]BusinessObjects.ShoppingCart, error) {
+	return s.shoppingCartRepository.GetAllShoppingCarts()
 }
 
-func CreateShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
+func (s *ShoppingCartService) GetShoppingCartByID(id string) (BusinessObjects.ShoppingCart, error) {
+	return s.shoppingCartRepository.GetShoppingCartByID(id)
+}
+
+func (s *ShoppingCartService) UpdateShoppingCartStatus(cartID string, status bool) error {
+	return s.shoppingCartRepository.UpdateShoppingCartStatus(cartID, status)
+}
+
+func (s *ShoppingCartService) CreateShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
 	cart := BusinessObjects.ShoppingCart{
 		CartID:    "CART" + Util.GenerateID(10),
 		UserID:    userID,
@@ -33,7 +45,7 @@ func CreateShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
 		CreatedAt: time.Now(),
 	}
 
-	newCart, err := Repositories.CreateShoppingCart(cart)
+	newCart, err := s.shoppingCartRepository.CreateShoppingCart(cart)
 	if err != nil {
 		return BusinessObjects.ShoppingCart{}, err
 	}
@@ -41,27 +53,27 @@ func CreateShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
 	return newCart, nil
 }
 
-func UpdateShoppingCart(cart BusinessObjects.ShoppingCart) error {
-	return Repositories.UpdateShoppingCart(cart)
+func (s *ShoppingCartService) UpdateShoppingCart(cart BusinessObjects.ShoppingCart) error {
+	return s.shoppingCartRepository.UpdateShoppingCart(cart)
 }
 
-func DeleteShoppingCart(id string) error {
-	return Repositories.DeleteShoppingCart(id)
+func (s *ShoppingCartService) DeleteShoppingCart(id string) error {
+	return s.shoppingCartRepository.DeleteShoppingCart(id)
 }
 
-func GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
-	return Repositories.GetUserShoppingCart(userID)
+func (s *ShoppingCartService) GetUserShoppingCart(userID string) (BusinessObjects.ShoppingCart, error) {
+	return s.shoppingCartRepository.GetUserShoppingCart(userID)
 }
 
-func AddProductToShoppingCart(userID, productID string, quantity int) error {
+func (s *ShoppingCartService) AddProductToShoppingCart(userID, productID string, quantity int) error {
 	// Retrieve or create the shopping cart
-	cart, err := Repositories.GetUserShoppingCart(userID)
+	cart, err := s.shoppingCartRepository.GetUserShoppingCart(userID)
 	if err != nil {
 		return err
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
+	cartItems, err := s.cartItemRepository.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return err
 	}
@@ -85,7 +97,7 @@ func AddProductToShoppingCart(userID, productID string, quantity int) error {
 		ProductID: productID,
 		Quantity:  productList[productID],
 	}
-	err = Repositories.UpdateOrCreateCartItem(cartItem)
+	err = s.cartItemRepository.UpdateOrCreateCartItem(cartItem)
 	if err != nil {
 		return err
 	}
@@ -93,15 +105,15 @@ func AddProductToShoppingCart(userID, productID string, quantity int) error {
 	return nil
 }
 
-func RemoveProductFromShoppingCart(userID, productID string, quantity int) error {
+func (s *ShoppingCartService) RemoveProductFromShoppingCart(userID, productID string, quantity int) error {
 	// Retrieve the shopping cart
-	cart, err := Repositories.GetUserShoppingCart(userID)
+	cart, err := s.shoppingCartRepository.GetUserShoppingCart(userID)
 	if err != nil {
 		return err
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
+	cartItems, err := s.cartItemRepository.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return err
 	}
@@ -129,12 +141,12 @@ func RemoveProductFromShoppingCart(userID, productID string, quantity int) error
 				ProductID: item.ProductID,
 				Quantity:  productList[item.ProductID],
 			}
-			err = Repositories.UpdateOrCreateCartItem(cartItem)
+			err = s.cartItemRepository.UpdateOrCreateCartItem(cartItem)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = Repositories.DeleteCartItem(item.CartID, item.ProductID)
+			err = s.cartItemRepository.DeleteCartItem(item.CartID, item.ProductID)
 			if err != nil {
 				return err
 			}
@@ -144,22 +156,22 @@ func RemoveProductFromShoppingCart(userID, productID string, quantity int) error
 	return nil
 }
 
-func ClearShoppingCart(userID string) error {
+func (s *ShoppingCartService) ClearShoppingCart(userID string) error {
 	// Retrieve the shopping cart
-	cart, err := Repositories.GetUserShoppingCart(userID)
+	cart, err := s.shoppingCartRepository.GetUserShoppingCart(userID)
 	if err != nil {
 		return err
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
+	cartItems, err := s.cartItemRepository.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return err
 	}
 
 	// Delete all cart items
 	for _, item := range cartItems {
-		err = Repositories.DeleteCartItem(item.CartID, item.ProductID)
+		err = s.cartItemRepository.DeleteCartItem(item.CartID, item.ProductID)
 		if err != nil {
 			return err
 		}
@@ -168,15 +180,15 @@ func ClearShoppingCart(userID string) error {
 	return nil
 }
 
-func NumberOfItemsInCart(userID string) (int, error) {
+func (s *ShoppingCartService) NumberOfItemsInCart(userID string) (int, error) {
 	// Retrieve the shopping cart
-	cart, err := Repositories.GetUserShoppingCart(userID)
+	cart, err := s.shoppingCartRepository.GetUserShoppingCart(userID)
 	if err != nil {
 		return 0, err
 	}
 
 	// Retrieve the cart items
-	cartItems, err := Repositories.GetCartItemByCartID(cart.CartID)
+	cartItems, err := s.cartItemRepository.GetCartItemByCartID(cart.CartID)
 	if err != nil {
 		return 0, err
 	}
@@ -192,7 +204,7 @@ func NumberOfItemsInCart(userID string) (int, error) {
 
 // Store the shopping cart in a cookie
 
-func DeleteUnitItem(w http.ResponseWriter, r *http.Request, productId string, userId string) error {
+func (s *ShoppingCartService) DeleteUnitItem(w http.ResponseWriter, r *http.Request, productId string, userId string) error {
 	savedCart, err := r.Cookie("Cart_" + userId)
 	if err == nil && savedCart != nil {
 		// Retrieve cart items from the cookie (map[string]CartItem)
@@ -237,7 +249,7 @@ func DeleteUnitItem(w http.ResponseWriter, r *http.Request, productId string, us
 }
 
 // RemoveFromCart removes a product from the cart.
-func RemoveFromCart(w http.ResponseWriter, r *http.Request, productId string, userId string) error {
+func (s *ShoppingCartService) RemoveFromCart(w http.ResponseWriter, r *http.Request, productId string, userId string) error {
 	savedCart, err := r.Cookie("Cart_" + userId)
 	if err == nil && savedCart != nil {
 		cartItems, err := Util.GetCartFromCookie(savedCart.Value)
@@ -263,7 +275,7 @@ func RemoveFromCart(w http.ResponseWriter, r *http.Request, productId string, us
 }
 
 // GetCart retrieves the cart items for a user.
-func GetCart(r *http.Request, userId string) ([]BusinessObjects.Item, error) {
+func (s *ShoppingCartService) GetCart(r *http.Request, userId string) ([]BusinessObjects.Item, error) {
 	var savedCart string
 
 	cartCookie, err := r.Cookie("Cart_" + userId)
@@ -287,7 +299,7 @@ func GetCart(r *http.Request, userId string) ([]BusinessObjects.Item, error) {
 }
 
 // DeleteCartInCookie removes the cart cookie for the user.
-func DeleteCartInCookie(w http.ResponseWriter, userId string) error {
+func (s *ShoppingCartService) DeleteCartInCookie(w http.ResponseWriter, userId string) error {
 	err := Util.DeleteCartToCookie(w, userId)
 	if err != nil {
 		return fmt.Errorf("error deleting cart in cookie: %w", err)
@@ -296,7 +308,7 @@ func DeleteCartInCookie(w http.ResponseWriter, userId string) error {
 }
 
 // NumberOfItemsInCart returns the number of items in the user's cart.
-func NumberOfItemsInCartCookie(r *http.Request, userId string) (int, error) {
+func (s *ShoppingCartService) NumberOfItemsInCartCookie(r *http.Request, userId string) (int, error) {
 	var savedCart string
 	if userId == "" {
 		cartCookie, err := r.Cookie("Cart")
@@ -326,7 +338,7 @@ func NumberOfItemsInCartCookie(r *http.Request, userId string) (int, error) {
 }
 
 // SaveCartToCookie adds or updates a product in the cart, then saves it to a cookie.
-func SaveCartToCookieHandler(w http.ResponseWriter, r *http.Request, productId string, userId string) error {
+func (s *ShoppingCartService) SaveCartToCookieHandler(w http.ResponseWriter, r *http.Request, productId string, userId string) error {
 
 	cartItems := make(map[string]BusinessObjects.Item)
 	savedCart, err := r.Cookie("Cart_" + userId)

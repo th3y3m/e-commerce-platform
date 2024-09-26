@@ -2,24 +2,32 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
 
-func GetPaginatedDiscountList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Discount], error) {
-	return Repositories.GetPaginatedDiscountList(searchValue, sortBy, pageIndex, pageSize, status)
+type DiscountService struct {
+	discountRepository Interface.IDiscountRepository
 }
 
-func GetAllDiscounts() ([]BusinessObjects.Discount, error) {
-	return Repositories.GetAllDiscounts()
+func NewDiscountService(discountRepository Interface.IDiscountRepository) Interface.IDiscountService {
+	return &DiscountService{discountRepository: discountRepository}
 }
 
-func GetDiscountByID(id string) (BusinessObjects.Discount, error) {
-	return Repositories.GetDiscountByID(id)
+func (d *DiscountService) GetPaginatedDiscountList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Discount], error) {
+	return d.discountRepository.GetPaginatedDiscountList(searchValue, sortBy, pageIndex, pageSize, status)
 }
 
-func CreateDiscount(DiscountType string, DiscountValue float64, startDate, endDate time.Time) error {
+func (d *DiscountService) GetAllDiscounts() ([]BusinessObjects.Discount, error) {
+	return d.discountRepository.GetAllDiscounts()
+}
+
+func (d *DiscountService) GetDiscountByID(id string) (BusinessObjects.Discount, error) {
+	return d.discountRepository.GetDiscountByID(id)
+}
+
+func (d *DiscountService) CreateDiscount(DiscountType string, DiscountValue float64, startDate, endDate time.Time) error {
 	discount := BusinessObjects.Discount{
 		DiscountID:    "DISC" + Util.GenerateID(10),
 		DiscountType:  DiscountType,
@@ -28,7 +36,7 @@ func CreateDiscount(DiscountType string, DiscountValue float64, startDate, endDa
 		EndDate:       endDate,
 	}
 
-	err := Repositories.CreateDiscount(discount)
+	err := d.discountRepository.CreateDiscount(discount)
 	if err != nil {
 		return err
 	}
@@ -36,9 +44,9 @@ func CreateDiscount(DiscountType string, DiscountValue float64, startDate, endDa
 	return nil
 }
 
-func UpdateDiscount(discountID, discountType string, discountValue float64, startDate, endDate time.Time) error {
+func (d *DiscountService) UpdateDiscount(discountID, discountType string, discountValue float64, startDate, endDate time.Time) error {
 
-	discount, err := Repositories.GetDiscountByID(discountID)
+	discount, err := d.discountRepository.GetDiscountByID(discountID)
 	if err != nil {
 		return err
 	}
@@ -48,9 +56,9 @@ func UpdateDiscount(discountID, discountType string, discountValue float64, star
 	discount.StartDate = startDate
 	discount.EndDate = endDate
 
-	return Repositories.UpdateDiscount(discount)
+	return d.discountRepository.UpdateDiscount(discount)
 }
 
-func DeleteDiscount(id string) error {
-	return Repositories.DeleteDiscount(id)
+func (d *DiscountService) DeleteDiscount(id string) error {
+	return d.discountRepository.DeleteDiscount(id)
 }

@@ -3,9 +3,19 @@ package Repositories
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
+
+	"github.com/sirupsen/logrus"
 )
 
-func GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.OrderDetail], error) {
+type OrderDetailRepository struct {
+	log *logrus.Logger
+}
+
+func NewOrderDetailRepository(log *logrus.Logger) *OrderDetailRepository {
+	return &OrderDetailRepository{log}
+}
+
+func (o *OrderDetailRepository) GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string, pageIndex, pageSize int) (Util.PaginatedList[BusinessObjects.OrderDetail], error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return Util.PaginatedList[BusinessObjects.OrderDetail]{}, err
@@ -60,7 +70,7 @@ func GetPaginatedOrderDetailList(searchValue, sortBy, orderId, productId string,
 }
 
 // GetAllOrderDetails retrieves all order details
-func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
+func (o *OrderDetailRepository) GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return nil, err
@@ -75,7 +85,7 @@ func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
 }
 
 // GetOrderDetailByID retrieves all products of a order
-func GetOrderDetailByID(orderID string) ([]BusinessObjects.OrderDetail, error) {
+func (o *OrderDetailRepository) GetOrderDetailByID(orderID string) ([]BusinessObjects.OrderDetail, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return []BusinessObjects.OrderDetail{}, err
@@ -90,7 +100,7 @@ func GetOrderDetailByID(orderID string) ([]BusinessObjects.OrderDetail, error) {
 }
 
 // CreateOrderDetail adds a new order detail to the database
-func CreateOrderDetail(rate BusinessObjects.OrderDetail) error {
+func (o *OrderDetailRepository) CreateOrderDetail(rate BusinessObjects.OrderDetail) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -104,7 +114,7 @@ func CreateOrderDetail(rate BusinessObjects.OrderDetail) error {
 }
 
 // UpdateOrderDetail updates an existing order detail in the database
-func UpdateOrderDetail(rate BusinessObjects.OrderDetail) error {
+func (o *OrderDetailRepository) UpdateOrderDetail(rate BusinessObjects.OrderDetail) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err
@@ -118,7 +128,7 @@ func UpdateOrderDetail(rate BusinessObjects.OrderDetail) error {
 }
 
 // DeleteOrderDetail removes a order detail from the database
-func DeleteOrderDetail(rateID string) error {
+func (o *OrderDetailRepository) DeleteOrderDetail(rateID string) error {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
 		return err

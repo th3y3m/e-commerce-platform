@@ -2,7 +2,7 @@ package API
 
 import (
 	"net/http"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +32,8 @@ type CategoryRequest struct {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /categories [get]
 func GetAllCategories(c *gin.Context) {
-	categories, err := Services.GetAllCategories()
+	module := DependencyInjection.NewCategoryServiceProvider()
+	categories, err := module.GetAllCategories()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -51,7 +52,9 @@ func GetAllCategories(c *gin.Context) {
 // @Router /categories/{id} [get]
 func GetCategoryByID(c *gin.Context) {
 	id := c.Param("id")
-	category, err := Services.GetCategoryByID(id)
+	module := DependencyInjection.NewCategoryServiceProvider()
+
+	category, err := module.GetCategoryByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,11 +74,13 @@ func GetCategoryByID(c *gin.Context) {
 // @Router /categories [post]
 func CreateCategory(c *gin.Context) {
 	var info CategoryRequest
+	module := DependencyInjection.NewCategoryServiceProvider()
+
 	if err := c.ShouldBindJSON(&info); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.CreateCategory(info.CategoryName)
+	err := module.CreateCategory(info.CategoryName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -96,12 +101,14 @@ func CreateCategory(c *gin.Context) {
 // @Router /categories/{id} [put]
 func UpdateCategory(c *gin.Context) {
 	id := c.Param("id")
+	module := DependencyInjection.NewCategoryServiceProvider()
+
 	var info CategoryRequest
 	if err := c.ShouldBindJSON(&info); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.UpdateCategory(id, info.CategoryName)
+	err := module.UpdateCategory(id, info.CategoryName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -120,7 +127,9 @@ func UpdateCategory(c *gin.Context) {
 // @Router /categories/{id} [delete]
 func DeleteCategory(c *gin.Context) {
 	id := c.Param("id")
-	err := Services.DeleteCategory(id)
+	module := DependencyInjection.NewCategoryServiceProvider()
+
+	err := module.DeleteCategory(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

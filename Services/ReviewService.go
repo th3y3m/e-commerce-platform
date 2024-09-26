@@ -2,24 +2,32 @@ package Services
 
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
 
-func GetPaginatedReviewList(sortBy string, reviewID string, userID string, productID string, pageIndex int, pageSize int, minRating *int, maxRating *int, status *bool) (Util.PaginatedList[BusinessObjects.Review], error) {
-	return Repositories.GetPaginatedReviewList(sortBy, reviewID, userID, productID, pageIndex, pageSize, minRating, maxRating, status)
+type ReviewService struct {
+	reviewRepository Interface.IReviewRepository
 }
 
-func GetAllReviews() ([]BusinessObjects.Review, error) {
-	return Repositories.GetAllReviews()
+func NewReviewService(reviewRepository Interface.IReviewRepository) Interface.IReviewService {
+	return &ReviewService{reviewRepository}
 }
 
-func GetReviewByID(id string) (BusinessObjects.Review, error) {
-	return Repositories.GetReviewByID(id)
+func (r *ReviewService) GetPaginatedReviewList(sortBy string, reviewID string, userID string, productID string, pageIndex int, pageSize int, minRating *int, maxRating *int, status *bool) (Util.PaginatedList[BusinessObjects.Review], error) {
+	return r.reviewRepository.GetPaginatedReviewList(sortBy, reviewID, userID, productID, pageIndex, pageSize, minRating, maxRating, status)
 }
 
-func CreateReview(review BusinessObjects.NewReview) error {
+func (r *ReviewService) GetAllReviews() ([]BusinessObjects.Review, error) {
+	return r.reviewRepository.GetAllReviews()
+}
+
+func (r *ReviewService) GetReviewByID(id string) (BusinessObjects.Review, error) {
+	return r.reviewRepository.GetReviewByID(id)
+}
+
+func (r *ReviewService) CreateReview(review BusinessObjects.NewReview) error {
 	reviewObj := BusinessObjects.Review{
 		ReviewID:  "REV" + Util.GenerateID(10),
 		UserID:    review.UserID,
@@ -30,11 +38,11 @@ func CreateReview(review BusinessObjects.NewReview) error {
 		CreatedAt: time.Now(),
 	}
 
-	return Repositories.CreateReview(reviewObj)
+	return r.reviewRepository.CreateReview(reviewObj)
 }
 
-func UpdateReview(reviewId, comment string, rating int) error {
-	review, err := Repositories.GetReviewByID(reviewId)
+func (r *ReviewService) UpdateReview(reviewId, comment string, rating int) error {
+	review, err := r.reviewRepository.GetReviewByID(reviewId)
 	if err != nil {
 		return err
 	}
@@ -42,9 +50,9 @@ func UpdateReview(reviewId, comment string, rating int) error {
 	review.Comment = comment
 	review.Rating = rating
 
-	return Repositories.UpdateReview(review)
+	return r.reviewRepository.UpdateReview(review)
 }
 
-func DeleteReview(id string) error {
-	return Repositories.DeleteReview(id)
+func (r *ReviewService) DeleteReview(id string) error {
+	return r.reviewRepository.DeleteReview(id)
 }

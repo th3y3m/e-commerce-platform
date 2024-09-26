@@ -2,7 +2,7 @@ package API
 
 import (
 	"net/http"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,7 +34,10 @@ type CourierResponse struct {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /couriers [get]
 func GetAllCouriers(c *gin.Context) {
-	couriers, err := Services.GetAllCouriers()
+
+	module := DependencyInjection.NewCourierServiceProvider()
+
+	couriers, err := module.GetAllCouriers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -52,8 +55,9 @@ func GetAllCouriers(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /couriers/{id} [get]
 func GetCourierByID(c *gin.Context) {
+	module := DependencyInjection.NewCourierServiceProvider()
 	id := c.Param("id")
-	courier, err := Services.GetCourierByID(id)
+	courier, err := module.GetCourierByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -73,6 +77,7 @@ func GetCourierByID(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /couriers [post]
 func CreateCourier(c *gin.Context) {
+	module := DependencyInjection.NewCourierServiceProvider()
 	var info struct {
 		CourierName string `json:"courier_name" binding:"required"`
 	}
@@ -80,7 +85,7 @@ func CreateCourier(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.CreateCourier(info.CourierName)
+	err := module.CreateCourier(info.CourierName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -101,6 +106,7 @@ func CreateCourier(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /couriers/{id} [put]
 func UpdateCourier(c *gin.Context) {
+	module := DependencyInjection.NewCourierServiceProvider()
 	id := c.Param("id")
 
 	var info struct {
@@ -111,7 +117,7 @@ func UpdateCourier(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := Services.UpdateCourier(id, info.CourierName, info.Status)
+	err := module.UpdateCourier(id, info.CourierName, info.Status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -129,8 +135,9 @@ func UpdateCourier(c *gin.Context) {
 // @Failure 500 {object} API.ErrorResponse
 // @Router /couriers/{id} [delete]
 func DeleteCourier(c *gin.Context) {
+	module := DependencyInjection.NewCourierServiceProvider()
 	id := c.Param("id")
-	err := Services.DeleteCourier(id)
+	err := module.DeleteCourier(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
