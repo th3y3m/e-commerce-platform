@@ -14,7 +14,7 @@ func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
 	return Repositories.GetAllOrderDetails()
 }
 
-func GetOrderDetailByID(id string) (BusinessObjects.OrderDetail, error) {
+func GetOrderDetailByID(id string) ([]BusinessObjects.OrderDetail, error) {
 	return Repositories.GetOrderDetailByID(id)
 }
 

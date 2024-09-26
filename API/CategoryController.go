@@ -37,7 +37,7 @@ func GetAllCategories(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"categories": categories})
+	c.JSON(http.StatusOK, categories)
 }
 
 // GetCategoryByID retrieves a category by ID.
@@ -56,7 +56,7 @@ func GetCategoryByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"category": category})
+	c.JSON(http.StatusOK, category)
 }
 
 // CreateCategory creates a new category.

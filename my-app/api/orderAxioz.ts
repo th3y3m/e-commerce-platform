@@ -23,7 +23,7 @@ interface NewOrder {
     shipAddress?: string;
 }
 
-const fetchAllOrders = async (params: Params) => {
+const getAllOrders = async (params: Params) => {
     try {
         const {
             sortBy = "",
@@ -63,7 +63,7 @@ const fetchAllOrders = async (params: Params) => {
         }
 
         const response = await axios.get(`auth/orders?${queryParams.toString()}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;  // Re-throw the error to handle it outside this function
     }
@@ -72,7 +72,7 @@ const fetchAllOrders = async (params: Params) => {
 const getOrderById = async (id: string) => {
     try {
         const response = await axios.get(`auth/orders/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -81,7 +81,7 @@ const getOrderById = async (id: string) => {
 const createOrder = async (orderData: NewOrder) => {
     try {
         const response = await axios.post('auth/orders', orderData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -90,7 +90,7 @@ const createOrder = async (orderData: NewOrder) => {
 const updateOrder = async (id: string, orderData: NewOrder) => {
     try {
         const response = await axios.put(`auth/orders/${id}`, orderData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -99,14 +99,14 @@ const updateOrder = async (id: string, orderData: NewOrder) => {
 const deleteOrder = async (id: string) => {
     try {
         const response = await axios.delete(`auth/orders/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
 export {
-    fetchAllOrders,
+    getAllOrders,
     getOrderById,
     createOrder,
     updateOrder,

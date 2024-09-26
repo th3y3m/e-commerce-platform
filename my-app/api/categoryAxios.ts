@@ -1,18 +1,18 @@
-import axios from "./customizeAxios";
+import instance from "./customizeAxios";
 
-const fetchAllCategories = async () => {
+const getAllCategories = async () => {
     try {
-        const response = await axios.get("auth/categories");
-        return response;
+        const response = await instance.get("categories");
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
-const fetchCategoryById = async (id: string) => {
+const getCategoryById = async (id: string) => {
     try {
-        const response = await axios.get(`auth/categories/${id}`);
-        return response;
+        const response = await instance.get(`categories/${id}`);
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -20,8 +20,8 @@ const fetchCategoryById = async (id: string) => {
 
 const createCategory = async (category_name: string) => {
     try {
-        const response = await axios.post("auth/categories", category_name);
-        return response;
+        const response = await instance.post("auth/categories", category_name);
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -29,8 +29,8 @@ const createCategory = async (category_name: string) => {
 
 const updateCategory = async (id: string, category_name: string) => {
     try {
-        const response = await axios.put(`auth/categories/${id}`, category_name);
-        return response;
+        const response = await instance.put(`auth/categories/${id}`, category_name);
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -38,16 +38,16 @@ const updateCategory = async (id: string, category_name: string) => {
 
 const deleteCategory = async (id: string) => {
     try {
-        const response = await axios.delete(`auth/categories/${id}`);
-        return response;
+        const response = await instance.delete(`auth/categories/${id}`);
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
 export {
-    fetchAllCategories,
-    fetchCategoryById,
+    getAllCategories,
+    getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory

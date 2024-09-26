@@ -1,18 +1,18 @@
 import axios from './customizeAxios';
 
-const fetchAllCouriers = async () => {
+const getAllCouriers = async () => {
     try {
         const response = await axios.get('auth/couriers');
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
-const fetchCourierById = async (id: string) => {
+const getCourierById = async (id: string) => {
     try {
         const response = await axios.get(`auth/couriers/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -21,7 +21,7 @@ const fetchCourierById = async (id: string) => {
 const createCourier = async (courier_name: string) => {
     try {
         const response = await axios.post('auth/couriers', courier_name);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -30,7 +30,7 @@ const createCourier = async (courier_name: string) => {
 const updateCourier = async (id: string, courier_name: string) => {
     try {
         const response = await axios.put(`auth/couriers/${id}`, courier_name);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -39,15 +39,15 @@ const updateCourier = async (id: string, courier_name: string) => {
 const deleteCourier = async (id: string) => {
     try {
         const response = await axios.delete(`auth/couriers/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
 export {
-    fetchAllCouriers,
-    fetchCourierById,
+    getAllCouriers,
+    getCourierById,
     createCourier,
     updateCourier,
     deleteCourier

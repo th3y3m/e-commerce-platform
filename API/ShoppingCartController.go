@@ -15,7 +15,7 @@ func GetShoppingCartByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"cart": cart})
+	c.JSON(http.StatusOK, cart)
 }
 
 func GetUserShoppingCart(c *gin.Context) {
@@ -26,7 +26,7 @@ func GetUserShoppingCart(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"cart": cart})
+	c.JSON(http.StatusOK, cart)
 }
 
 func AddProductToCart(c *gin.Context) {
@@ -88,7 +88,7 @@ func NumberOfItemsInCart(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"items": items})
+	c.JSON(http.StatusOK, items)
 }
 
 // Cookie handlers...
@@ -147,7 +147,7 @@ func NumberOfItemsInCartCookie(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"items": items})
+	c.JSON(http.StatusOK, items)
 }
 
 func SaveCartToCookieHandler(c *gin.Context) {

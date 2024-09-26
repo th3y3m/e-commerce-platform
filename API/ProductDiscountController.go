@@ -14,5 +14,5 @@ func GetProductDiscountByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"rate": rate})
+	c.JSON(http.StatusOK, rate)
 }

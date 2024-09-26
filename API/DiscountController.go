@@ -60,7 +60,7 @@ func GetPaginatedDiscountList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"discounts": discounts})
+	c.JSON(http.StatusOK, discounts)
 }
 
 // GetAllDiscounts retrieves all discounts.
@@ -77,7 +77,7 @@ func GetAllDiscounts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"discounts": discounts})
+	c.JSON(http.StatusOK, discounts)
 }
 
 // GetDiscountByID retrieves a discount by its ID.
@@ -96,7 +96,7 @@ func GetDiscountByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"discount": discount})
+	c.JSON(http.StatusOK, discount)
 }
 
 // CreateDiscount creates a new discount.

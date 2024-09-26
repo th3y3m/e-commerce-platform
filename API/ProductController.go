@@ -174,5 +174,5 @@ func GetProductPriceAfterDiscount(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"price": price})
+	c.JSON(http.StatusOK, price)
 }

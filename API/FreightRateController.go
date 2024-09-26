@@ -30,7 +30,7 @@ func GetAllFreightRates(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"freightRates": freightRates})
+	c.JSON(http.StatusOK, freightRates)
 }
 
 // GetFreightRateByID retrieves freight rate by ID.
@@ -49,7 +49,7 @@ func GetFreightRateByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"freight rate": freightRate})
+	c.JSON(http.StatusOK, freightRate)
 }
 
 func CreateFreightRate(c *gin.Context) {
@@ -69,6 +69,8 @@ func CreateFreightRate(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+	c.JSON(http.StatusOK, gin.H{"message": "Create Freight Rate successfully"})
+
 }
 
 func UpdateFreightRate(c *gin.Context) {
@@ -89,6 +91,7 @@ func UpdateFreightRate(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+	c.JSON(http.StatusOK, gin.H{"message": "Update Freight Rate successfully"})
 }
 
 func DeleteFreightRate(c *gin.Context) {
@@ -97,4 +100,6 @@ func DeleteFreightRate(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Delete Freight Rate successfully"})
 }

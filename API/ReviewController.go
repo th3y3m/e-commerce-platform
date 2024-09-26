@@ -25,7 +25,7 @@ func GetPaginatedReviewList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"reviews": reviews})
+	c.JSON(http.StatusOK, reviews)
 }
 
 func GetAllReviews(c *gin.Context) {
@@ -34,7 +34,7 @@ func GetAllReviews(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"reviews": reviews})
+	c.JSON(http.StatusOK, reviews)
 }
 
 func GetReviewByID(c *gin.Context) {
@@ -45,7 +45,7 @@ func GetReviewByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"review": review})
+	c.JSON(http.StatusOK, review)
 }
 
 func CreateReview(c *gin.Context) {

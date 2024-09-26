@@ -24,7 +24,7 @@ interface UpdateReview {
     Comment: string;
 }
 
-const fetchAllReviews = async (params: Params) => {
+const getAllReviews = async (params: Params) => {
     try {
         const {
             sortBy = "",
@@ -52,7 +52,7 @@ const fetchAllReviews = async (params: Params) => {
         if (maxRating) queryParams.append('maxRating', maxRating);
 
         const response = await axios.get(`auth/reviews?${queryParams.toString()}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;  // Re-throw the error to handle it outside this function
     }
@@ -61,7 +61,7 @@ const fetchAllReviews = async (params: Params) => {
 const getReviewByID = async (id: string) => {
     try {
         const response = await axios.get(`auth/reviews/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -70,7 +70,7 @@ const getReviewByID = async (id: string) => {
 const createReview = async (reviewData: NewReview) => {
     try {
         const response = await axios.post('auth/reviews', reviewData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -79,7 +79,7 @@ const createReview = async (reviewData: NewReview) => {
 const updateReview = async (id: string, reviewData: UpdateReview) => {
     try {
         const response = await axios.post(`auth/reviews/${id}`, reviewData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -88,14 +88,14 @@ const updateReview = async (id: string, reviewData: UpdateReview) => {
 const deleteReview = async (id: string) => {
     try {
         const response = await axios.delete(`auth/reviews/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
 export {
-    fetchAllReviews,
+    getAllReviews,
     getReviewByID,
     createReview,
     updateReview,

@@ -26,7 +26,7 @@ func GetPaginatedNewsList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"news": news})
+	c.JSON(http.StatusOK, news)
 }
 
 func GetAllNews(c *gin.Context) {
@@ -35,7 +35,7 @@ func GetAllNews(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"news": news})
+	c.JSON(http.StatusOK, news)
 }
 
 func GetNewsByID(c *gin.Context) {
@@ -46,7 +46,7 @@ func GetNewsByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"news": news})
+	c.JSON(http.StatusOK, news)
 }
 
 func CreateNews(c *gin.Context) {
@@ -122,6 +122,8 @@ func UpdateNews(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "News updated successfully"})
 }
 
 func DeleteNews(c *gin.Context) {
@@ -130,4 +132,6 @@ func DeleteNews(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "News deleted successfully"})
 }

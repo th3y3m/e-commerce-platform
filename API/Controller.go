@@ -9,6 +9,7 @@ import (
 	_ "th3y3m/e-commerce-platform/docs" // Import generated docs
 
 	"github.com/casbin/casbin/v2"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -36,6 +37,15 @@ func Controller() *gin.Engine {
 	}
 	log.Println("Casbin enforcer loaded successfully")
 
+	// CORS middleware
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
+
 	// Swagger route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -43,15 +53,22 @@ func Controller() *gin.Engine {
 	router.POST("/login", Login)
 	router.POST("/register", RegisterCustomer)
 	router.GET("/verify", VerifyUserEmailHandler)
-	router.GET("/auth/google", GoogleLogin)
-	router.GET("/auth/google/callback", GoogleCallback)
-	router.GET("/auth/google/logout", GoogleLogout)
-	router.GET("/auth/facebook", FacebookLogin)
-	router.GET("/auth/facebook/callback", FacebookCallback)
-	router.GET("/auth/facebook/logout", FacebookLogout)
+	router.GET("/google", GoogleLogin)
+	router.GET("/google/callback", GoogleCallback)
+	router.GET("/google/logout", GoogleLogout)
+	router.GET("/facebook", FacebookLogin)
+	router.GET("/facebook/callback", FacebookCallback)
+	router.GET("/facebook/logout", FacebookLogout)
 
 	router.GET("/couriers", GetAllCouriers)
 	router.GET("/users", GetUsers)
+
+	router.GET("/categories", GetAllCategories)
+	router.GET("/categories/:id", GetCategoryByID)
+
+	router.GET("/products", GetPaginatedProductList)
+	router.GET("/products/:id", GetProductByID)
+	router.GET("/products/:id/price", GetProductPriceAfterDiscount)
 
 	// Protected routes with JWT and Casbin middleware
 	protected := router.Group("/auth")
@@ -61,15 +78,10 @@ func Controller() *gin.Engine {
 		protected.PUT("/users/UpdateProfile/:id", UpdateProfile)
 		protected.PUT("/users/Ban/:id", BanUser)
 		protected.PUT("/users/UnBan/:id", UnBanUser)
-
-		protected.GET("/products", GetPaginatedProductList)
-		protected.GET("/products/:id", GetProductByID)
 		protected.POST("/products", CreateProduct)
 		protected.PUT("/products/:id", UpdateProduct)
 		protected.DELETE("/products/:id", DeleteProduct)
 
-		protected.GET("/categories", GetAllCategories)
-		protected.GET("/categories/:id", GetCategoryByID)
 		protected.POST("/categories", CreateCategory)
 		protected.PUT("/categories/:id", UpdateCategory)
 		protected.DELETE("/categories/:id", DeleteCategory)

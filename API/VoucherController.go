@@ -24,7 +24,7 @@ func GetPaginatedVoucherList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"vouchers": vouchers})
+	c.JSON(http.StatusOK, vouchers)
 }
 
 func GetAllVouchers(c *gin.Context) {
@@ -33,7 +33,7 @@ func GetAllVouchers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"vouchers": vouchers})
+	c.JSON(http.StatusOK, vouchers)
 }
 
 func GetVoucherByID(c *gin.Context) {
@@ -43,7 +43,7 @@ func GetVoucherByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"voucher": voucher})
+	c.JSON(http.StatusOK, voucher)
 }
 
 func CreateVoucher(c *gin.Context) {

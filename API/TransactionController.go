@@ -27,7 +27,7 @@ func GetPaginatedTransactionList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"transactions": transactions})
+	c.JSON(http.StatusOK, transactions)
 }
 
 func GetAllTransactions(c *gin.Context) {
@@ -36,7 +36,7 @@ func GetAllTransactions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"transactions": transactions})
+	c.JSON(http.StatusOK, transactions)
 }
 
 func GetTransactionByID(c *gin.Context) {
@@ -46,7 +46,7 @@ func GetTransactionByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"transaction": transaction})
+	c.JSON(http.StatusOK, transaction)
 }
 
 func CreateTransaction(c *gin.Context) {

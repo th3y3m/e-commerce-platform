@@ -87,8 +87,6 @@ func RegisterCustomer(email, password string) error {
 		return fmt.Errorf("error scheduling user deletion: %w", err)
 	}
 
-	// Store the job reference so we can cancel it later
-	fmt.Printf("Scheduled delete task for user %v.\n", newUser.UserID)
 	deleteJobs[newUser.UserID] = job
 
 	return nil

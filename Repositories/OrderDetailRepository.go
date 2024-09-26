@@ -75,18 +75,18 @@ func GetAllOrderDetails() ([]BusinessObjects.OrderDetail, error) {
 }
 
 // GetOrderDetailByID retrieves all products of a order
-func GetOrderDetailByID(rateID string) (BusinessObjects.OrderDetail, error) {
+func GetOrderDetailByID(orderID string) ([]BusinessObjects.OrderDetail, error) {
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
-		return BusinessObjects.OrderDetail{}, err
+		return []BusinessObjects.OrderDetail{}, err
 	}
 
-	var rate BusinessObjects.OrderDetail
-	if err := db.First(&rate, "order_id = ?", rateID).Error; err != nil {
-		return BusinessObjects.OrderDetail{}, err
+	var orderDetails []BusinessObjects.OrderDetail
+	if err := db.Where("order_id = ?", orderID).Find(&orderDetails).Error; err != nil {
+		return []BusinessObjects.OrderDetail{}, err
 	}
 
-	return rate, nil
+	return orderDetails, nil
 }
 
 // CreateOrderDetail adds a new order detail to the database

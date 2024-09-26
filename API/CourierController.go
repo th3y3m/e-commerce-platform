@@ -39,7 +39,7 @@ func GetAllCouriers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"couriers": couriers})
+	c.JSON(http.StatusOK, couriers)
 }
 
 // GetCourierByID retrieves a courier by its ID.
@@ -58,7 +58,7 @@ func GetCourierByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"courier": courier})
+	c.JSON(http.StatusOK, courier)
 }
 
 // CreateCourier creates a new courier.

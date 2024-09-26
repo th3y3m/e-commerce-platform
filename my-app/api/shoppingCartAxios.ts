@@ -14,7 +14,7 @@ interface Item {
 const GetShoppingCartByUserID = async (userID: string) => {
     try {
         const response = await axios.get(`auth/shoppingCart/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -23,7 +23,7 @@ const GetShoppingCartByUserID = async (userID: string) => {
 const GetUserShoppingCart = async (userID: string) => {
     try {
         const response = await axios.get(`auth/shoppingCart/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -32,7 +32,7 @@ const GetUserShoppingCart = async (userID: string) => {
 const AddProductToShoppingCart = async (item: CartItem) => {
     try {
         const response = await axios.post('auth/shoppingCart', item);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -41,7 +41,7 @@ const AddProductToShoppingCart = async (item: CartItem) => {
 const RemoveProductFromCart = async (item: CartItem) => {
     try {
         const response = await axios.put('auth/shoppingCart', item);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -50,7 +50,7 @@ const RemoveProductFromCart = async (item: CartItem) => {
 const ClearShoppingCart = async (userID: string) => {
     try {
         const response = await axios.delete(`auth/shoppingCart/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -59,7 +59,7 @@ const ClearShoppingCart = async (userID: string) => {
 const NumberOfItemsInCart = async (userID: string) => {
     try {
         const response = await axios.get(`auth/shoppingCart/numberofitems/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -68,7 +68,7 @@ const NumberOfItemsInCart = async (userID: string) => {
 const DeleteUnitItem = async (item: Item) => {
     try {
         const response = await axios.put(`cookie/deleteUnitItem`, { item });
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -77,7 +77,7 @@ const DeleteUnitItem = async (item: Item) => {
 const RemoveFromCart = async (item: Item) => {
     try {
         const response = await axios.put(`cookie/removeFromCart`, item);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -86,7 +86,7 @@ const RemoveFromCart = async (item: Item) => {
 const GetCartItems = async (userID: string) => {
     try {
         const response = await axios.get(`cookie/getCartItems/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -95,7 +95,7 @@ const GetCartItems = async (userID: string) => {
 const DeleteCartInCookie = async (userID: string) => {
     try {
         const response = await axios.delete(`cookie/deleteCartInCookie/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -104,7 +104,7 @@ const DeleteCartInCookie = async (userID: string) => {
 const NumberOfItemsInCartCookie = async (userID: string) => {
     try {
         const response = await axios.get(`cookie/numberOfItemsInCartCookie/${userID}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -114,7 +114,7 @@ const SaveCartToCookieHandler = async (item: Item) => {
 
     try {
         const response = await axios.post(`cookie/saveCartToCookieHandler`, item);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }

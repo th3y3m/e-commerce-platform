@@ -14,7 +14,7 @@ interface NewDiscount {
     EndDate?: Date;
 }
 
-const fetchAllDiscounts = async (params: Params) => {
+const getAllDiscounts = async (params: Params) => {
     try {
         const {
             searchQuery = "",
@@ -34,7 +34,7 @@ const fetchAllDiscounts = async (params: Params) => {
         if (pageSize) queryParams.append('pageSize', pageSize);
 
         const response = await axios.get(`auth/discounts?${queryParams.toString()}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;  // Re-throw the error to handle it outside this function
     }
@@ -43,7 +43,7 @@ const fetchAllDiscounts = async (params: Params) => {
 const getDiscountByID = async (id: string) => {
     try {
         const response = await axios.get(`auth/discounts/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -52,7 +52,7 @@ const getDiscountByID = async (id: string) => {
 const createDiscount = async (discountData: NewDiscount) => {
     try {
         const response = await axios.post('auth/discounts', discountData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -60,7 +60,7 @@ const createDiscount = async (discountData: NewDiscount) => {
 const updateDiscount = async (id: string, discountData: NewDiscount) => {
     try {
         const response = await axios.post(`auth/discounts/${id}`, discountData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -69,14 +69,14 @@ const updateDiscount = async (id: string, discountData: NewDiscount) => {
 const deleteDiscount = async (id: string) => {
     try {
         const response = await axios.delete(`auth/discounts/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
 export {
-    fetchAllDiscounts,
+    getAllDiscounts,
     getDiscountByID,
     createDiscount,
     updateDiscount,

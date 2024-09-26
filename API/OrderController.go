@@ -46,7 +46,7 @@ func GetPaginatedOrderList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"orders": orders})
+	c.JSON(http.StatusOK, orders)
 }
 
 func GetAllOrders(c *gin.Context) {
@@ -55,7 +55,7 @@ func GetAllOrders(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"orders": orders})
+	c.JSON(http.StatusOK, orders)
 }
 
 func GetOrderById(c *gin.Context) {
@@ -65,7 +65,7 @@ func GetOrderById(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"order": order})
+	c.JSON(http.StatusOK, order)
 }
 
 func PlaceOrder(c *gin.Context) {
@@ -79,4 +79,5 @@ func PlaceOrder(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+	c.JSON(http.StatusOK, gin.H{"message": "Order placed successfully"})
 }

@@ -18,7 +18,7 @@ interface NewNews {
     ImageURL: string;
 }
 
-const fetchAllNews = async (params: Params) => {
+const getAllNews = async (params: Params) => {
     try {
         const {
             searchQuery = "",
@@ -42,7 +42,7 @@ const fetchAllNews = async (params: Params) => {
         if (authorID) queryParams.append('authorID', authorID);
 
         const response = await axios.get(`auth/news?${queryParams.toString()}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;  // Re-throw the error to handle it outside this function
     }
@@ -51,7 +51,7 @@ const fetchAllNews = async (params: Params) => {
 const getNewsByID = async (id: string) => {
     try {
         const response = await axios.get(`auth/news/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -60,7 +60,7 @@ const getNewsByID = async (id: string) => {
 const createNews = async (newsData: NewNews) => {
     try {
         const response = await axios.post('auth/news', newsData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -69,7 +69,7 @@ const createNews = async (newsData: NewNews) => {
 const updateNews = async (id: string, newsData: NewNews) => {
     try {
         const response = await axios.post(`auth/news/${id}`, newsData);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
@@ -78,14 +78,14 @@ const updateNews = async (id: string, newsData: NewNews) => {
 const deleteNews = async (id: string) => {
     try {
         const response = await axios.delete(`auth/news/${id}`);
-        return response;
+        return response.data;
     } catch (error) {
         throw error;
     }
 }
 
 export {
-    fetchAllNews,
+    getAllNews,
     getNewsByID,
     createNews,
     updateNews,
