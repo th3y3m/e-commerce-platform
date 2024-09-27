@@ -15,10 +15,10 @@ import (
 
 type UserRepository struct {
 	log *logrus.Logger
-	db  *gorm.DB
+	db  Interface.IDatabase
 }
 
-func NewUserRepository(log *logrus.Logger, db *gorm.DB) Interface.IUserRepository {
+func NewUserRepository(log *logrus.Logger, db Interface.IDatabase) Interface.IUserRepository {
 	return &UserRepository{log: log, db: db}
 }
 

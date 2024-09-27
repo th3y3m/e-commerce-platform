@@ -10,22 +10,21 @@ import (
 
 type CategoryRepository struct {
 	log *logrus.Logger
+	db  Interface.IDatabase
 }
 
-func NewCategoryRepository(log *logrus.Logger) Interface.ICategoryRepository {
-	return &CategoryRepository{log}
+func NewCategoryRepository(log *logrus.Logger, db Interface.IDatabase) Interface.ICategoryRepository {
+	return &CategoryRepository{
+		log: log,
+		db:  db,
+	}
 }
 
 func (c *CategoryRepository) GetPaginatedCategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
 	c.log.Infof("Fetching paginated category list with searchValue: %s, sortBy: %s, pageIndex: %d, pageSize: %d, status: %v", searchValue, sortBy, pageIndex, pageSize, status)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return Util.PaginatedList[BusinessObjects.Category]{}, err
-	}
 
 	var categories []BusinessObjects.Category
-	query := db.Model(&BusinessObjects.Category{})
+	query := c.db.Model(&BusinessObjects.Category{})
 	if searchValue != "" {
 		query = query.Where("category_name LIKE ?", "%"+searchValue+"%")
 	}
@@ -60,14 +59,9 @@ func (c *CategoryRepository) GetPaginatedCategoryList(searchValue, sortBy string
 // GetAllCategories retrieves all categories from the database
 func (c *CategoryRepository) GetAllCategories() ([]BusinessObjects.Category, error) {
 	c.log.Info("Fetching all categories")
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return nil, err
-	}
 
 	var categories []BusinessObjects.Category
-	if err := db.Find(&categories).Error; err != nil {
+	if err := c.db.Find(&categories).Error; err != nil {
 		c.log.Error("Failed to fetch all categories:", err)
 		return nil, err
 	}
@@ -79,14 +73,9 @@ func (c *CategoryRepository) GetAllCategories() ([]BusinessObjects.Category, err
 // GetCategoryByID retrieves a category by its ID
 func (c *CategoryRepository) GetCategoryByID(categoryID string) (BusinessObjects.Category, error) {
 	c.log.Infof("Fetching category by ID: %s", categoryID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return BusinessObjects.Category{}, err
-	}
 
 	var category BusinessObjects.Category
-	if err := db.First(&category, "category_id = ?", categoryID).Error; err != nil {
+	if err := c.db.First(&category, "category_id = ?", categoryID).Error; err != nil {
 		c.log.Error("Failed to fetch category by ID:", err)
 		return BusinessObjects.Category{}, err
 	}
@@ -98,13 +87,8 @@ func (c *CategoryRepository) GetCategoryByID(categoryID string) (BusinessObjects
 // CreateCategory adds a new category to the database
 func (c *CategoryRepository) CreateCategory(category BusinessObjects.Category) error {
 	c.log.Infof("Creating new category with name: %s", category.CategoryName)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Create(&category).Error; err != nil {
+	if err := c.db.Create(&category).Error; err != nil {
 		c.log.Error("Failed to create new category:", err)
 		return err
 	}
@@ -116,13 +100,8 @@ func (c *CategoryRepository) CreateCategory(category BusinessObjects.Category) e
 // UpdateCategory updates an existing category
 func (c *CategoryRepository) UpdateCategory(category BusinessObjects.Category) error {
 	c.log.Infof("Updating category with ID: %s", category.CategoryID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Save(&category).Error; err != nil {
+	if err := c.db.Save(&category).Error; err != nil {
 		c.log.Error("Failed to update category:", err)
 		return err
 	}
@@ -134,13 +113,8 @@ func (c *CategoryRepository) UpdateCategory(category BusinessObjects.Category) e
 // DeleteCategory removes a category from the database by its ID
 func (c *CategoryRepository) DeleteCategory(categoryID string) error {
 	c.log.Infof("Deleting category with ID: %s", categoryID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Delete(&BusinessObjects.Category{}, "category_id = ?", categoryID).Error; err != nil {
+	if err := c.db.Delete(&BusinessObjects.Category{}, "category_id = ?", categoryID).Error; err != nil {
 		c.log.Error("Failed to delete category:", err)
 		return err
 	}
