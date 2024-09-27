@@ -19,3 +19,8 @@ type NewTransaction struct {
 	PaymentMethod string
 	PaymentStatus string
 }
+
+type TransactionStatusModel struct {
+	IsSuccessful bool
+	RedirectUrl  string
+}

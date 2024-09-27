@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/joho/godotenv"
@@ -20,29 +20,28 @@ import (
 
 var TimeZoneAsiaHoChiMinh, _ = time.LoadLocation("Asia/Ho_Chi_Minh")
 
-func NewVnpayService() *VnpayService {
+func NewVnpayService(transactionRepository Interface.ITransactionRepository, orderRepository Interface.IOrderRepository) Interface.IVnPayService {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 	return &VnpayService{
-		url:        os.Getenv("VNPAY_URL"),
-		returnUrl:  os.Getenv("VNPAY_RETURN_URL"),
-		tmnCode:    os.Getenv("VNPAY_TMNCODE"),
-		hashSecret: os.Getenv("VNPAY_HASH_SECRET"),
+		url:                   os.Getenv("VNPAY_URL"),
+		returnUrl:             os.Getenv("VNPAY_RETURN_URL"),
+		tmnCode:               os.Getenv("VNPAY_TMNCODE"),
+		hashSecret:            os.Getenv("VNPAY_HASH_SECRET"),
+		transactionRepository: transactionRepository,
+		orderRepository:       orderRepository,
 	}
 }
 
-type TransactionStatusModel struct {
-	IsSuccessful bool
-	RedirectUrl  string
-}
-
 type VnpayService struct {
-	url        string
-	returnUrl  string
-	tmnCode    string
-	hashSecret string
+	url                   string
+	returnUrl             string
+	tmnCode               string
+	hashSecret            string
+	transactionRepository Interface.ITransactionRepository
+	orderRepository       Interface.IOrderRepository
 }
 
 func (s *VnpayService) CreateVNPayUrl(amount float64, orderinfor string) (string, error) {
@@ -73,7 +72,7 @@ func (s *VnpayService) CreateVNPayUrl(amount float64, orderinfor string) (string
 	return TransactionUrl, nil
 }
 
-func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*TransactionStatusModel, error) {
+func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*BusinessObjects.TransactionStatusModel, error) {
 
 	vnpSecureHash := queryString.Get("vnp_SecureHash")
 	vnpAmount := queryString.Get("vnp_Amount")
@@ -88,16 +87,16 @@ func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*Transacti
 	rawQueryString := strings.Join(rawData, "&")
 
 	if !s.ValidateSignature(rawQueryString, vnpSecureHash, s.hashSecret) {
-		return &TransactionStatusModel{IsSuccessful: false, RedirectUrl: "LINK_INVALID"}, nil
+		return &BusinessObjects.TransactionStatusModel{IsSuccessful: false, RedirectUrl: "LINK_INVALID"}, nil
 	}
 
-	order, err := Repositories.GetOrderByID(queryString.Get("vnp_TxnRef"))
+	order, err := s.orderRepository.GetOrderByID(queryString.Get("vnp_TxnRef"))
 	if err != nil {
 		return nil, err
 	}
 
 	if order.OrderStatus == "Complete" {
-		return &TransactionStatusModel{
+		return &BusinessObjects.TransactionStatusModel{
 			IsSuccessful: false,
 			RedirectUrl:  "LINK_INVALID",
 		}, nil
@@ -106,7 +105,7 @@ func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*Transacti
 	vnpResponseCode := queryString.Get("vnp_ResponseCode")
 	if vnpResponseCode == "00" && queryString.Get("vnp_TransactionStatus") == "00" {
 		order.OrderStatus = "Complete"
-		err = Repositories.UpdateOrder(order)
+		err = s.orderRepository.UpdateOrder(order)
 		if err != nil {
 			return nil, err
 		}
@@ -125,24 +124,24 @@ func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*Transacti
 			PaymentSignature: queryString.Get("vnp_BankTranNo"),
 			PaymentMethod:    "VNPay",
 		}
-		err = Repositories.CreateTransaction(*Transaction)
+		err = s.transactionRepository.CreateTransaction(*Transaction)
 		if err != nil {
 			return nil, err
 		}
 
-		return &TransactionStatusModel{
+		return &BusinessObjects.TransactionStatusModel{
 			IsSuccessful: true,
 			RedirectUrl:  fmt.Sprintf("https://localhost:3000/confirm?orderId=%s", order.OrderID),
 		}, nil
 	}
 
 	order.OrderStatus = "Cancelled"
-	err = Repositories.UpdateOrder(order)
+	err = s.orderRepository.UpdateOrder(order)
 	if err != nil {
 		return nil, err
 	}
 
-	return &TransactionStatusModel{
+	return &BusinessObjects.TransactionStatusModel{
 		IsSuccessful: false,
 		RedirectUrl:  fmt.Sprintf("https://localhost:3000/reject?orderId=%s", queryString.Get("vnp_TxnRef")),
 	}, nil

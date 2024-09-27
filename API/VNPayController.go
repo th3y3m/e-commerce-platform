@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +12,7 @@ import (
 func CreateVNPayUrl(c *gin.Context) {
 	amount, _ := strconv.ParseFloat(c.Param("amount"), 64)
 	orderID := c.Param("orderID")
-	vnpayConfig := Services.NewVnpayService()
+	vnpayConfig := DependencyInjection.NewVnpayServiceProvider()
 	paymentUrl, err := vnpayConfig.CreateVNPayUrl(amount, orderID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -22,7 +22,7 @@ func CreateVNPayUrl(c *gin.Context) {
 }
 
 func ValidateVNPayResponse(c *gin.Context) {
-	vnpayConfig := Services.NewVnpayService()
+	vnpayConfig := DependencyInjection.NewVnpayServiceProvider()
 	queryParams := c.Request.URL.Query()
 	fmt.Print(queryParams)
 	res, err := vnpayConfig.ValidateVNPayResponse(queryParams)

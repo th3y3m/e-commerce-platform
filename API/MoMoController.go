@@ -3,17 +3,14 @@ package API
 import (
 	"net/http"
 	"strconv"
-	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CreateMoMoUrl(c *gin.Context) {
-	MoMoConfig, err := Services.NewMoMoService()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	MoMoConfig := DependencyInjection.NewMoMoServiceProvider()
+
 	amount, _ := strconv.ParseFloat(c.Param("amount"), 64)
 	orderID := c.Param("orderID")
 	paymentUrl, err := MoMoConfig.CreateMoMoUrl(amount, orderID)
@@ -25,11 +22,8 @@ func CreateMoMoUrl(c *gin.Context) {
 }
 
 func ValidateMoMoResponse(c *gin.Context) {
-	MoMoConfig, err := Services.NewMoMoService()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	MoMoConfig := DependencyInjection.NewMoMoServiceProvider()
+
 	queryParams := c.Request.URL.Query()
 	res, err := MoMoConfig.ValidateMoMoResponse(queryParams)
 	if err != nil {

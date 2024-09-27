@@ -11,39 +11,43 @@ import (
 	"time"
 
 	"th3y3m/e-commerce-platform/BusinessObjects"
-	"th3y3m/e-commerce-platform/Repositories"
+	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/joho/godotenv"
 )
 
-func NewMoMoService() (*MoMoService, error) {
+func NewMoMoService(transactionRepository Interface.ITransactionRepository, orderRepository Interface.IOrderRepository) Interface.IMoMoService {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	return &MoMoService{
-		endpoint:    os.Getenv("MOMO_ENDPOINT"),
-		secretKey:   os.Getenv("MOMO_SECRET_KEY"),
-		accessKey:   os.Getenv("MOMO_ACCESS_KEY"),
-		returnUrl:   os.Getenv("MOMO_RETURN_URL"),
-		notifyUrl:   os.Getenv("MOMO_NOTIFY_URL"),
-		partnerCode: os.Getenv("MOMO_PARTNER_CODE"),
-		requestType: os.Getenv("MOMO_REQUEST_TYPE"),
-		extraData:   os.Getenv("MOMO_EXTRA_DATA"),
-	}, nil
+		endpoint:              os.Getenv("MOMO_ENDPOINT"),
+		secretKey:             os.Getenv("MOMO_SECRET_KEY"),
+		accessKey:             os.Getenv("MOMO_ACCESS_KEY"),
+		returnUrl:             os.Getenv("MOMO_RETURN_URL"),
+		notifyUrl:             os.Getenv("MOMO_NOTIFY_URL"),
+		partnerCode:           os.Getenv("MOMO_PARTNER_CODE"),
+		requestType:           os.Getenv("MOMO_REQUEST_TYPE"),
+		extraData:             os.Getenv("MOMO_EXTRA_DATA"),
+		transactionRepository: transactionRepository,
+		orderRepository:       orderRepository,
+	}
 }
 
 type MoMoService struct {
-	endpoint    string
-	secretKey   string
-	accessKey   string
-	returnUrl   string
-	notifyUrl   string
-	partnerCode string
-	requestType string
-	extraData   string
+	endpoint              string
+	secretKey             string
+	accessKey             string
+	returnUrl             string
+	notifyUrl             string
+	partnerCode           string
+	requestType           string
+	extraData             string
+	transactionRepository Interface.ITransactionRepository
+	orderRepository       Interface.IOrderRepository
 }
 
 // CreatePaymentUrl generates a payment URL for the given amount and order details.
@@ -97,20 +101,20 @@ func (s *MoMoService) CreateMoMoUrl(amount float64, orderId string) (string, err
 	return "", errors.New("unexpected response from MoMo API")
 }
 
-func (s *MoMoService) ValidateMoMoResponse(queryString url.Values) (*TransactionStatusModel, error) {
+func (s *MoMoService) ValidateMoMoResponse(queryString url.Values) (*BusinessObjects.TransactionStatusModel, error) {
 
 	orderId := queryString.Get("orderId")
 	resultCode := queryString.Get("resultCode")
 	amount := queryString.Get("amount")
 	signature := queryString.Get("signature")
 
-	order, err := Repositories.GetOrderByID(orderId)
+	order, err := s.orderRepository.GetOrderByID(orderId)
 	if err != nil {
 		return nil, err
 	}
 
 	if order.OrderID == "" || order.OrderStatus == "Complete" {
-		return &TransactionStatusModel{
+		return &BusinessObjects.TransactionStatusModel{
 			IsSuccessful: false,
 			RedirectUrl:  "https://localhost:3000/reject",
 		}, nil
@@ -118,7 +122,7 @@ func (s *MoMoService) ValidateMoMoResponse(queryString url.Values) (*Transaction
 
 	if resultCode == "0" {
 		order.OrderStatus = "Complete"
-		err = Repositories.UpdateOrder(order)
+		err = s.orderRepository.UpdateOrder(order)
 		if err != nil {
 			return nil, err
 		}
@@ -135,24 +139,24 @@ func (s *MoMoService) ValidateMoMoResponse(queryString url.Values) (*Transaction
 			PaymentSignature: signature,
 			PaymentMethod:    "MoMo",
 		}
-		err = Repositories.CreateTransaction(*Transaction)
+		err = s.transactionRepository.CreateTransaction(*Transaction)
 		if err != nil {
 			return nil, err
 		}
 
-		return &TransactionStatusModel{
+		return &BusinessObjects.TransactionStatusModel{
 			IsSuccessful: true,
 			RedirectUrl:  fmt.Sprintf("https://localhost:3000/confirm?orderId=%s", order.OrderID),
 		}, nil
 	}
 
 	order.OrderStatus = "Cancelled"
-	err = Repositories.UpdateOrder(order)
+	err = s.orderRepository.UpdateOrder(order)
 	if err != nil {
 		return nil, err
 	}
 
-	return &TransactionStatusModel{
+	return &BusinessObjects.TransactionStatusModel{
 		IsSuccessful: false,
 		RedirectUrl:  fmt.Sprintf("https://localhost:3000/reject?orderId=%s", orderId),
 	}, nil
