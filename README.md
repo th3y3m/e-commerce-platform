@@ -18,6 +18,17 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 
 ---
 
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#-features">Features</a></li>
+    <li><a href="#-technologies-used">Technologies Used</a></li>
+    <li><a href="#-screenshots">Screenshots</a></li>
+    <li><a href="#-contact-us">Contact Us</a></li>
+  </ol>
+</details>
+
+---
 ## 🚀 Features
 
 - **User Authentication**: Supports Google and Facebook authentication via `goth`, alongside email and JWT authentication.
@@ -38,7 +49,10 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 - **Scheduling**: `gocron` for background tasks.
 - **RBAC Authorization**: `casbin` for role-based access control.
 - **Unique Identifiers**: `google/uuid` for generating UUIDs.
-- **Task Queue**: `asynq` for background job processing (indirect dependency).
+- **Unit Test**: `testify` for Unit Test.
+
+## 📸 Screenshots
+(Screenshots coming soon...)
 
 ## Requirements
 
@@ -87,7 +101,10 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 
-#### Connect me via: truongtanhuy3006@gmail.com
+## 📬 Contact Us
+For inquiries or support, reach out via [truongtanhuy3006@gmail.com](mailto:truongtanhuy3006@gmail.com).
+
+---
 
 ##### &#169; 2024 th3y3m
 
