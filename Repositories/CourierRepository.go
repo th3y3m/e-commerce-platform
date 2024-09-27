@@ -10,22 +10,21 @@ import (
 
 type CourierRepository struct {
 	log *logrus.Logger
+	db  Interface.IDatabase
 }
 
-func NewCourierRepository(log *logrus.Logger) Interface.ICourierRepository {
-	return &CourierRepository{log}
+func NewCourierRepository(log *logrus.Logger, db Interface.IDatabase) Interface.ICourierRepository {
+	return &CourierRepository{
+		log: log,
+		db:  db,
+	}
 }
 
 func (c *CourierRepository) GetPaginatedCourierList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Courier], error) {
 	c.log.Infof("Fetching paginated courier list with searchValue: %s, sortBy: %s, pageIndex: %d, pageSize: %d, status: %v", searchValue, sortBy, pageIndex, pageSize, status)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return Util.PaginatedList[BusinessObjects.Courier]{}, err
-	}
 
 	var couriers []BusinessObjects.Courier
-	query := db.Model(&BusinessObjects.Courier{})
+	query := c.db.Model(&BusinessObjects.Courier{})
 	if searchValue != "" {
 		query = query.Where("courier LIKE ?", "%"+searchValue+"%")
 	}
@@ -60,14 +59,9 @@ func (c *CourierRepository) GetPaginatedCourierList(searchValue, sortBy string, 
 // GetAllCouriers retrieves all couriers from the database
 func (c *CourierRepository) GetAllCouriers() ([]BusinessObjects.Courier, error) {
 	c.log.Info("Fetching all couriers")
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return nil, err
-	}
 
 	var couriers []BusinessObjects.Courier
-	if err := db.Find(&couriers).Error; err != nil {
+	if err := c.db.Find(&couriers).Error; err != nil {
 		c.log.Error("Failed to fetch all couriers:", err)
 		return nil, err
 	}
@@ -79,14 +73,9 @@ func (c *CourierRepository) GetAllCouriers() ([]BusinessObjects.Courier, error) 
 // GetCourierByID retrieves a courier by its ID
 func (c *CourierRepository) GetCourierByID(courierID string) (BusinessObjects.Courier, error) {
 	c.log.Infof("Fetching courier by ID: %s", courierID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return BusinessObjects.Courier{}, err
-	}
 
 	var courier BusinessObjects.Courier
-	if err := db.First(&courier, "courier_id = ?", courierID).Error; err != nil {
+	if err := c.db.First(&courier, "courier_id = ?", courierID).Error; err != nil {
 		c.log.Error("Failed to fetch courier by ID:", err)
 		return BusinessObjects.Courier{}, err
 	}
@@ -98,13 +87,8 @@ func (c *CourierRepository) GetCourierByID(courierID string) (BusinessObjects.Co
 // CreateCourier adds a new courier to the database
 func (c *CourierRepository) CreateCourier(courier BusinessObjects.Courier) error {
 	c.log.Infof("Creating new courier with name: %s", courier.Courier)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Create(&courier).Error; err != nil {
+	if err := c.db.Create(&courier).Error; err != nil {
 		c.log.Error("Failed to create new courier:", err)
 		return err
 	}
@@ -116,13 +100,8 @@ func (c *CourierRepository) CreateCourier(courier BusinessObjects.Courier) error
 // UpdateCourier updates an existing courier
 func (c *CourierRepository) UpdateCourier(courier BusinessObjects.Courier) error {
 	c.log.Infof("Updating courier with ID: %s", courier.CourierID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Save(&courier).Error; err != nil {
+	if err := c.db.Save(&courier).Error; err != nil {
 		c.log.Error("Failed to update courier:", err)
 		return err
 	}
@@ -134,18 +113,13 @@ func (c *CourierRepository) UpdateCourier(courier BusinessObjects.Courier) error
 // DeleteCourier removes a courier from the database by its ID
 func (c *CourierRepository) DeleteCourier(courierID string) error {
 	c.log.Infof("Deleting courier with ID: %s", courierID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		c.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	// if err := db.Delete(&BusinessObjects.Courier{}, "courier_id = ?", courierID).Error; err != nil {
+	// if err := c.db.Delete(&BusinessObjects.Courier{}, "courier_id = ?", courierID).Error; err != nil {
 	// 	return err
 	// }
 
 	// Set status to false
-	if err := db.Model(&BusinessObjects.Courier{}).Where("courier_id = ?", courierID).Update("status", false).Error; err != nil {
+	if err := c.db.Model(&BusinessObjects.Courier{}).Where("courier_id = ?", courierID).Update("status", false).Error; err != nil {
 		c.log.Error("Failed to delete courier:", err)
 		return err
 	}

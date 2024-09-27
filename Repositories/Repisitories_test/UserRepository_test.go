@@ -22,11 +22,12 @@ func (m *MockDB) Find(dest interface{}, conds ...interface{}) *gorm.DB {
 	args := m.Called(append([]interface{}{dest}, conds...)...)
 
 	// Simulate populating `dest` with the mock data
-	if users, ok := args.Get(0).([]BusinessObjects.User); ok {
-		*dest.(*[]BusinessObjects.User) = users
-	}
+	// if users, ok := args.Get(0).([]BusinessObjects.User); ok {
+	// 	*dest.(*[]BusinessObjects.User) = users
+	// }
 
-	return &gorm.DB{}
+	// return &gorm.DB{}
+	return args.Get(0).(*gorm.DB)
 }
 
 // Mock First method
