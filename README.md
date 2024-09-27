@@ -7,25 +7,18 @@
 
 This project is an e-commerce platform built using Go, leveraging a range of powerful libraries and services to handle various aspects of the application, including user authentication, payment processing, product management, and more.
 
----
-
-## Technologies Used
-
-<p align="center">
-  <img src="https://www.vectorlogo.zone/logos/golang/golang-official.svg" alt="Go" width="100" height="100"/>
-  <img src="https://www.vectorlogo.zone/logos/postgresql/postgresql-icon.svg" alt="PostgreSQL" width="100" height="100"/>
-  <img src="https://avatars.githubusercontent.com/u/2370800?s=200&v=4" alt="Gin Gonic" width="100" height="100"/>
-  <img src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg" alt="Google Cloud" width="100" height="100"/>
-  <img src="https://avatars.githubusercontent.com/u/10409771?s=200&v=4" alt="Casbin" width="100" height="100"/>
-  <img src="https://www.vectorlogo.zone/logos/jsonwebtokenio/jsonwebtokenio-icon.svg" alt="JWT" width="100" height="100"/>
-  <img src="https://www.vectorlogo.zone/logos/facebook/facebook-icon.svg" alt="Facebook OAuth" width="100" height="100"/>
-  <img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="Google OAuth" width="100" height="100"/>
-  <img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" alt="Redis" width="100" height="100"/>
-</p>
+![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)
+![GORM](https://img.shields.io/badge/GORM-7289DA?style=for-the-badge&logo=postgresql&logoColor=white)
+![Gin](https://img.shields.io/badge/Gin-00ADD8?style=for-the-badge&logo=go&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+![Casbin](https://img.shields.io/badge/Casbin-7289DA?style=for-the-badge&logo=casbin&logoColor=white)
+![Goth](https://img.shields.io/badge/Goth-FF4088?style=for-the-badge&logo=goth&logoColor=white)
 
 ---
 
-## Features
+## 🚀 Features
 
 - **User Authentication**: Supports Google and Facebook authentication via `goth`, alongside email and JWT authentication.
 - **Storage**: Uses Google Cloud Storage for storing product images and other media files.
@@ -36,7 +29,7 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 - **Custom Product UUIDs**: Generates unique identifiers for products using `google/uuid`.
 - **Configuration Management**: Environment variables are managed using `godotenv` for easier configuration.
 
-## Tech Stack
+## 🛠️ Technologies Used
 
 - **Backend Framework**: `gin` (A lightweight web framework in Go).
 - **Database**: PostgreSQL with `gorm` for ORM.
