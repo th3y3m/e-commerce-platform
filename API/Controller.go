@@ -74,88 +74,89 @@ func Controller() *gin.Engine {
 	protected := router.Group("/auth")
 	protected.Use(Middleware.AuthMiddleware(enforcer))
 	{
-		protected.GET("/users/:id", GetUserByID)
-		protected.PUT("/users/UpdateProfile/:id", UpdateProfile)
-		protected.PUT("/users/Ban/:id", BanUser)
-		protected.PUT("/users/UnBan/:id", UnBanUser)
-		protected.POST("/products", CreateProduct)
-		protected.PUT("/products/:id", UpdateProduct)
-		protected.DELETE("/products/:id", DeleteProduct)
-
-		protected.POST("/categories", CreateCategory)
-		protected.PUT("/categories/:id", UpdateCategory)
-		protected.DELETE("/categories/:id", DeleteCategory)
-
-		protected.GET("/couriers/:id", GetCourierByID)
-		protected.POST("/couriers", CreateCourier)
-		protected.PUT("/couriers/:id", UpdateCourier)
-		protected.DELETE("/couriers/:id", DeleteCourier)
-
-		protected.GET("/discounts", GetAllDiscounts)
-		protected.GET("/discounts/:id", GetDiscountByID)
-		protected.POST("/discounts", CreateDiscount)
-		protected.PUT("/discounts/:id", UpdateDiscount)
-		protected.DELETE("/discounts/:id", DeleteDiscount)
-
-		protected.GET("/productDiscounts/:id", GetProductDiscountByID)
-
-		protected.GET("/cartItems/:id", GetCartItemByCartID)
-
-		protected.GET("/orders", GetPaginatedOrderList)
-		protected.GET("/orders/:id", GetOrderById)
-		protected.POST("/orders", PlaceOrder)
-
-		protected.GET("/orderDetails/:id", GetOrderDetailOfAOrder)
-
-		protected.GET("/freightRates", GetAllFreightRates)
-		protected.GET("/freightRates/:id", GetFreightRateByID)
-		protected.POST("/freightRates", CreateFreightRate)
-		protected.PUT("/freightRates/:id", UpdateFreightRate)
-		protected.DELETE("/freightRates/:id", DeleteFreightRate)
-
-		protected.GET("/vouchers", GetAllVouchers)
-		protected.GET("/vouchers/:id", GetVoucherByID)
-		protected.POST("/vouchers", CreateVoucher)
-		protected.PUT("/vouchers/:id", UpdateVoucher)
-		protected.DELETE("/vouchers/:id", DeleteVoucher)
-
-		protected.GET("/reviews", GetAllReviews)
-		protected.GET("/reviews/:id", GetReviewByID)
-		protected.POST("/reviews", CreateReview)
-		protected.PUT("/reviews/:id", UpdateReview)
-		protected.DELETE("/reviews/:id", DeleteReview)
-
-		protected.GET("/transactions", GetPaginatedTransactionList)
-		protected.GET("/transactions/:id", GetTransactionByID)
-		protected.POST("/transactions", CreateTransaction)
-		protected.PUT("/transactions/:id", UpdateTransaction)
-
-		protected.GET("/shoppingCart/:id", GetShoppingCartByID)
-		protected.GET("/shoppingCart", GetUserShoppingCart)
-		protected.POST("/shoppingCart", AddProductToCart)
-		protected.PUT("/shoppingCart", RemoveProductFromCart)
-		protected.DELETE("/shoppingCart/:id", ClearShoppingCart)
-		protected.GET("/shoppingCart/numberofitems/:id", NumberOfItemsInCart)
-
-		protected.PUT("/cookie/deleteUnitItem", DeleteUnitItem)
-		protected.PUT("/cookie/removeFromCart", RemoveFromCart)
-		protected.GET("/cookie/getCartItems/:id", GetCartItems)
-		protected.PUT("/cookie/deleteCartInCookie/:id", DeleteCartInCookie)
-		protected.GET("/cookie/numberOfItemsInCartCookie/:id", NumberOfItemsInCartCookie)
-		protected.POST("/cookie/saveCartToCookieHandler", SaveCartToCookieHandler)
-
-		protected.GET("/news", GetAllNews)
-		protected.GET("/news/:id", GetNewsByID)
-		protected.POST("/news", CreateNews)
-		protected.PUT("/news/:id", UpdateNews)
-		protected.DELETE("/news/:id", DeleteNews)
-
-		protected.GET("/vnpay", CreateVNPayUrl)
-		protected.POST("/vnpay", ValidateVNPayResponse)
-
-		protected.GET("/momo", CreateMoMoUrl)
-		protected.POST("/momo", ValidateMoMoResponse)
+		// routes
 	}
+	router.GET("/users/:id", GetUserByID)
+	router.PUT("/users/UpdateProfile/:id", UpdateProfile)
+	router.PUT("/users/Ban/:id", BanUser)
+	router.PUT("/users/UnBan/:id", UnBanUser)
+	router.POST("/products", CreateProduct)
+	router.PUT("/products/:id", UpdateProduct)
+	router.DELETE("/products/:id", DeleteProduct)
+
+	router.POST("/categories", CreateCategory)
+	router.PUT("/categories/:id", UpdateCategory)
+	router.DELETE("/categories/:id", DeleteCategory)
+
+	router.GET("/couriers/:id", GetCourierByID)
+	router.POST("/couriers", CreateCourier)
+	router.PUT("/couriers/:id", UpdateCourier)
+	router.DELETE("/couriers/:id", DeleteCourier)
+
+	router.GET("/discounts", GetAllDiscounts)
+	router.GET("/discounts/:id", GetDiscountByID)
+	router.POST("/discounts", CreateDiscount)
+	router.PUT("/discounts/:id", UpdateDiscount)
+	router.DELETE("/discounts/:id", DeleteDiscount)
+
+	router.GET("/productDiscounts/:id", GetProductDiscountByID)
+
+	router.GET("/cartItems/:id", GetCartItemByCartID)
+
+	router.GET("/orders", GetPaginatedOrderList)
+	router.GET("/orders/:id", GetOrderById)
+	router.POST("/orders", PlaceOrder)
+
+	router.GET("/orderDetails/:id", GetOrderDetailOfAOrder)
+
+	router.GET("/freightRates", GetAllFreightRates)
+	router.GET("/freightRates/:id", GetFreightRateByID)
+	router.POST("/freightRates", CreateFreightRate)
+	router.PUT("/freightRates/:id", UpdateFreightRate)
+	router.DELETE("/freightRates/:id", DeleteFreightRate)
+
+	router.GET("/vouchers", GetAllVouchers)
+	router.GET("/vouchers/:id", GetVoucherByID)
+	router.POST("/vouchers", CreateVoucher)
+	router.PUT("/vouchers/:id", UpdateVoucher)
+	router.DELETE("/vouchers/:id", DeleteVoucher)
+
+	router.GET("/reviews", GetAllReviews)
+	router.GET("/reviews/:id", GetReviewByID)
+	router.POST("/reviews", CreateReview)
+	router.PUT("/reviews/:id", UpdateReview)
+	router.DELETE("/reviews/:id", DeleteReview)
+
+	router.GET("/transactions", GetPaginatedTransactionList)
+	router.GET("/transactions/:id", GetTransactionByID)
+	router.POST("/transactions", CreateTransaction)
+	router.PUT("/transactions/:id", UpdateTransaction)
+
+	router.GET("/shoppingCart/:id", GetShoppingCartByID)
+	router.GET("/shoppingCart", GetUserShoppingCart)
+	router.POST("/shoppingCart", AddProductToCart)
+	router.PUT("/shoppingCart", RemoveProductFromCart)
+	router.DELETE("/shoppingCart/:id", ClearShoppingCart)
+	router.GET("/shoppingCart/numberofitems/:id", NumberOfItemsInCart)
+
+	router.PUT("/cookie/deleteUnitItem", DeleteUnitItem)
+	router.PUT("/cookie/removeFromCart", RemoveFromCart)
+	router.GET("/cookie/getCartItems/:id", GetCartItems)
+	router.PUT("/cookie/deleteCartInCookie/:id", DeleteCartInCookie)
+	router.GET("/cookie/numberOfItemsInCartCookie/:id", NumberOfItemsInCartCookie)
+	router.POST("/cookie/saveCartToCookieHandler", SaveCartToCookieHandler)
+
+	router.GET("/news", GetAllNews)
+	router.GET("/news/:id", GetNewsByID)
+	router.POST("/news", CreateNews)
+	router.PUT("/news/:id", UpdateNews)
+	router.DELETE("/news/:id", DeleteNews)
+
+	router.GET("/vnpay", CreateVNPayUrl)
+	router.POST("/vnpay", ValidateVNPayResponse)
+
+	router.GET("/momo", CreateMoMoUrl)
+	router.POST("/momo", ValidateMoMoResponse)
 
 	log.Println("Routes registered successfully")
 

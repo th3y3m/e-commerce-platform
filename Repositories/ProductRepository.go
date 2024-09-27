@@ -10,22 +10,21 @@ import (
 
 type ProductRepository struct {
 	log *logrus.Logger
+	db  Interface.IDatabase
 }
 
-func NewProductRepository(log *logrus.Logger) Interface.IProductRepository {
-	return &ProductRepository{log: log}
+func NewProductRepository(log *logrus.Logger, db Interface.IDatabase) Interface.IProductRepository {
+	return &ProductRepository{
+		log: log,
+		db:  db,
+	}
 }
 
 func (p *ProductRepository) GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
 	p.log.Infof("Fetching paginated product list with searchValue: %s, sortBy: %s, productID: %s, sellerID: %s, categoryID: %s, pageIndex: %d, pageSize: %d, status: %v", searchValue, sortBy, productID, sellerID, categoryID, pageIndex, pageSize, status)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		p.log.Error("Failed to connect to PostgreSQL:", err)
-		return Util.PaginatedList[BusinessObjects.Product]{}, err
-	}
 
 	var products []BusinessObjects.Product
-	query := db.Model(&BusinessObjects.Product{})
+	query := p.db.Model(&BusinessObjects.Product{})
 
 	if productID != "" {
 		query = query.Where("product_id = ?", productID)
@@ -84,14 +83,9 @@ func (p *ProductRepository) GetPaginatedProductList(searchValue, sortBy, product
 // GetAllProducts retrieves all products from the database
 func (p *ProductRepository) GetAllProducts() ([]BusinessObjects.Product, error) {
 	p.log.Info("Fetching all products")
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		p.log.Error("Failed to connect to PostgreSQL:", err)
-		return nil, err
-	}
 
 	var products []BusinessObjects.Product
-	if err := db.Find(&products).Error; err != nil {
+	if err := p.db.Find(&products).Error; err != nil {
 		p.log.Error("Failed to fetch all products:", err)
 		return nil, err
 	}
@@ -103,14 +97,9 @@ func (p *ProductRepository) GetAllProducts() ([]BusinessObjects.Product, error) 
 // GetProductByID retrieves a product by its ID
 func (p *ProductRepository) GetProductByID(productID string) (BusinessObjects.Product, error) {
 	p.log.Infof("Fetching product by ID: %s", productID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		p.log.Error("Failed to connect to PostgreSQL:", err)
-		return BusinessObjects.Product{}, err
-	}
 
 	var product BusinessObjects.Product
-	if err := db.First(&product, "product_id = ?", productID).Error; err != nil {
+	if err := p.db.First(&product, "product_id = ?", productID).Error; err != nil {
 		p.log.Error("Failed to fetch product by ID:", err)
 		return BusinessObjects.Product{}, err
 	}
@@ -122,13 +111,8 @@ func (p *ProductRepository) GetProductByID(productID string) (BusinessObjects.Pr
 // CreateProduct adds a new product to the database
 func (p *ProductRepository) CreateProduct(product BusinessObjects.Product) error {
 	p.log.Infof("Creating new product with ID: %s", product.ProductID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		p.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Create(&product).Error; err != nil {
+	if err := p.db.Create(&product).Error; err != nil {
 		p.log.Error("Failed to create new product:", err)
 		return err
 	}
@@ -140,13 +124,8 @@ func (p *ProductRepository) CreateProduct(product BusinessObjects.Product) error
 // UpdateProduct updates an existing product
 func (p *ProductRepository) UpdateProduct(product BusinessObjects.Product) error {
 	p.log.Infof("Updating product with ID: %s", product.ProductID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		p.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
 
-	if err := db.Save(&product).Error; err != nil {
+	if err := p.db.Save(&product).Error; err != nil {
 		p.log.Error("Failed to update product:", err)
 		return err
 	}
@@ -158,13 +137,9 @@ func (p *ProductRepository) UpdateProduct(product BusinessObjects.Product) error
 // DeleteProduct removes a product from the database by its ID
 func (p *ProductRepository) DeleteProduct(productID string) error {
 	p.log.Infof("Deleting product with ID: %s", productID)
-	db, err := Util.ConnectToPostgreSQL()
-	if err != nil {
-		p.log.Error("Failed to connect to PostgreSQL:", err)
-		return err
-	}
+
 	// Set product.Status to false
-	if err := db.Model(&BusinessObjects.Product{}).Where("product_id = ?", productID).Update("status", false).Error; err != nil {
+	if err := p.db.Model(&BusinessObjects.Product{}).Where("product_id = ?", productID).Update("status", false).Error; err != nil {
 		p.log.Error("Failed to delete product:", err)
 		return err
 	}

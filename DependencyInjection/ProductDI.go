@@ -4,13 +4,19 @@ import (
 	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Repositories"
 	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/sirupsen/logrus"
 )
 
 func NewProductRepositoryProvider() Interface.IProductRepository {
 	log := logrus.New()
-	return Repositories.NewProductRepository(log)
+	db, err := Util.ConnectToPostgreSQL()
+
+	if err != nil {
+		log.Fatalf("Failed to connect to PostgreSQL: %v", err)
+	}
+	return Repositories.NewProductRepository(log, db)
 }
 
 func NewProductServiceProvider() Interface.IProductService {
