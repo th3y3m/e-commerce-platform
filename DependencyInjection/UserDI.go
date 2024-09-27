@@ -4,6 +4,7 @@ import (
 	"th3y3m/e-commerce-platform/Interface"
 	"th3y3m/e-commerce-platform/Repositories"
 	"th3y3m/e-commerce-platform/Services"
+	"th3y3m/e-commerce-platform/Util"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -22,7 +23,12 @@ func NewNewAuthenticationServiceProvider() Interface.IAuthenticationService {
 
 func NewUserRepositoryProvider() Interface.IUserRepository {
 	log := logrus.New()
-	return Repositories.NewUserRepository(log)
+	db, err := Util.ConnectToPostgreSQL()
+	if err != nil {
+		log.Error("Failed to connect to PostgreSQL:", err)
+		return nil
+	}
+	return Repositories.NewUserRepository(log, db)
 }
 
 func NewUserServiceProvider() Interface.IUserService {

@@ -17,8 +17,10 @@ func NewNewsRepository(log *logrus.Logger) Interface.INewsRepository {
 }
 
 func (n *NewsRepository) GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error) {
+	n.log.Infof("Fetching paginated news list with searchValue: %s, sortBy: %s, newId: %s, authorID: %s, pageIndex: %d, pageSize: %d, status: %v", searchValue, sortBy, newId, authorID, pageIndex, pageSize, status)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return Util.PaginatedList[BusinessObjects.News]{}, err
 	}
 
@@ -76,78 +78,99 @@ func (n *NewsRepository) GetPaginatedNewsList(searchValue, sortBy, newId, author
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
+		n.log.Error("Failed to count news:", err)
 		return Util.PaginatedList[BusinessObjects.News]{}, err
 	}
 
 	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&news).Error; err != nil {
+		n.log.Error("Failed to fetch paginated news:", err)
 		return Util.PaginatedList[BusinessObjects.News]{}, err
 	}
 
+	n.log.Infof("Successfully fetched paginated news list with total count: %d", total)
 	return Util.NewPaginatedList(news, total, pageIndex, pageSize), nil
 }
 
-// GetAllNews retrieves all freight news from the database
+// GetAllNews retrieves all news from the database
 func (n *NewsRepository) GetAllNews() ([]BusinessObjects.News, error) {
+	n.log.Info("Fetching all news")
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return nil, err
 	}
 
 	var news []BusinessObjects.News
 	if err := db.Find(&news).Error; err != nil {
+		n.log.Error("Failed to fetch all news:", err)
 		return nil, err
 	}
 
+	n.log.Info("Successfully fetched all news")
 	return news, nil
 }
 
-// GetNewByID retrieves a freight news by its ID
+// GetNewByID retrieves a news by its ID
 func (n *NewsRepository) GetNewByID(newsID string) (BusinessObjects.News, error) {
+	n.log.Infof("Fetching news by ID: %s", newsID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return BusinessObjects.News{}, err
 	}
 
 	var news BusinessObjects.News
 	if err := db.First(&news, "news_id = ?", newsID).Error; err != nil {
+		n.log.Error("Failed to fetch news by ID:", err)
 		return BusinessObjects.News{}, err
 	}
 
+	n.log.Infof("Successfully fetched news by ID: %s", newsID)
 	return news, nil
 }
 
-// CreateNew adds a new freight news to the database
+// CreateNew adds a new news to the database
 func (n *NewsRepository) CreateNew(news BusinessObjects.News) error {
+	n.log.Infof("Creating new news with title: %s", news.Title)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Create(&news).Error; err != nil {
+		n.log.Error("Failed to create new news:", err)
 		return err
 	}
 
+	n.log.Infof("Successfully created new news with title: %s", news.Title)
 	return nil
 }
 
-// UpdateNew updates an existing freight news
+// UpdateNew updates an existing news
 func (n *NewsRepository) UpdateNew(news BusinessObjects.News) error {
+	n.log.Infof("Updating news with ID: %s", news.NewsID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Save(&news).Error; err != nil {
+		n.log.Error("Failed to update news:", err)
 		return err
 	}
 
+	n.log.Infof("Successfully updated news with ID: %s", news.NewsID)
 	return nil
 }
 
-// DeleteNew removes a freight news from the database by its ID
+// DeleteNew removes a news from the database by its ID
 func (n *NewsRepository) DeleteNew(newsID string) error {
+	n.log.Infof("Deleting news with ID: %s", newsID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
@@ -156,8 +179,10 @@ func (n *NewsRepository) DeleteNew(newsID string) error {
 	// }
 
 	if err := db.Model(&BusinessObjects.News{}).Where("news_id = ?", newsID).Update("status", false).Error; err != nil {
+		n.log.Error("Failed to delete news:", err)
 		return err
 	}
 
+	n.log.Infof("Successfully deleted news with ID: %s", newsID)
 	return nil
 }

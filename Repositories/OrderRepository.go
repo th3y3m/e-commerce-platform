@@ -18,8 +18,10 @@ func NewOrderRepository(log *logrus.Logger) Interface.IOrderRepository {
 }
 
 func (o *OrderRepository) GetPaginatedOrderList(sortBy, orderID, customerId, courierId, voucherId string, pageIndex, pageSize int, startDate, endDate *time.Time, minPrice, maxPrice *float64, status string) (Util.PaginatedList[BusinessObjects.Order], error) {
+	o.log.Infof("Fetching paginated order list with sortBy: %s, orderID: %s, customerId: %s, courierId: %s, voucherId: %s, pageIndex: %d, pageSize: %d, startDate: %v, endDate: %v, minPrice: %v, maxPrice: %v, status: %s", sortBy, orderID, customerId, courierId, voucherId, pageIndex, pageSize, startDate, endDate, minPrice, maxPrice, status)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		o.log.Error("Failed to connect to PostgreSQL:", err)
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
 	}
 
@@ -89,78 +91,99 @@ func (o *OrderRepository) GetPaginatedOrderList(sortBy, orderID, customerId, cou
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
+		o.log.Error("Failed to count orders:", err)
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
 	}
 
 	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&orders).Error; err != nil {
+		o.log.Error("Failed to fetch paginated orders:", err)
 		return Util.PaginatedList[BusinessObjects.Order]{}, err
 	}
 
+	o.log.Infof("Successfully fetched paginated order list with total count: %d", total)
 	return Util.NewPaginatedList(orders, total, pageIndex, pageSize), nil
 }
 
 // GetAllOrders retrieves all orders from the database
 func (o *OrderRepository) GetAllOrders() ([]BusinessObjects.Order, error) {
+	o.log.Info("Fetching all orders")
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		o.log.Error("Failed to connect to PostgreSQL:", err)
 		return nil, err
 	}
 
 	var orders []BusinessObjects.Order
 	if err := db.Find(&orders).Error; err != nil {
+		o.log.Error("Failed to fetch all orders:", err)
 		return nil, err
 	}
 
+	o.log.Info("Successfully fetched all orders")
 	return orders, nil
 }
 
 // GetOrderByID retrieves an order by its ID
 func (o *OrderRepository) GetOrderByID(orderID string) (BusinessObjects.Order, error) {
+	o.log.Infof("Fetching order by ID: %s", orderID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		o.log.Error("Failed to connect to PostgreSQL:", err)
 		return BusinessObjects.Order{}, err
 	}
 
 	var order BusinessObjects.Order
 	if err := db.First(&order, "order_id = ?", orderID).Error; err != nil {
+		o.log.Error("Failed to fetch order by ID:", err)
 		return BusinessObjects.Order{}, err
 	}
 
+	o.log.Infof("Successfully fetched order by ID: %s", orderID)
 	return order, nil
 }
 
 // CreateOrder adds a new order to the database
 func (o *OrderRepository) CreateOrder(order BusinessObjects.Order) error {
+	o.log.Infof("Creating new order with ID: %s", order.OrderID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		o.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Create(&order).Error; err != nil {
+		o.log.Error("Failed to create new order:", err)
 		return err
 	}
 
+	o.log.Infof("Successfully created new order with ID: %s", order.OrderID)
 	return nil
 }
 
 // UpdateOrder updates an existing order
 func (o *OrderRepository) UpdateOrder(order BusinessObjects.Order) error {
+	o.log.Infof("Updating order with ID: %s", order.OrderID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		o.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Save(&order).Error; err != nil {
+		o.log.Error("Failed to update order:", err)
 		return err
 	}
 
+	o.log.Infof("Successfully updated order with ID: %s", order.OrderID)
 	return nil
 }
 
 // DeleteOrder removes an order from the database by its ID
 func (o *OrderRepository) DeleteOrder(orderID string) error {
+	o.log.Infof("Deleting order with ID: %s", orderID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		o.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
@@ -169,8 +192,10 @@ func (o *OrderRepository) DeleteOrder(orderID string) error {
 	// }
 
 	if err := db.Model(&BusinessObjects.Order{}).Where("order_id = ?", orderID).Update("order_status", "Cancel").Error; err != nil {
+		o.log.Error("Failed to delete order:", err)
 		return err
 	}
 
+	o.log.Infof("Successfully deleted order with ID: %s", orderID)
 	return nil
 }

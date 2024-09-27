@@ -18,8 +18,10 @@ func NewVoucherRepository(log *logrus.Logger) Interface.IVoucherRepository {
 }
 
 func (v *VoucherRepository) GetPaginatedVoucherList(sortBy, voucherID string, pageIndex, pageSize int, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Voucher], error) {
+	v.log.Infof("Fetching paginated voucher list with sortBy: %s, voucherID: %s, pageIndex: %d, pageSize: %d, status: %v, startDate: %v, endDate: %v", sortBy, voucherID, pageIndex, pageSize, status, startDate, endDate)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		v.log.Error("Failed to connect to PostgreSQL:", err)
 		return Util.PaginatedList[BusinessObjects.Voucher]{}, err
 	}
 
@@ -63,78 +65,99 @@ func (v *VoucherRepository) GetPaginatedVoucherList(sortBy, voucherID string, pa
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
+		v.log.Error("Failed to count vouchers:", err)
 		return Util.PaginatedList[BusinessObjects.Voucher]{}, err
 	}
 
 	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&vouchers).Error; err != nil {
+		v.log.Error("Failed to fetch paginated vouchers:", err)
 		return Util.PaginatedList[BusinessObjects.Voucher]{}, err
 	}
 
+	v.log.Infof("Successfully fetched paginated voucher list with total count: %d", total)
 	return Util.NewPaginatedList(vouchers, total, pageIndex, pageSize), nil
 }
 
 // GetAllVouchers retrieves all vouchers from the database
 func (v *VoucherRepository) GetAllVouchers() ([]BusinessObjects.Voucher, error) {
+	v.log.Info("Fetching all vouchers")
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		v.log.Error("Failed to connect to PostgreSQL:", err)
 		return nil, err
 	}
 
 	var vouchers []BusinessObjects.Voucher
 	if err := db.Find(&vouchers).Error; err != nil {
+		v.log.Error("Failed to fetch all vouchers:", err)
 		return nil, err
 	}
 
+	v.log.Info("Successfully fetched all vouchers")
 	return vouchers, nil
 }
 
 // GetVoucherByID retrieves a voucher by its ID
 func (v *VoucherRepository) GetVoucherByID(voucherID string) (BusinessObjects.Voucher, error) {
+	v.log.Infof("Fetching voucher by ID: %s", voucherID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		v.log.Error("Failed to connect to PostgreSQL:", err)
 		return BusinessObjects.Voucher{}, err
 	}
 
 	var voucher BusinessObjects.Voucher
 	if err := db.First(&voucher, "voucher_id = ?", voucherID).Error; err != nil {
+		v.log.Error("Failed to fetch voucher by ID:", err)
 		return BusinessObjects.Voucher{}, err
 	}
 
+	v.log.Infof("Successfully fetched voucher by ID: %s", voucherID)
 	return voucher, nil
 }
 
 // CreateVoucher adds a new voucher to the database
 func (v *VoucherRepository) CreateVoucher(voucher BusinessObjects.Voucher) error {
+	v.log.Infof("Creating new voucher with ID: %s", voucher.VoucherID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		v.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Create(&voucher).Error; err != nil {
+		v.log.Error("Failed to create new voucher:", err)
 		return err
 	}
 
+	v.log.Infof("Successfully created new voucher with ID: %s", voucher.VoucherID)
 	return nil
 }
 
 // UpdateVoucher updates an existing voucher
 func (v *VoucherRepository) UpdateVoucher(voucher BusinessObjects.Voucher) error {
+	v.log.Infof("Updating voucher with ID: %s", voucher.VoucherID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		v.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Save(&voucher).Error; err != nil {
+		v.log.Error("Failed to update voucher:", err)
 		return err
 	}
 
+	v.log.Infof("Successfully updated voucher with ID: %s", voucher.VoucherID)
 	return nil
 }
 
 // DeleteVoucher removes a voucher from the database by its ID
 func (v *VoucherRepository) DeleteVoucher(voucherID string) error {
+	v.log.Infof("Deleting voucher with ID: %s", voucherID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		v.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
@@ -143,8 +166,10 @@ func (v *VoucherRepository) DeleteVoucher(voucherID string) error {
 	// }
 
 	if err := db.Model(&BusinessObjects.Voucher{}).Where("voucher_id = ?", voucherID).Update("status", false).Error; err != nil {
+		v.log.Error("Failed to delete voucher:", err)
 		return err
 	}
 
+	v.log.Infof("Successfully deleted voucher with ID: %s", voucherID)
 	return nil
 }

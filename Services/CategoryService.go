@@ -14,8 +14,8 @@ func NewCategoryService(categoryRepository Interface.ICategoryRepository) *Categ
 	return &CategoryService{categoryRepository}
 }
 
-func (c *CategoryService) GetPaginatedategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
-	return c.categoryRepository.GetPaginatedategoryList(searchValue, sortBy, pageIndex, pageSize, status)
+func (c *CategoryService) GetPaginatedCategoryList(searchValue, sortBy string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Category], error) {
+	return c.categoryRepository.GetPaginatedCategoryList(searchValue, sortBy, pageIndex, pageSize, status)
 }
 
 func (c *CategoryService) GetAllCategories() ([]BusinessObjects.Category, error) {

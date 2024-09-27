@@ -17,8 +17,10 @@ func NewProductRepository(log *logrus.Logger) Interface.IProductRepository {
 }
 
 func (p *ProductRepository) GetPaginatedProductList(searchValue, sortBy, productID, sellerID, categoryID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.Product], error) {
+	p.log.Infof("Fetching paginated product list with searchValue: %s, sortBy: %s, productID: %s, sellerID: %s, categoryID: %s, pageIndex: %d, pageSize: %d, status: %v", searchValue, sortBy, productID, sellerID, categoryID, pageIndex, pageSize, status)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		p.log.Error("Failed to connect to PostgreSQL:", err)
 		return Util.PaginatedList[BusinessObjects.Product]{}, err
 	}
 
@@ -65,85 +67,108 @@ func (p *ProductRepository) GetPaginatedProductList(searchValue, sortBy, product
 	}
 
 	if err := query.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&products).Error; err != nil {
+		p.log.Error("Failed to fetch paginated products:", err)
 		return Util.PaginatedList[BusinessObjects.Product]{}, err
 	}
 
 	var totalCount int64
 	if err := query.Count(&totalCount).Error; err != nil {
+		p.log.Error("Failed to count products:", err)
 		return Util.PaginatedList[BusinessObjects.Product]{}, err
 	}
 
+	p.log.Infof("Successfully fetched paginated product list with total count: %d", totalCount)
 	return Util.NewPaginatedList(products, totalCount, pageIndex, pageSize), nil
 }
 
 // GetAllProducts retrieves all products from the database
 func (p *ProductRepository) GetAllProducts() ([]BusinessObjects.Product, error) {
+	p.log.Info("Fetching all products")
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		p.log.Error("Failed to connect to PostgreSQL:", err)
 		return nil, err
 	}
 
 	var products []BusinessObjects.Product
 	if err := db.Find(&products).Error; err != nil {
+		p.log.Error("Failed to fetch all products:", err)
 		return nil, err
 	}
 
+	p.log.Info("Successfully fetched all products")
 	return products, nil
 }
 
 // GetProductByID retrieves a product by its ID
 func (p *ProductRepository) GetProductByID(productID string) (BusinessObjects.Product, error) {
+	p.log.Infof("Fetching product by ID: %s", productID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		p.log.Error("Failed to connect to PostgreSQL:", err)
 		return BusinessObjects.Product{}, err
 	}
 
 	var product BusinessObjects.Product
 	if err := db.First(&product, "product_id = ?", productID).Error; err != nil {
+		p.log.Error("Failed to fetch product by ID:", err)
 		return BusinessObjects.Product{}, err
 	}
 
+	p.log.Infof("Successfully fetched product by ID: %s", productID)
 	return product, nil
 }
 
 // CreateProduct adds a new product to the database
 func (p *ProductRepository) CreateProduct(product BusinessObjects.Product) error {
+	p.log.Infof("Creating new product with ID: %s", product.ProductID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		p.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Create(&product).Error; err != nil {
+		p.log.Error("Failed to create new product:", err)
 		return err
 	}
 
+	p.log.Infof("Successfully created new product with ID: %s", product.ProductID)
 	return nil
 }
 
 // UpdateProduct updates an existing product
 func (p *ProductRepository) UpdateProduct(product BusinessObjects.Product) error {
+	p.log.Infof("Updating product with ID: %s", product.ProductID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		p.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 
 	if err := db.Save(&product).Error; err != nil {
+		p.log.Error("Failed to update product:", err)
 		return err
 	}
 
+	p.log.Infof("Successfully updated product with ID: %s", product.ProductID)
 	return nil
 }
 
 // DeleteProduct removes a product from the database by its ID
 func (p *ProductRepository) DeleteProduct(productID string) error {
+	p.log.Infof("Deleting product with ID: %s", productID)
 	db, err := Util.ConnectToPostgreSQL()
 	if err != nil {
+		p.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
 	// Set product.Status to false
 	if err := db.Model(&BusinessObjects.Product{}).Where("product_id = ?", productID).Update("status", false).Error; err != nil {
+		p.log.Error("Failed to delete product:", err)
 		return err
 	}
 
+	p.log.Infof("Successfully deleted product with ID: %s", productID)
 	return nil
 }
