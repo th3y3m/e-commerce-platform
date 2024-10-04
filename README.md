@@ -2,7 +2,6 @@
 [![E-Commerce Platform (CI applid)](https://github.com/th3y3m/e-commerce-platform/actions/workflows/ci-script.yml/badge.svg)](https://github.com/th3y3m/e-commerce-platform/actions/workflows/ci-script.yml)
 ![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-
 # Welcome to E-Commerce Platform in Go
 
 This project is an e-commerce platform built using Go, leveraging a range of powerful libraries and services to handle various aspects of the application, including user authentication, payment processing, product management, and more.
@@ -15,6 +14,8 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
 ![Casbin](https://img.shields.io/badge/Casbin-7289DA?style=for-the-badge&logo=casbin&logoColor=white)
 ![Goth](https://img.shields.io/badge/Goth-FF4088?style=for-the-badge&logo=goth&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
 
 ---
 
@@ -29,6 +30,7 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 </details>
 
 ---
+
 ## 🚀 Features
 
 - **User Authentication**: Supports Google and Facebook authentication via `goth`, alongside email and JWT authentication.
@@ -39,6 +41,8 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 - **Session Management**: Uses `gin-contrib/sessions` for secure session handling.
 - **Custom Product UUIDs**: Generates unique identifiers for products using `google/uuid`.
 - **Configuration Management**: Environment variables are managed using `godotenv` for easier configuration.
+- **Caching**: Implements Redis for caching frequently accessed data.
+- **Message Queue**: Uses RabbitMQ for handling asynchronous communication between services.
 
 ## 🛠️ Technologies Used
 
@@ -49,9 +53,12 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 - **Scheduling**: `gocron` for background tasks.
 - **RBAC Authorization**: `casbin` for role-based access control.
 - **Unique Identifiers**: `google/uuid` for generating UUIDs.
+- **Caching**: `redis` for caching.
+- **Message Queue**: `RabbitMQ` for message queue management.
 - **Unit Test**: `testify` for Unit Test.
 
 ## 📸 Screenshots
+
 (Screenshots coming soon...)
 
 ## Requirements
@@ -60,7 +67,9 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 - PostgreSQL database.
 - Google Cloud credentials for Cloud Storage.
 - OAuth credentials for Google and Facebook authentication.
-  
+- Redis server for caching.
+- RabbitMQ server for message queues.
+
 ## Installation
 
 1. **Clone the repository**:
@@ -93,6 +102,8 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 - **Google Cloud Storage**: For storing media files.
 - **GoCron**: For scheduling tasks.
 - **Goth**: For Google and Facebook OAuth.
+- **Redis**: For caching frequently used data.
+- **RabbitMQ**: For message queue management.
 - **Godotenv**: For environment variable management.
 - **UUID**: For generating unique product and order IDs.
 
@@ -100,11 +111,10 @@ This project is an e-commerce platform built using Go, leveraging a range of pow
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-
 ## 📬 Contact Us
+
 For inquiries or support, reach out via [truongtanhuy3006@gmail.com](mailto:truongtanhuy3006@gmail.com).
 
 ---
 
 ##### &#169; 2024 th3y3m
-
