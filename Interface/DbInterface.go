@@ -1,6 +1,8 @@
 package Interface
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type IDatabase interface {
 	Find(dest interface{}, conds ...interface{}) *gorm.DB

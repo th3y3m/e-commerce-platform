@@ -22,7 +22,7 @@ func GetPaginatedNewsList(c *gin.Context) {
 	authorID := c.DefaultQuery("authorID", "")
 	status, _ := strconv.ParseBool(c.DefaultQuery("status", ""))
 
-	news, err := module.GetPaginatedNewsList(searchValue, sortBy, newID, authorID, pageIndex, pageSize, &status)
+	news, err := module.GetPaginatedNewsList(c, searchValue, sortBy, newID, authorID, pageIndex, pageSize, &status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -32,7 +32,7 @@ func GetPaginatedNewsList(c *gin.Context) {
 
 func GetAllNews(c *gin.Context) {
 	module := DependencyInjection.NewNewsServiceProvider()
-	news, err := module.GetAllNews()
+	news, err := module.GetAllNews(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -44,7 +44,7 @@ func GetNewsByID(c *gin.Context) {
 	module := DependencyInjection.NewNewsServiceProvider()
 
 	id := c.Param("id")
-	news, err := module.GetNewsByID(id)
+	news, err := module.GetNewsByID(c, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -99,7 +99,7 @@ func CreateNews(c *gin.Context) {
 	}
 
 	// Call the service to create the news entry
-	err = module.CreateNews(news.Title, news.Content, news.AuthorID, news.Category, publicURL)
+	err = module.CreateNews(c, news.Title, news.Content, news.AuthorID, news.Category, publicURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -123,7 +123,7 @@ func UpdateNews(c *gin.Context) {
 	}
 
 	id := c.Param("id")
-	err := module.UpdateNews(id, news.Title, news.Content, news.AuthorID, news.Category, news.ImageURL)
+	err := module.UpdateNews(c, id, news.Title, news.Content, news.AuthorID, news.Category, news.ImageURL)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
@@ -134,7 +134,7 @@ func UpdateNews(c *gin.Context) {
 func DeleteNews(c *gin.Context) {
 	module := DependencyInjection.NewNewsServiceProvider()
 	id := c.Param("id")
-	err := module.DeleteNews(id)
+	err := module.DeleteNews(c, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}

@@ -6,7 +6,7 @@ import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 )
 

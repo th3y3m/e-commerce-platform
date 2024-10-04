@@ -1,8 +1,14 @@
 package Repositories
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Interface"
+	"th3y3m/e-commerce-platform/Provider"
 	"th3y3m/e-commerce-platform/Util"
 
 	"github.com/sirupsen/logrus"
@@ -10,15 +16,42 @@ import (
 
 type NewsRepository struct {
 	log *logrus.Logger
+	db  Provider.IDb
 }
 
-func NewNewsRepository(log *logrus.Logger) Interface.INewsRepository {
-	return &NewsRepository{log: log}
+func NewNewsRepository(log *logrus.Logger, db Provider.IDb) Interface.INewsRepository {
+	return &NewsRepository{log: log, db: db}
 }
 
-func (n *NewsRepository) GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error) {
+func getPaginatedNewListCacheKey(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) string {
+	return fmt.Sprintf("paginatedNewsList:%s:%s:%s:%s:%d:%d:%v", searchValue, sortBy, newId, authorID, pageIndex, pageSize, status)
+}
+
+func getNewsCacheKey(newsID string) string {
+	return "news:" + newsID
+}
+
+func (n *NewsRepository) GetPaginatedNewsList(ctx context.Context, searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error) {
 	n.log.Infof("Fetching paginated news list with searchValue: %s, sortBy: %s, newId: %s, authorID: %s, pageIndex: %d, pageSize: %d, status: %v", searchValue, sortBy, newId, authorID, pageIndex, pageSize, status)
-	db, err := Util.ConnectToPostgreSQL()
+	redisClient, err := n.db.GetRedis()
+	if err != nil {
+		n.log.Error("Failed to get Redis client:", err)
+		return Util.PaginatedList[BusinessObjects.News]{}, err
+	}
+
+	cacheKey := getPaginatedNewListCacheKey(searchValue, sortBy, newId, authorID, pageIndex, pageSize, status)
+	val, err := redisClient.Get(ctx, cacheKey).Result()
+	if err == nil {
+		n.log.Infof("Cache hit for paginated news list")
+		var paginatedList Util.PaginatedList[BusinessObjects.News]
+		if err := json.Unmarshal([]byte(val), &paginatedList); err == nil {
+			return paginatedList, nil
+		}
+		n.log.Warn("Failed to unmarshal cached paginated list data:", err)
+	}
+
+	n.log.Infof("Cache miss for paginated news list")
+	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return Util.PaginatedList[BusinessObjects.News]{}, err
@@ -87,14 +120,21 @@ func (n *NewsRepository) GetPaginatedNewsList(searchValue, sortBy, newId, author
 		return Util.PaginatedList[BusinessObjects.News]{}, err
 	}
 
+	paginatedList := Util.NewPaginatedList(news, total, pageIndex, pageSize)
+	data, err := json.Marshal(paginatedList)
+	if err == nil {
+		redisClient.Set(ctx, cacheKey, data, time.Hour)
+	}
+
 	n.log.Infof("Successfully fetched paginated news list with total count: %d", total)
-	return Util.NewPaginatedList(news, total, pageIndex, pageSize), nil
+	return paginatedList, nil
 }
 
 // GetAllNews retrieves all news from the database
-func (n *NewsRepository) GetAllNews() ([]BusinessObjects.News, error) {
+func (n *NewsRepository) GetAllNews(ctx context.Context) ([]BusinessObjects.News, error) {
 	n.log.Info("Fetching all news")
-	db, err := Util.ConnectToPostgreSQL()
+
+	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return nil, err
@@ -111,9 +151,27 @@ func (n *NewsRepository) GetAllNews() ([]BusinessObjects.News, error) {
 }
 
 // GetNewByID retrieves a news by its ID
-func (n *NewsRepository) GetNewByID(newsID string) (BusinessObjects.News, error) {
+func (n *NewsRepository) GetNewByID(ctx context.Context, newsID string) (BusinessObjects.News, error) {
 	n.log.Infof("Fetching news by ID: %s", newsID)
-	db, err := Util.ConnectToPostgreSQL()
+	redisClient, err := n.db.GetRedis()
+	if err != nil {
+		n.log.Error("Failed to get Redis client:", err)
+		return BusinessObjects.News{}, err
+	}
+
+	cacheKey := getNewsCacheKey(newsID)
+	val, err := redisClient.Get(ctx, cacheKey).Result()
+	if err == nil {
+		n.log.Infof("Cache hit for news ID: %s", newsID)
+		var news BusinessObjects.News
+		if err := json.Unmarshal([]byte(val), &news); err == nil {
+			return news, nil
+		}
+		n.log.Warn("Failed to unmarshal cached news data:", err)
+	}
+
+	n.log.Infof("Cache miss for news ID: %s", newsID)
+	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return BusinessObjects.News{}, err
@@ -125,14 +183,19 @@ func (n *NewsRepository) GetNewByID(newsID string) (BusinessObjects.News, error)
 		return BusinessObjects.News{}, err
 	}
 
+	data, err := json.Marshal(news)
+	if err == nil {
+		redisClient.Set(ctx, cacheKey, data, time.Hour)
+	}
+
 	n.log.Infof("Successfully fetched news by ID: %s", newsID)
 	return news, nil
 }
 
 // CreateNew adds a new news to the database
-func (n *NewsRepository) CreateNew(news BusinessObjects.News) error {
+func (n *NewsRepository) CreateNew(ctx context.Context, news BusinessObjects.News) error {
 	n.log.Infof("Creating new news with title: %s", news.Title)
-	db, err := Util.ConnectToPostgreSQL()
+	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
@@ -148,9 +211,9 @@ func (n *NewsRepository) CreateNew(news BusinessObjects.News) error {
 }
 
 // UpdateNew updates an existing news
-func (n *NewsRepository) UpdateNew(news BusinessObjects.News) error {
+func (n *NewsRepository) UpdateNew(ctx context.Context, news BusinessObjects.News) error {
 	n.log.Infof("Updating news with ID: %s", news.NewsID)
-	db, err := Util.ConnectToPostgreSQL()
+	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
@@ -166,17 +229,13 @@ func (n *NewsRepository) UpdateNew(news BusinessObjects.News) error {
 }
 
 // DeleteNew removes a news from the database by its ID
-func (n *NewsRepository) DeleteNew(newsID string) error {
+func (n *NewsRepository) DeleteNew(ctx context.Context, newsID string) error {
 	n.log.Infof("Deleting news with ID: %s", newsID)
-	db, err := Util.ConnectToPostgreSQL()
+	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
 		return err
 	}
-
-	// if err := db.Delete(&BusinessObjects.News{}, "news_id = ?", newsID).Error; err != nil {
-	// 	return err
-	// }
 
 	if err := db.Model(&BusinessObjects.News{}).Where("news_id = ?", newsID).Update("status", false).Error; err != nil {
 		n.log.Error("Failed to delete news:", err)

@@ -3,6 +3,7 @@ package Repositories
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Interface"
+	"th3y3m/e-commerce-platform/Provider"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 
@@ -11,15 +12,16 @@ import (
 
 type TransactionRepository struct {
 	log *logrus.Logger
+	db  Provider.IDb
 }
 
-func NewTransactionRepository(log *logrus.Logger) Interface.ITransactionRepository {
-	return &TransactionRepository{log}
+func NewTransactionRepository(log *logrus.Logger, db Provider.IDb) Interface.ITransactionRepository {
+	return &TransactionRepository{log: log, db: db}
 }
 
 func (t *TransactionRepository) GetPaginatedTransactionList(sortBy, transactionID, orderID string, pageIndex, pageSize int, minPrice, maxPrice *float64, status *bool, startDate, endDate time.Time) (Util.PaginatedList[BusinessObjects.Transaction], error) {
 	t.log.Infof("Fetching paginated transaction list with sortBy: %s, transactionID: %s, orderID: %s, pageIndex: %d, pageSize: %d, minPrice: %v, maxPrice: %v, status: %v, startDate: %v, endDate: %v", sortBy, transactionID, orderID, pageIndex, pageSize, minPrice, maxPrice, status, startDate, endDate)
-	db, err := Util.ConnectToPostgreSQL()
+	db, err := t.db.GetDB()
 	if err != nil {
 		t.log.Error("Failed to connect to PostgreSQL:", err)
 		return Util.PaginatedList[BusinessObjects.Transaction]{}, err

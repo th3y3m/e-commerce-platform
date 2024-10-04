@@ -3,7 +3,7 @@
 
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { fetchCategories, fetchCategoryById } from '@/redux/slice/CategorySlice';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const ProductPage = () => {
     const dispatch = useAppDispatch();
@@ -16,6 +16,12 @@ const ProductPage = () => {
         dispatch(fetchCategoryById("CAT9e1f6ee0g1"));
 
     }, [dispatch]);
+    const [n, setN] = useState(60);
+
+    // countdown n
+    setTimeout(() => {
+        setN(n - 1);
+    }, 1000);
 
     return (
         <div>
@@ -26,6 +32,7 @@ const ProductPage = () => {
                     <h3>{category.CategoryName}</h3>
                 </div>
             ))}
+            {n}
         </div>
     );
 };

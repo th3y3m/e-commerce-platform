@@ -3,6 +3,7 @@ package Services
 import (
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Interface"
+	"th3y3m/e-commerce-platform/Provider/RabbitMQ"
 	"th3y3m/e-commerce-platform/Util"
 	"time"
 )
@@ -62,6 +63,11 @@ func (o *OrderService) CreateOrder(order BusinessObjects.NewOrder) error {
 }
 
 func (o *OrderService) PlaceOrder(userId, cartId, shipAddress, CourierID, VoucherID string) error {
+	err := RabbitMQ.PublishMessage("Order placed")
+	if err != nil {
+		return err
+	}
+
 	productsList, err := o.cartItemRepository.GetCartItemByCartID(cartId)
 	if err != nil {
 		return err

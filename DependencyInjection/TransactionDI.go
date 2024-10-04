@@ -10,7 +10,8 @@ import (
 
 func NewTransactionRepositoryProvider() Interface.ITransactionRepository {
 	log := logrus.New()
-	return Repositories.NewTransactionRepository(log)
+	db := NewDbProvider()
+	return Repositories.NewTransactionRepository(log, db)
 }
 
 func NewTransactionServiceProvider() Interface.ITransactionService {

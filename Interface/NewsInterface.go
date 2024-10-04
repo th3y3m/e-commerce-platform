@@ -1,24 +1,25 @@
 package Interface
 
 import (
+	"context"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"th3y3m/e-commerce-platform/Util"
 )
 
 type INewsRepository interface {
-	GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error)
-	GetAllNews() ([]BusinessObjects.News, error)
-	GetNewByID(newsID string) (BusinessObjects.News, error)
-	CreateNew(news BusinessObjects.News) error
-	UpdateNew(news BusinessObjects.News) error
-	DeleteNew(newsID string) error
+	GetPaginatedNewsList(ctx context.Context, searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error)
+	GetAllNews(ctx context.Context) ([]BusinessObjects.News, error)
+	GetNewByID(ctx context.Context, newsID string) (BusinessObjects.News, error)
+	CreateNew(ctx context.Context, news BusinessObjects.News) error
+	UpdateNew(ctx context.Context, news BusinessObjects.News) error
+	DeleteNew(ctx context.Context, newsID string) error
 }
 
 type INewsService interface {
-	GetPaginatedNewsList(searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error)
-	GetAllNews() ([]BusinessObjects.News, error)
-	GetNewsByID(newsID string) (BusinessObjects.News, error)
-	CreateNews(title, content, authorID, category, ImageURL string) error
-	UpdateNews(newsId, title, content, authorID, category, ImageURL string) error
-	DeleteNews(newsID string) error
+	GetPaginatedNewsList(ctx context.Context, searchValue, sortBy, newId, authorID string, pageIndex, pageSize int, status *bool) (Util.PaginatedList[BusinessObjects.News], error)
+	GetAllNews(ctx context.Context) ([]BusinessObjects.News, error)
+	GetNewsByID(ctx context.Context, newsID string) (BusinessObjects.News, error)
+	CreateNews(ctx context.Context, title, content, authorID, category, ImageURL string) error
+	UpdateNews(ctx context.Context, newsId, title, content, authorID, category, ImageURL string) error
+	DeleteNews(ctx context.Context, newsID string) error
 }

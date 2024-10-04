@@ -10,7 +10,8 @@ import (
 
 func NewNewsRepositoryProvider() Interface.INewsRepository {
 	log := logrus.New()
-	return Repositories.NewNewsRepository(log)
+	db := NewDbProvider()
+	return Repositories.NewNewsRepository(log, db)
 }
 
 func NewNewsServiceProvider() Interface.INewsService {
