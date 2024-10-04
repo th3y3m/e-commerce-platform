@@ -68,7 +68,7 @@ func (s *MoMoService) CreateMoMoUrl(amount float64, orderId string) (string, err
 		"partnerName": "MoMo",
 		"storeId":     "MoMoStore",
 		"requestId":   requestId,
-		"amount":      formattedAmount,
+		"amount":      strconv.FormatInt(formattedAmount, 10),
 		"orderId":     orderId,
 		"orderInfo":   orderInfo,
 		"redirectUrl": s.returnUrl,

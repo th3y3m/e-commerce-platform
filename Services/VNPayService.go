@@ -64,9 +64,13 @@ func (s *VnpayService) CreateVNPayUrl(amount float64, orderinfor string) (string
 	pay.AddRequestData("vnp_Command", "pay")
 	pay.AddRequestData("vnp_TmnCode", s.tmnCode)
 	pay.AddRequestData("vnp_Amount", fmt.Sprintf("%.0f", vnpAmount))
+	pay.AddRequestData("vnp_BankCode", "")
 	pay.AddRequestData("vnp_CreateDate", time.Now().Format("20060102150405"))
+	pay.AddRequestData("vnp_CurrCode", "VND")
 	pay.AddRequestData("vnp_IpAddr", clientIPAddress)
+	pay.AddRequestData("vnp_Locale", "vn")
 	pay.AddRequestData("vnp_OrderInfo", "Customer")
+	pay.AddRequestData("vnp_OrderType", "other")
 	pay.AddRequestData("vnp_ReturnUrl", s.returnUrl)
 	pay.AddRequestData("vnp_TxnRef", orderinfor)
 

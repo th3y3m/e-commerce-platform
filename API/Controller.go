@@ -160,10 +160,10 @@ func Controller() *gin.Engine {
 	router.DELETE("/news/:id", DeleteNews)
 
 	router.GET("/vnpay", CreateVNPayUrl)
-	router.POST("/vnpay", ValidateVNPayResponse)
+	router.GET("/vnpay/paymentconfirm", ValidateVNPayResponse)
 
 	router.GET("/momo", CreateMoMoUrl)
-	router.POST("/momo", ValidateMoMoResponse)
+	router.POST("/momo/paymentconfirm", ValidateMoMoResponse)
 
 	log.Println("Routes registered successfully")
 
