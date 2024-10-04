@@ -44,5 +44,6 @@ func NewOAuthServiceProvider() Interface.IOAuthService {
 
 func NewMailServiceProvider() Interface.IMailService {
 	userRepository := NewUserRepositoryProvider()
-	return Services.NewMailService(userRepository)
+	productRepository := NewProductRepositoryProvider()
+	return Services.NewMailService(userRepository, productRepository)
 }

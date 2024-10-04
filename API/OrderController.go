@@ -78,10 +78,11 @@ func PlaceOrder(c *gin.Context) {
 	shipAddress := c.DefaultQuery("shipAddress", "")
 	courierId := c.DefaultQuery("courierId", "")
 	voucherId := c.DefaultQuery("voucherId", "")
+	paymentMethod := c.DefaultQuery("paymentMethod", "VnPay")
 
-	err := module.PlaceOrder(userId, cartId, shipAddress, courierId, voucherId)
+	url, err := module.PlaceOrder(userId, cartId, shipAddress, courierId, voucherId, paymentMethod)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Order placed successfully"})
+	c.JSON(http.StatusOK, url)
 }

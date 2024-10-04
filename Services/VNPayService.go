@@ -20,7 +20,7 @@ import (
 
 var TimeZoneAsiaHoChiMinh, _ = time.LoadLocation("Asia/Ho_Chi_Minh")
 
-func NewVnpayService(transactionRepository Interface.ITransactionRepository, orderRepository Interface.IOrderRepository) Interface.IVnPayService {
+func NewVnpayService(transactionRepository Interface.ITransactionRepository, orderRepository Interface.IOrderRepository, shoppingCartService Interface.IShoppingCartService) Interface.IVnPayService {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
@@ -32,6 +32,7 @@ func NewVnpayService(transactionRepository Interface.ITransactionRepository, ord
 		hashSecret:            os.Getenv("VNPAY_HASH_SECRET"),
 		transactionRepository: transactionRepository,
 		orderRepository:       orderRepository,
+		shoppingCartService:   shoppingCartService,
 	}
 }
 
@@ -42,6 +43,7 @@ type VnpayService struct {
 	hashSecret            string
 	transactionRepository Interface.ITransactionRepository
 	orderRepository       Interface.IOrderRepository
+	shoppingCartService   Interface.IShoppingCartService
 }
 
 func (s *VnpayService) CreateVNPayUrl(amount float64, orderinfor string) (string, error) {
@@ -126,6 +128,15 @@ func (s *VnpayService) ValidateVNPayResponse(queryString url.Values) (*BusinessO
 		}
 		err = s.transactionRepository.CreateTransaction(*Transaction)
 		if err != nil {
+			return nil, err
+		}
+
+		cart, err := s.shoppingCartService.GetUserShoppingCart(order.CustomerID)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := s.shoppingCartService.UpdateShoppingCartStatus(cart.CartID, false); err != nil {
 			return nil, err
 		}
 

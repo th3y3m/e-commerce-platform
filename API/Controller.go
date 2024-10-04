@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"th3y3m/e-commerce-platform/DependencyInjection"
 	"th3y3m/e-commerce-platform/Middleware"
 
 	_ "th3y3m/e-commerce-platform/docs" // Import generated docs
@@ -45,6 +46,12 @@ func Controller() *gin.Engine {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+
+	module := DependencyInjection.NewOrderServiceProvider()
+
+	// Start consumers in the background
+	go module.ConsumeInventoryUpdates()
+	go module.ConsumeMailNotifycation()
 
 	// Swagger route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -8,5 +8,6 @@ import (
 func NewVnpayServiceProvider() Interface.IVnPayService {
 	transactionRepository := NewTransactionRepositoryProvider()
 	orderRepository := NewOrderRepositoryProvider()
-	return Services.NewVnpayService(transactionRepository, orderRepository)
+	shoopingCartService := NewShoppingCartServiceProvider()
+	return Services.NewVnpayService(transactionRepository, orderRepository, shoopingCartService)
 }

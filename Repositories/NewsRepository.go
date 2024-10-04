@@ -134,6 +134,25 @@ func (n *NewsRepository) GetPaginatedNewsList(ctx context.Context, searchValue, 
 func (n *NewsRepository) GetAllNews(ctx context.Context) ([]BusinessObjects.News, error) {
 	n.log.Info("Fetching all news")
 
+	redisClient, err := n.db.GetRedis()
+	if err != nil {
+		n.log.Error("Failed to get Redis client:", err)
+		return []BusinessObjects.News{}, err
+	}
+
+	cacheKey := getNewsCacheKey("all")
+	val, err := redisClient.Get(ctx, cacheKey).Result()
+	if err == nil {
+		n.log.Infof("Cache hit for GetAllNews")
+		var news []BusinessObjects.News
+		if err := json.Unmarshal([]byte(val), &news); err == nil {
+			return news, nil
+		}
+		n.log.Warn("Failed to unmarshal cached news data:", err)
+	}
+
+	n.log.Infof("Cache miss for GetAllNews")
+
 	db, err := n.db.GetDB()
 	if err != nil {
 		n.log.Error("Failed to connect to PostgreSQL:", err)
@@ -144,6 +163,11 @@ func (n *NewsRepository) GetAllNews(ctx context.Context) ([]BusinessObjects.News
 	if err := db.Find(&news).Error; err != nil {
 		n.log.Error("Failed to fetch all news:", err)
 		return nil, err
+	}
+
+	data, err := json.Marshal(news)
+	if err == nil {
+		redisClient.Set(ctx, cacheKey, data, time.Hour)
 	}
 
 	n.log.Info("Successfully fetched all news")

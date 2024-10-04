@@ -48,6 +48,7 @@ type MoMoService struct {
 	extraData             string
 	transactionRepository Interface.ITransactionRepository
 	orderRepository       Interface.IOrderRepository
+	shoppingCartService   Interface.IShoppingCartService
 }
 
 // CreatePaymentUrl generates a payment URL for the given amount and order details.
@@ -141,6 +142,20 @@ func (s *MoMoService) ValidateMoMoResponse(queryString url.Values) (*BusinessObj
 		}
 		err = s.transactionRepository.CreateTransaction(*Transaction)
 		if err != nil {
+			return nil, err
+		}
+
+		order, err := s.orderRepository.GetOrderByID(orderId)
+		if err != nil {
+			return nil, err
+		}
+
+		cart, err := s.shoppingCartService.GetUserShoppingCart(order.CustomerID)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := s.shoppingCartService.UpdateShoppingCartStatus(cart.CartID, false); err != nil {
 			return nil, err
 		}
 
