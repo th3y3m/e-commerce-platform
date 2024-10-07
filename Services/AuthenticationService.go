@@ -21,13 +21,14 @@ type AuthenticationService struct {
 	deleteJobs     map[string]*gocron.Job
 }
 
-func NewAuthenticationService(userRepository Interface.IUserRepository, userService Interface.IUserService, log *logrus.Logger, scheduler *gocron.Scheduler, deleteJobs map[string]*gocron.Job) Interface.IAuthenticationService {
+func NewAuthenticationService(userRepository Interface.IUserRepository, userService Interface.IUserService, log *logrus.Logger, scheduler *gocron.Scheduler, deleteJobs map[string]*gocron.Job, mailService Interface.IMailService) Interface.IAuthenticationService {
 	return &AuthenticationService{
 		userRepository: userRepository,
 		userService:    userService,
 		log:            log,
 		scheduler:      scheduler,
 		deleteJobs:     deleteJobs,
+		mailService:    mailService,
 	}
 }
 

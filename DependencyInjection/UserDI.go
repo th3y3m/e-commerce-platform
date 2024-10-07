@@ -5,20 +5,17 @@ import (
 	"th3y3m/e-commerce-platform/Repositories"
 	"th3y3m/e-commerce-platform/Services"
 	"th3y3m/e-commerce-platform/Util"
-	"time"
 
 	"github.com/go-co-op/gocron"
 	"github.com/sirupsen/logrus"
 )
 
-func NewNewAuthenticationServiceProvider() Interface.IAuthenticationService {
+func NewNewAuthenticationServiceProvider(deleteJobs map[string]*gocron.Job, scheduler *gocron.Scheduler) Interface.IAuthenticationService {
 	userRepository := NewUserRepositoryProvider()
 	userService := NewUserServiceProvider()
 	log := logrus.New()
-	scheduler := gocron.NewScheduler(time.UTC)
-	deleteJobs := make(map[string]*gocron.Job)
-	scheduler.StartAsync()
-	return Services.NewAuthenticationService(userRepository, userService, log, scheduler, deleteJobs)
+	mailService := NewMailServiceProvider()
+	return Services.NewAuthenticationService(userRepository, userService, log, scheduler, deleteJobs, mailService)
 }
 
 func NewUserRepositoryProvider() Interface.IUserRepository {

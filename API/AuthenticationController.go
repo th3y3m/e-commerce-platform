@@ -46,7 +46,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "email and password are required"})
 		return
 	}
-	service := DependencyInjection.NewNewAuthenticationServiceProvider()
+	service := DependencyInjection.NewNewAuthenticationServiceProvider(DeleteJobs, scheduler)
 
 	token, err := service.Login(request.Email, request.Password)
 
@@ -79,7 +79,7 @@ func RegisterCustomer(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "email and password are required"})
 		return
 	}
-	service := DependencyInjection.NewNewAuthenticationServiceProvider()
+	service := DependencyInjection.NewNewAuthenticationServiceProvider(DeleteJobs, scheduler)
 
 	err := service.RegisterCustomer(request.Email, request.Password)
 

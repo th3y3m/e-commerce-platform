@@ -6,15 +6,21 @@ import (
 	"path/filepath"
 	"th3y3m/e-commerce-platform/DependencyInjection"
 	"th3y3m/e-commerce-platform/Middleware"
+	"time"
 
 	_ "th3y3m/e-commerce-platform/docs" // Import generated docs
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// Start the scheduler in the background
+var scheduler = gocron.NewScheduler(time.UTC)
+var DeleteJobs = make(map[string]*gocron.Job)
 
 // @title E-Commerce Platform API
 // @version 1.0
@@ -52,6 +58,7 @@ func Controller() *gin.Engine {
 	// Start consumers in the background
 	go module.ConsumeInventoryUpdates()
 	go module.ConsumeMailNotifycation()
+	scheduler.StartAsync()
 
 	// Swagger route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

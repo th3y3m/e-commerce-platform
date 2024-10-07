@@ -14,7 +14,7 @@ func VerifyUserEmailHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Token is missing"})
 		return
 	}
-	service := DependencyInjection.NewNewAuthenticationServiceProvider()
+	service := DependencyInjection.NewNewAuthenticationServiceProvider(DeleteJobs, scheduler)
 
 	err := service.VerifyUserEmail(token)
 	if err != nil {
