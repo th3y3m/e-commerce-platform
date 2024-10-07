@@ -1,38 +1,31 @@
-// app/Product/page.tsx
 "use client";
 
+import ProductCard from '@/components/ProductCard';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { fetchCategories, fetchCategoryById } from '@/redux/slice/CategorySlice';
+import { fetchAllProducts } from '@/redux/slice/ProductSlice';
 import React, { useEffect, useState } from 'react';
 
 const ProductPage = () => {
     const dispatch = useAppDispatch();
 
-    const categories = useAppSelector(state => state.category.categories);
-    const category = useAppSelector(state => state.category.category);
+    const products = useAppSelector(state => state.product.products);
 
+    // Fetch products when the component mounts
     useEffect(() => {
-        dispatch(fetchCategories());
-        dispatch(fetchCategoryById("CAT9e1f6ee0g1"));
-
+        dispatch(fetchAllProducts({
+            pageIndex: "1",
+            pageSize: "10"
+        }));
     }, [dispatch]);
-    const [n, setN] = useState(60);
-
-    // countdown n
-    setTimeout(() => {
-        setN(n - 1);
-    }, 1000);
 
     return (
         <div>
             <h1>Product Page</h1>
             <p>Welcome to the Product page!</p>
-            {categories && categories.map((category) => (
-                <div key={category.CategoryID}>
-                    <h3>{category.CategoryName}</h3>
-                </div>
+
+            {products && products.Items && products.Items.length > 0 && products.Items.map((product) => (
+                <ProductCard key={product.ProductID} product={product} />
             ))}
-            {n}
         </div>
     );
 };

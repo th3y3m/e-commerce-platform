@@ -20,6 +20,7 @@ type IProductService interface {
 	GetProductByID(productID string) (BusinessObjects.Product, error)
 	CreateProduct(SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error
 	UpdateProduct(productID, SellerID, ProductName, Description, CategoryID, ImageURL string, Price float64, Quantity int) error
+	UpdateAllProduct(product BusinessObjects.Product) error
 	DeleteProduct(productID string) error
 	GetProductPriceAfterDiscount(productID string) (float64, error)
 }

@@ -16,7 +16,7 @@ func NewOrderRepositoryProvider() Interface.IOrderRepository {
 func NewOrderServiceProvider() Interface.IOrderService {
 	orderRepository := NewOrderRepositoryProvider()
 	cartItemRepository := NewCartItemRepositoryProvider()
-	productRepository := NewProductRepositoryProvider()
+	productService := NewProductServiceProvider()
 	shoppingCartService := NewShoppingCartServiceProvider()
 	orderDetailService := NewOrderDetailServiceProvider()
 	transactionService := NewTransactionServiceProvider()
@@ -25,5 +25,5 @@ func NewOrderServiceProvider() Interface.IOrderService {
 	mailService := NewMailServiceProvider()
 	userService := NewUserServiceProvider()
 
-	return Services.NewOrderService(orderRepository, cartItemRepository, productRepository, shoppingCartService, orderDetailService, transactionService, momoService, vnPayService, mailService, userService)
+	return Services.NewOrderService(orderRepository, cartItemRepository, productService, shoppingCartService, orderDetailService, transactionService, momoService, vnPayService, mailService, userService)
 }

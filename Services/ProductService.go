@@ -75,6 +75,10 @@ func (p *ProductService) UpdateProduct(productID, SellerID, ProductName, Descrip
 	return p.productRepository.UpdateProduct(product)
 }
 
+func (p *ProductService) UpdateAllProduct(product BusinessObjects.Product) error {
+	return p.productRepository.UpdateProduct(product)
+}
+
 func (p *ProductService) DeleteProduct(id string) error {
 	return p.productRepository.DeleteProduct(id)
 }

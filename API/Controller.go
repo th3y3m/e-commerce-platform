@@ -53,6 +53,10 @@ func Controller() *gin.Engine {
 		AllowCredentials: true,
 	}))
 
+	// router.GET("/ws", func(c *gin.Context) {
+	// 	websocket_server.HandleConnections(c.Writer, c.Request)
+	// })
+
 	module := DependencyInjection.NewOrderServiceProvider()
 
 	// Start consumers in the background

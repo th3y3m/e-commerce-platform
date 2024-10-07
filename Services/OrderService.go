@@ -14,7 +14,7 @@ import (
 type OrderService struct {
 	orderRepository     Interface.IOrderRepository
 	cartItemRepository  Interface.ICartItemRepository
-	productRepository   Interface.IProductRepository
+	productService      Interface.IProductService
 	shoppingCartService Interface.IShoppingCartService
 	OrderDetailService  Interface.IOrderDetailService
 	TransactionService  Interface.ITransactionService
@@ -24,11 +24,11 @@ type OrderService struct {
 	userService         Interface.IUserService
 }
 
-func NewOrderService(orderRepository Interface.IOrderRepository, cartItemRepository Interface.ICartItemRepository, productRepository Interface.IProductRepository, shoppingCartService Interface.IShoppingCartService, OrderDetailService Interface.IOrderDetailService, TransactionService Interface.ITransactionService, momoService Interface.IMoMoService, VnpayService Interface.IVnPayService, mailService Interface.IMailService, userService Interface.IUserService) Interface.IOrderService {
+func NewOrderService(orderRepository Interface.IOrderRepository, cartItemRepository Interface.ICartItemRepository, productService Interface.IProductService, shoppingCartService Interface.IShoppingCartService, OrderDetailService Interface.IOrderDetailService, TransactionService Interface.ITransactionService, momoService Interface.IMoMoService, VnpayService Interface.IVnPayService, mailService Interface.IMailService, userService Interface.IUserService) Interface.IOrderService {
 	return &OrderService{
 		orderRepository:     orderRepository,
 		cartItemRepository:  cartItemRepository,
-		productRepository:   productRepository,
+		productService:      productService,
 		shoppingCartService: shoppingCartService,
 		OrderDetailService:  OrderDetailService,
 		TransactionService:  TransactionService,
@@ -110,7 +110,7 @@ func (o *OrderService) ProcessOrder(userId, cartId, shipAddress, CourierID, Vouc
 
 	totalAmount := 0.0
 	for _, product := range productsList {
-		p, err := o.productRepository.GetProductByID(product.ProductID)
+		p, err := o.productService.GetProductByID(product.ProductID)
 		if err != nil {
 			return BusinessObjects.Order{}, err
 		}
@@ -137,7 +137,7 @@ func (o *OrderService) ProcessOrder(userId, cartId, shipAddress, CourierID, Vouc
 	}
 
 	for _, item := range productsList {
-		product, err := o.productRepository.GetProductByID(item.ProductID)
+		product, err := o.productService.GetProductByID(item.ProductID)
 		if err != nil {
 			return BusinessObjects.Order{}, err
 		}
@@ -186,13 +186,13 @@ func (o *OrderService) UpdateInventory(userId, cartId string) error {
 	}
 
 	for _, product := range productsList {
-		p, err := o.productRepository.GetProductByID(product.ProductID)
+		p, err := o.productService.GetProductByID(product.ProductID)
 		if err != nil {
 			return err
 		}
 
 		p.Quantity -= product.Quantity
-		err = o.productRepository.UpdateProduct(p)
+		err = o.productService.UpdateAllProduct(p)
 		if err != nil {
 			return err
 		}
