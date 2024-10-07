@@ -1,20 +1,18 @@
 package Util
 
 import (
-	"log"
 	"os"
 	"th3y3m/e-commerce-platform/BusinessObjects"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 func GenerateToken(user BusinessObjects.User) (string, error) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file: %v", err)
+	// }
 
 	// Get environment variables
 	key := os.Getenv("JWT_SECRET")
