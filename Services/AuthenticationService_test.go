@@ -116,6 +116,39 @@ func TestLogin_Fail_UserNotFound(t *testing.T) {
 	assert.Empty(t, token)
 	userRepository.AssertExpectations(t)
 }
+func TestLogin_Fail_GetByEmail(t *testing.T) {
+	// Arrange
+	userRepository := &mocks.IUserRepository{}
+	userService := &mocks.IUserService{}
+	mailService := &mocks.IMailService{}
+	log := logrus.New()
+	scheduler := gocron.NewScheduler(time.UTC)
+	deleteJobs := make(map[string]*gocron.Job)
+	authService := Services.NewAuthenticationService(userRepository, userService, log, scheduler, deleteJobs, mailService)
+
+	password := "password"
+	passwordHash, err := Util.HashPassword(password)
+
+	if err != nil {
+		t.Error(err)
+	}
+	user := BusinessObjects.User{
+		Email:        "test@gmail.com",
+		PasswordHash: passwordHash,
+	}
+
+	error := assert.AnError
+
+	userRepository.On("GetUserByEmail", user.Email).Return(user, error)
+
+	// Act
+	token, err := authService.Login(user.Email, password)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Empty(t, token)
+	userRepository.AssertExpectations(t)
+}
 
 func TestLogin_Fail_InvalidPassword(t *testing.T) {
 	// Arrange

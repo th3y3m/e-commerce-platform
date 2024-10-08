@@ -29,7 +29,7 @@ func (p *ProductDiscountService) GetProductDiscountByID(id string) ([]BusinessOb
 	return p.productDiscountRepository.GetProductDiscountByID(id)
 }
 
-func (p *ProductDiscountService) CreateProductDiscount(productID string, discountID string, discount float64) error {
+func (p *ProductDiscountService) CreateProductDiscount(productID string, discountID string) error {
 	productDiscount := BusinessObjects.ProductDiscount{
 		ProductID:  productID,
 		DiscountID: discountID,

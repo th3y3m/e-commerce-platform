@@ -1,5 +1,5 @@
 import { createProduct, deleteProduct, getAllProducts, getProductByID, updateProduct } from "@/api/productAxios";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface Params {
     searchValue?: string;
@@ -22,14 +22,51 @@ interface NewProduct {
     ImageURL: string;
 }
 
+interface PaginatedList<T> {
+    Items: T[];
+    TotalCount: number;
+    PageIndex: number;
+    PageSize: number;
+    TotalPages: number;
+}
+
+interface Product {
+    ProductID: string;
+    SellerID: string;
+    ProductName: string;
+    Description: string;
+    Price: number;
+    Quantity: number;
+    CategoryID: string;
+    ImageURL: string;
+    CreatedAt: Date;
+    UpdatedAt: Date;
+    Status: boolean;
+}
+
+interface ProductState {
+    products: PaginatedList<Product>;
+    product: Product | null;
+    status: string;
+    error: string | null;
+}
+
+const initialState: ProductState = {
+    products: { Items: [], TotalCount: 0, PageIndex: 1, PageSize: 10, TotalPages: 0 },
+    product: null,
+    status: "",
+    error: null,
+};
+
+// Async Thunks
 export const fetchAllProducts = createAsyncThunk(
     "product/fetchAllProducts",
     async (params: Params, { rejectWithValue }) => {
         try {
             const response = await getAllProducts(params);
             return response;
-        } catch (error) {
-            return rejectWithValue(error);
+        } catch (error: unknown) {
+            return rejectWithValue((error as Error).message);
         }
     }
 );
@@ -40,8 +77,8 @@ export const fetchProductById = createAsyncThunk(
         try {
             const response = await getProductByID(id);
             return response;
-        } catch (error) {
-            return rejectWithValue(error);
+        } catch (error: unknown) {
+            return rejectWithValue((error as Error).message);
         }
     }
 );
@@ -52,20 +89,20 @@ export const createNewProduct = createAsyncThunk(
         try {
             const response = await createProduct(productData);
             return response;
-        } catch (error) {
-            return rejectWithValue(error);
+        } catch (error: unknown) {
+            return rejectWithValue((error as Error).message);
         }
     }
 );
 
 export const updateProductByID = createAsyncThunk(
     "product/updateProductByID",
-    async ({ id, productData }: { id: string, productData: NewProduct }, { rejectWithValue }) => {
+    async ({ id, productData }: { id: string; productData: NewProduct }, { rejectWithValue }) => {
         try {
             const response = await updateProduct(id, productData);
             return response;
-        } catch (error) {
-            return rejectWithValue(error);
+        } catch (error: unknown) {
+            return rejectWithValue((error as Error).message);
         }
     }
 );
@@ -76,111 +113,98 @@ export const deleteProductByID = createAsyncThunk(
         try {
             const response = await deleteProduct(id);
             return response;
-        } catch (error) {
-            return rejectWithValue(error);
+        } catch (error: unknown) {
+            return rejectWithValue((error as Error).message);
         }
     }
 );
 
-export const GetProductPriceAfterDiscount = createAsyncThunk(
-    "product/GetProductPriceAfterDiscount",
-    async (id: string, { rejectWithValue }) => {
+export const updateProductQuantity = createAsyncThunk(
+    "product/updateProductQuantity",
+    async ({ productId, quantity }: { productId: string, quantity: number }, { rejectWithValue }) => {
         try {
-            const response = await getProductByID(id);
-            return response;
+            return { productId, quantity };
         } catch (error) {
             return rejectWithValue(error);
         }
     }
 );
-interface PaginatedList<T> {
-    Items: T[];
-    TotalCount: number;
-    PageIndex: number;
-    PageSize: number;
-    TotalPages: number;
-}
-interface Product {
-    ProductID: string
-    SellerID: string
-    ProductName: string
-    Description: string
-    Price: number
-    Quantity: number
-    CategoryID: string
-    ImageURL: string
-    CreatedAt: Date
-    UpdatedAt: Date
-    Status: boolean
 
-}
-const initialState = {
-    products: {} as PaginatedList<Product>,
-    product: {} as Product,
-    status: "",
-};
-
+// Product Slice
 const ProductSlice = createSlice({
     name: "product",
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(updateProductQuantity.fulfilled, (state, action) => {
+                const { productId, quantity } = action.payload;
+                const product = state.products.Items.find(item => item.ProductID === productId);
+                if (product) {
+                    product.Quantity = quantity;
+                }
+            })
+            // Fetch All Products
             .addCase(fetchAllProducts.pending, (state) => {
                 state.status = "loading";
+                state.error = null;
             })
-            .addCase(fetchAllProducts.fulfilled, (state, action) => {
+            .addCase(fetchAllProducts.fulfilled, (state, action: PayloadAction<PaginatedList<Product>>) => {
                 state.products = action.payload;
                 state.status = "success";
             })
-            .addCase(fetchAllProducts.rejected, (state) => {
+            .addCase(fetchAllProducts.rejected, (state, action) => {
                 state.status = "failed";
+                state.error = action.payload as string;
             })
+            // Fetch Product by ID
             .addCase(fetchProductById.pending, (state) => {
                 state.status = "loading";
+                state.error = null;
             })
-            .addCase(fetchProductById.fulfilled, (state, action) => {
+            .addCase(fetchProductById.fulfilled, (state, action: PayloadAction<Product>) => {
                 state.product = action.payload;
                 state.status = "success";
             })
-            .addCase(fetchProductById.rejected, (state) => {
+            .addCase(fetchProductById.rejected, (state, action) => {
                 state.status = "failed";
+                state.error = action.payload as string;
             })
+            // Create Product
             .addCase(createNewProduct.pending, (state) => {
                 state.status = "loading";
+                state.error = null;
             })
             .addCase(createNewProduct.fulfilled, (state, action) => {
                 state.status = "success";
             })
-            .addCase(createNewProduct.rejected, (state) => {
+            .addCase(createNewProduct.rejected, (state, action) => {
                 state.status = "failed";
+                state.error = action.payload as string;
             })
+            // Update Product
             .addCase(updateProductByID.pending, (state) => {
                 state.status = "loading";
+                state.error = null;
             })
             .addCase(updateProductByID.fulfilled, (state, action) => {
                 state.status = "success";
             })
-            .addCase(updateProductByID.rejected, (state) => {
+            .addCase(updateProductByID.rejected, (state, action) => {
                 state.status = "failed";
+                state.error = action.payload as string;
             })
+            // Delete Product
             .addCase(deleteProductByID.pending, (state) => {
                 state.status = "loading";
+                state.error = null;
             })
             .addCase(deleteProductByID.fulfilled, (state, action) => {
                 state.status = "success";
             })
-            .addCase(deleteProductByID.rejected, (state) => {
+            .addCase(deleteProductByID.rejected, (state, action) => {
                 state.status = "failed";
-            })
-            .addCase(GetProductPriceAfterDiscount.pending, (state) => {
-                state.status = "loading";
-            })
-            .addCase(GetProductPriceAfterDiscount.fulfilled, (state, action) => {
-                state.status = "success";
-            })
-            .addCase(GetProductPriceAfterDiscount.rejected, (state) => {
-                state.status = "failed";
+                state.error = action.payload as string;
             });
     },
 });

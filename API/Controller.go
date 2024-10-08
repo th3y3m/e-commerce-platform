@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"th3y3m/e-commerce-platform/DependencyInjection"
 	"th3y3m/e-commerce-platform/Middleware"
+	"th3y3m/e-commerce-platform/websocket_server"
 	"time"
 
 	_ "th3y3m/e-commerce-platform/docs" // Import generated docs
@@ -53,9 +54,11 @@ func Controller() *gin.Engine {
 		AllowCredentials: true,
 	}))
 
-	// router.GET("/ws", func(c *gin.Context) {
-	// 	websocket_server.HandleConnections(c.Writer, c.Request)
-	// })
+	router.GET("/ws", func(c *gin.Context) {
+		websocket_server.HandleConnections(c.Writer, c.Request)
+	})
+
+	go websocket_server.HandleBroadcasts()
 
 	module := DependencyInjection.NewOrderServiceProvider()
 
