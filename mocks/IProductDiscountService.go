@@ -16,16 +16,16 @@ type IProductDiscountService struct {
 }
 
 // CreateProductDiscount provides a mock function with given fields: productID, discountID, discount
-func (_m *IProductDiscountService) CreateProductDiscount(productID string, discountID string, discount float64) error {
-	ret := _m.Called(productID, discountID, discount)
+func (_m *IProductDiscountService) CreateProductDiscount(productID string, discountID string) error {
+	ret := _m.Called(productID, discountID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateProductDiscount")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string, float64) error); ok {
-		r0 = rf(productID, discountID, discount)
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(productID, discountID)
 	} else {
 		r0 = ret.Error(0)
 	}
