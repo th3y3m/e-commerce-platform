@@ -36,12 +36,7 @@ func (t *TransactionService) CreateTransaction(transaction BusinessObjects.NewTr
 		PaymentStatus:   transaction.PaymentStatus,
 	}
 
-	err := t.transactionRepository.CreateTransaction(newTransaction)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return t.transactionRepository.CreateTransaction(newTransaction)
 }
 
 func (t *TransactionService) UpdateTransaction(transaction BusinessObjects.Transaction) error {
